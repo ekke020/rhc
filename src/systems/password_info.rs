@@ -17,6 +17,11 @@ impl PasswordInfo {
             start_time: Instant::now(),
         }
     }
+
+    pub fn get_possible_hash_types(&self) -> &Vec<hasher::HashType> {
+        &self.possible_hash_types
+    }
+    
     pub fn print(&self) {
         println!("Hash type: {:#?}\nPassword: {:#?}", self.hash_type_result, self.password);
         let duration = self.start_time.elapsed();
