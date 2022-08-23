@@ -16,6 +16,15 @@ pub mod print {
         println!("{:>5}{}", "", "-a, --all  \t List all possible algorithms.");
     }
 
+    pub fn available_algorithms() {
+        println!("SHA_224");
+        println!("SHA_256");
+        println!("SHA_384");
+        println!("SHA_512");
+        println!("SHA_512/224");
+        println!("SHA_512/256");
+    }
+
     pub fn tests() {
         println!("SHA 224: {}", SHA_224_TEST.as_bytes().len() * 4);
         println!("SHA 256: {}", SHA_256_TEST.as_bytes().len() * 4);
