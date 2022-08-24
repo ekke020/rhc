@@ -8,15 +8,15 @@ const ASCII_TABLE: [char; 95] = [
     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~',
 ];
 
-pub fn crack(length: usize, start_char: &char) -> Option<PW::PasswordInfo> {
+pub fn crack(length: usize, start_char: &char) -> Option<PasswordInfo> {
     run_crack(length, &start_char.to_string(), None)
 }
 
 fn run_crack(
     pw_length: usize,
     prefix: &String,
-    is_cracked: Option<PW::PasswordInfo>,
-) -> Option<PW::PasswordInfo> {
+    is_cracked: Option<PasswordInfo>,
+) -> Option<PasswordInfo> {
     if is_cracked.is_some() {
         return is_cracked;
     } else if pw_length == 0 {

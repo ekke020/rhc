@@ -1,6 +1,6 @@
 use sha2::*;
 use std::fmt;
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum HashType {
     Sha224(String),
     Sha256(String),
@@ -8,29 +8,32 @@ pub enum HashType {
     Sha512(String),
     Sha512_224(String),
     Sha512_256(String),
+    #[default]
     Empty,
 }
-impl HashType {
-  pub fn get_hash(&self) -> &String {
-    match self {
-      HashType::Sha224(h) => h,
-      HashType::Sha256(h) => h,
-      HashType::Sha384(h) => h,
-      HashType::Sha512(h) => h,
-      HashType::Sha512_224(h) => h,
-      HashType::Sha512_256(h) => h,
-      HashType::Empty => panic!("Dont match on empty!"),
-    }
-  }
 
-  pub fn is_match(&self, other: &str) -> bool {
-      let hash;
-      match self {
-        HashType::Empty => return false,
-        _ => hash = get_hash(other, self),
-      }
-      self.get_hash().eq_ignore_ascii_case(&hash)
-  }
+
+impl HashType {
+    pub fn get_hash(&self) -> &String {
+        match self {
+            HashType::Sha224(h) => h,
+            HashType::Sha256(h) => h,
+            HashType::Sha384(h) => h,
+            HashType::Sha512(h) => h,
+            HashType::Sha512_224(h) => h,
+            HashType::Sha512_256(h) => h,
+            HashType::Empty => panic!("Dont match on empty!"),
+        }
+    }
+
+    pub fn is_match(&self, other: &str) -> bool {
+        let hash;
+        match self {
+            HashType::Empty => return false,
+            _ => hash = get_hash(other, self),
+        }
+        self.get_hash().eq_ignore_ascii_case(&hash)
+    }
 }
 impl fmt::Display for HashType {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
@@ -42,7 +45,7 @@ impl fmt::Display for HashType {
             HashType::Sha512_224(_) => write!(fmt, "Sha512_224"),
             HashType::Sha512_256(_) => write!(fmt, "Sha512_256"),
             HashType::Empty => write!(fmt, "Empty"),
-          }
+        }
     }
 }
 

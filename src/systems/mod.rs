@@ -4,7 +4,6 @@ pub mod hasher;
 pub mod password_info;
 pub mod password_matcher;
 pub mod printer;
-pub mod input;
 
 pub mod macros {
     macro_rules! lazy_array {

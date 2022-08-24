@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub struct MatcherInfo {
-    hash_types: Vec<hasher::HashType>,
+    hash_types: Vec<HashType>,
 }
 
 impl MatcherInfo {
@@ -23,11 +23,11 @@ impl MatcherInfo {
         println!("Possible hashtypes:");
         self.hash_types
             .iter()
-            .filter(|hash| **hash != hasher::HashType::Empty)
+            .filter(|hash| **hash != HashType::Empty)
             .for_each(|hash| println!("\t{}", hash.to_string()));
     }
 
-    pub fn try_password(&self, password: &str) -> Option<PW::PasswordInfo> {
+    pub fn try_password(&self, password: &str) -> Option<PasswordInfo> {
         let is_equal = self
             .hash_types
             .iter()
@@ -39,39 +39,39 @@ impl MatcherInfo {
                 //     hash_type.clone(),
                 //     password.to_owned(),
                 // );
-                let pw_info = PW::PasswordInfo::new(vec![]);
-                return Some(pw_info);
+                // let pw_info = PW::PasswordInfo::new(vec![]);
+                return None;
             }
             None => return None,
         }
     }
 }
 
-fn get_possible_algorithm(input: &str) -> Result<(hasher::HashType, hasher::HashType), String> {
+fn get_possible_algorithm(input: &str) -> Result<(HashType, HashType), String> {
     let hash;
     match input.as_bytes().len() * 4 {
         224 => {
             hash = (
-                hasher::HashType::Sha224(input.to_owned()),
-                hasher::HashType::Sha512_224(input.to_owned()),
+                HashType::Sha224(input.to_owned()),
+                HashType::Sha512_224(input.to_owned()),
             )
         }
         256 => {
             hash = (
-                hasher::HashType::Sha256(input.to_owned()),
-                hasher::HashType::Sha512_256(input.to_owned()),
+                HashType::Sha256(input.to_owned()),
+                HashType::Sha512_256(input.to_owned()),
             )
         }
         384 => {
             hash = (
-                hasher::HashType::Sha384(input.to_owned()),
-                hasher::HashType::Empty,
+                HashType::Sha384(input.to_owned()),
+                HashType::Empty,
             )
         }
         512 => {
             hash = (
-                hasher::HashType::Sha512(input.to_owned()),
-                hasher::HashType::Empty,
+                HashType::Sha512(input.to_owned()),
+                HashType::Empty,
             )
         }
         _ => return Err("Unable to detect algorithm...".to_string()),
