@@ -1,4 +1,6 @@
 mod systems;
+mod config;
+mod input;
 #[macro_use]
 extern crate lazy_static;
 pub mod prelude {
@@ -10,70 +12,21 @@ pub mod prelude {
     pub use crate::systems::password_info as PW;
     pub use crate::systems::password_matcher as matcher;
     pub use crate::systems::printer::print;
+    pub use crate::config::Config;
     pub const CRACK_TEST: &str = "99fb2f48c6af4761f904fc85f95eb56190e5d40b1f44ec3a9c1fa319";
     lazy_static! {
         pub static ref MATCHER_INFO: matcher::MatcherInfo = matcher::MatcherInfo::new(CRACK_TEST);
         pub static ref START_TIME: std::time::SystemTime = std::time::SystemTime::now();
     }
 }
-use clap::value_parser;
-use clap::ArgMatches;
 use prelude::*;
-use std::env::args;
-use std::sync::mpsc;
 use std::sync::mpsc::Sender;
 use std::thread;
 
-use clap::Arg;
-use clap::Command;
-
-#[derive(Debug)]
-struct Config {
-    length: Option<usize>,
-    algorithm_type: Option<String>,
-    hash: Option<String>,
-    list_all: bool,
-}
-
-impl Config {
-    fn check_for_print_flags(&self) {
-        if self.list_all {
-            print::available_algorithms();
-            std::process::exit(1);
-        }
-    }
-
-    fn exit_if_hash_is_unavailable(&self) {
-        if self.hash.is_none() {
-            println!("No hash was supplied, (-h, --help for options)");
-            std::process::exit(1);
-        }
-    }
-}
-
-impl From<ArgMatches> for Config {
-    fn from(m: ArgMatches) -> Self {
-        exit_if_empty(&m);
-        Config {
-            length: m.get_one::<usize>("length").cloned(),
-            algorithm_type: m.get_one::<String>("type").cloned(),
-            list_all: m.is_present("all"),
-            hash: m.get_one::<String>("hash").cloned(),
-        }
-    }
-}
-
-fn exit_if_empty(m: &ArgMatches) {
-    if !m.args_present() {
-        println!("Insufficient arguments, (-h, --help for options)");
-        std::process::exit(1);
-    }
-}
 fn main() {
-    // input::take_arguments();
-
-    let args = match_input();
+    let args = input::create_flag_matcher();
     let config = Config::from(args);
+    config.scan();
 
     let result = hash::get_possible_algorithm(CRACK_TEST).unwrap();
     let pw_info = PW::PasswordInfo::new(vec![result.0, result.1]);
@@ -91,45 +44,6 @@ fn main() {
     // received.print();
 }
 
-fn match_input() -> ArgMatches {
-    Command::new("rhc")
-        .about("A password cracking tool that utilizes brute force to crack passwords.")
-        .arg(
-            Arg::new("length")
-                .required(false)
-                .takes_value(true)
-                .value_parser(value_parser!(usize))
-                .long("length")
-                .short('l')
-                .help("The length of the hashed value."),
-        )
-        .arg(
-            Arg::new("type")
-                .required(false)
-                .takes_value(true)
-                .value_parser(value_parser!(String))
-                .long("type")
-                .short('t')
-                .help("Specifies the algorithm used to generate the hash"),
-        )
-        .arg(
-            Arg::new("all")
-                .required(false)
-                .long("all")
-                .short('a')
-                .help("List available algorithms"),
-        )
-        .arg(
-            Arg::new("input")
-                .required(false)
-                .takes_value(true)
-                .long("input")
-                .short('i')
-                .value_parser(value_parser!(String))
-                .help("the supplied hash"),
-        )
-        .get_matches()
-}
 
 mod hash {
     use crate::prelude::*;
