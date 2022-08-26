@@ -16,6 +16,12 @@ pub mod print {
         println!("{:>5}{}", "", "-a, --all  \t List all possible algorithms.");
     }
 
+    pub fn failed_to_establish_algorithm(hash: &str) {
+        println!("Not able to establish algorithm from {}", hash);
+        println!("Make sure the provided hash is valid");
+        println!("Use: -a, --all for a list of available algorithms");
+    }
+    
     pub fn available_algorithms() {
         println!("SHA_224");
         println!("SHA_256");
