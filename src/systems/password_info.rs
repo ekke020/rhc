@@ -1,10 +1,9 @@
 use crate::prelude::*;
 use std::time::Instant;
+
 #[derive(Clone)]
 pub struct PasswordInfo {
-    // possible_hash_types: Vec<hasher::HashType>,
-    first_hash_type: HashType,
-    second_hash_type: HashType,
+    possible_algorithms: Vec<HashType>,
     hash_type_result: HashType,
     password_length: usize,
     password: Option<String>,
@@ -14,8 +13,7 @@ pub struct PasswordInfo {
 impl Default for PasswordInfo {
     fn default() -> Self {
         Self {
-            first_hash_type: HashType::default(),
-            second_hash_type: HashType::default(),
+            possible_algorithms: Vec::new(),
             hash_type_result: HashType::default(),
             password_length: 0,
             password: None,
@@ -25,38 +23,32 @@ impl Default for PasswordInfo {
 }
 
 impl PasswordInfo {
+
+    pub fn get_algorithms(&self) -> &Vec<HashType> {
+         &self.possible_algorithms
+    }
+
+    pub fn get_mut_algorithms(&mut self) -> &mut Vec<HashType> {
+        &mut self.possible_algorithms
+    }
+
     pub fn set_password(&mut self, password: String) {
         self.password = Some(password);
     }
 
     pub fn get_password(&self) -> &String {
         &self
-            .password.as_ref()
+            .password
+            .as_ref()
             .expect("Password should never be returned as a None value")
     }
 
-    pub fn set_password_length(&mut self, length: usize) { 
+    pub fn set_password_length(&mut self, length: usize) {
         self.password_length = length;
     }
 
     pub fn get_password_length(&self) -> &usize {
         &self.password_length
-    }
-
-    pub fn set_first_hash_type(&mut self, hash_type: HashType) {
-        self.first_hash_type = hash_type;
-    }
-
-    pub fn get_first_hash_type(&self) -> &HashType {
-        &self.first_hash_type
-    }
-
-    pub fn set_second_hash_type(&mut self, hash_type: HashType) {
-        self.second_hash_type = hash_type;
-    }
-
-    pub fn get_second_hash_type(&self) -> &HashType {
-        &self.second_hash_type
     }
 
     pub fn set_hash_type_result(&mut self, hash_type: HashType) {
@@ -67,13 +59,8 @@ impl PasswordInfo {
         &self.hash_type_result
     }
 
-    pub fn print(&self) {
-        println!(
-            "Hash type: {:#?}\nPassword: {:#?}",
-            self.hash_type_result, self.password
-        );
-        let duration = self.start_time.elapsed();
-        print::elapsed_time(duration.as_secs());
+    pub fn get_elapsed_time(&self) -> u64 {
+        self.start_time.elapsed().as_secs()
     }
 }
 
@@ -92,15 +79,10 @@ impl<'a> PasswordInfoBuilder<'a> {
 
     pub fn set_algorithm_type(&mut self, algorithm_type: &Option<String>) -> &mut Self {
         if let Some(algorithm) = algorithm_type {
-            self.pw_info.set_first_hash_type(hash::get_algorithm(algorithm, self.hash.to_string()));
+            let verified = hash::get_algorithm(algorithm, self.hash.to_string());
+            self.pw_info.get_mut_algorithms().push(verified);
         } else {
-            match hash::get_possible_algorithm(self.hash) {
-                Ok(hash_type) => {
-                    self.pw_info.set_first_hash_type(hash_type.0);
-                    self.pw_info.set_second_hash_type(hash_type.1);
-                },
-                Err(e) => e.print_and_exit(),
-            }
+            hash::set_possible_algorithms(self);
         }
         self
     }
@@ -121,15 +103,6 @@ impl<'a> PasswordInfoBuilder<'a> {
 
 mod hash {
     use crate::prelude::*;
-    #[derive(Debug)]
-    pub struct HasherError<'a>(&'a str);
-
-    impl<'a> HasherError<'a> {
-        pub fn print_and_exit(self) {
-            println!("{}", self.0);
-            std::process::exit(1);
-        }
-    }
 
     pub fn get_algorithm(algorithm: &String, hash: String) -> HashType {
         match algorithm.to_uppercase().as_str() {
@@ -145,28 +118,24 @@ mod hash {
             }
         }
     }
-    // TODO: Refactor this function so it dosn't use tuples.
-    pub fn get_possible_algorithm<'a>(
-        input: &str,
-    ) -> Result<(HashType, HashType), HasherError<'a>> {
-        let hash;
-        match input.as_bytes().len() * 4 {
+
+    pub fn set_possible_algorithms<'a>(pib: &mut PasswordInfoBuilder) {
+        let algorithms = pib.pw_info.get_mut_algorithms();
+        match pib.hash.as_bytes().len() * 4 {
             224 => {
-                hash = (
-                    HashType::Sha224(input.to_owned()),
-                    HashType::Sha512_224(input.to_owned()),
-                )
+                algorithms.push(HashType::Sha224(String::from(pib.hash)));
+                algorithms.push(HashType::Sha512_224(String::from(pib.hash)));
             }
             256 => {
-                hash = (
-                    HashType::Sha256(input.to_owned()),
-                    HashType::Sha512_256(input.to_owned()),
-                )
+                algorithms.push(HashType::Sha256(String::from(pib.hash)));
+                algorithms.push(HashType::Sha512_256(String::from(pib.hash)));
             }
-            384 => hash = (HashType::Sha384(input.to_owned()), HashType::Empty),
-            512 => hash = (HashType::Sha512(input.to_owned()), HashType::Empty),
-            _ => return Err(HasherError("Unable to detect algorithm...")),
+            384 => algorithms.push(HashType::Sha384(String::from(pib.hash))),
+            512 => algorithms.push(HashType::Sha512(String::from(pib.hash))),
+            _ => {
+                print::failed_to_establish_algorithm(pib.hash);
+                std::process::exit(1);
+            }
         }
-        Ok(hash)
     }
 }
