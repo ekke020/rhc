@@ -2,11 +2,10 @@ pub mod cracker;
 pub mod filereader;
 pub mod hasher;
 pub mod password_info;
-pub mod password_matcher;
 pub mod printer;
 
 pub mod macros {
-    macro_rules! lazy_array {
+    macro_rules! _lazy_array {
         ($start:expr, $size:expr, u8) => {{
             let mut temp_arr: [u8; $size] = [0; $size];
             for i in 0..$size {
@@ -22,7 +21,7 @@ pub mod macros {
             temp_arr
         }};
     }
-    macro_rules! lazy_vector {
+    macro_rules! _lazy_vector {
         ($start:expr, $size:expr, char) => {{
             let mut temp_vec: Vec<char> = Vec::new();
             for i in 0..$size {
@@ -32,5 +31,4 @@ pub mod macros {
         }};
     }
 
-    pub(crate) use {lazy_array, lazy_vector};
 }
