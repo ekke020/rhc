@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::core::hasher::HashType;
 
 const ASCII_TABLE: [char; 95] = [
     ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2',
@@ -62,10 +62,11 @@ fn try_password(password: &str, hash_type: &HashType) -> Option<Cracked> {
     None
 }
 
+
 #[cfg(test)]
 mod tests {
-    use crate::cracker;
-    use crate::systems::hasher::HashType;
+    use crate::core::cracker;
+    use crate::core::hasher::HashType;
 
     #[test]
     fn password_matches() {

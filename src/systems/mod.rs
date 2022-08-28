@@ -1,8 +1,14 @@
-pub mod cracker;
-pub mod filereader;
-pub mod hasher;
-pub mod password_info;
+mod filereader;
 pub mod printer;
+mod config;
+pub mod spawner;
+pub mod input;
+
+pub mod prelude {
+    pub use crate::systems::printer;
+    pub use crate::systems::spawner;
+    pub use crate::systems::input;
+}
 
 pub mod macros {
     macro_rules! _lazy_array {

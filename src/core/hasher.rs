@@ -1,6 +1,5 @@
 use sha2::*;
 use std::fmt;
-// TODO: Rename f
 #[derive(Debug, Clone, PartialEq, Default)]
 pub enum HashType {
     Sha224(String),

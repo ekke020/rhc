@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::core::hasher::HashType;
 use std::time::Instant;
 
 #[derive(Clone)]
@@ -23,9 +23,8 @@ impl Default for PasswordInfo {
 }
 
 impl PasswordInfo {
-
     pub fn get_algorithms(&self) -> &Vec<HashType> {
-         &self.possible_algorithms
+        &self.possible_algorithms
     }
 
     pub fn get_mut_algorithms(&mut self) -> &mut Vec<HashType> {
@@ -102,7 +101,9 @@ impl<'a> PasswordInfoBuilder<'a> {
 }
 
 mod hash {
-    use crate::prelude::*;
+    use crate::core::hasher::HashType;
+    use crate::core::password_info::PasswordInfoBuilder;
+    use crate::systems::printer::print;
 
     pub fn get_algorithm(algorithm: &String, hash: String) -> HashType {
         match algorithm.to_uppercase().as_str() {
@@ -119,7 +120,7 @@ mod hash {
         }
     }
 
-    pub fn set_possible_algorithms<'a>(pib: &mut PasswordInfoBuilder) {
+    pub fn set_possible_algorithms(pib: &mut PasswordInfoBuilder) {
         let algorithms = pib.pw_info.get_mut_algorithms();
         match pib.hash.as_bytes().len() * 4 {
             224 => {
