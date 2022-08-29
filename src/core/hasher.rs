@@ -1,5 +1,6 @@
-use sha2::*;
 use std::fmt;
+
+use sha2::Digest;
 #[derive(Debug, Clone, PartialEq, Default)]
 pub enum HashType {
     Sha224(String),
@@ -59,6 +60,7 @@ fn get_hash(password: &str, hash_type: &HashType) -> String {
         HashType::Empty => panic!("No hash value inside Empty"),
     }
 }
+
 
 fn get_sha512(password: &str) -> String {
     let mut sha512 = sha2::Sha512::new();
