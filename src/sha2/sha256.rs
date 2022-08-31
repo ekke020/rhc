@@ -86,7 +86,8 @@ pub fn mutate_chunk_new(decimals: &[u8]) {
     println!("{answer}");
 }
 
-fn fit_manipulation(word_32_bit: u32) -> u32 {
+fn bit_manipulation(word_32_bit: u32) -> u32 {
+    // TODO: Fix this method
     let n0 = right_rotate(word_32_bit, 7);
     let n1 = right_rotate(word_32_bit, 18);
     let n2 = right_shift(word_32_bit, 3);
@@ -95,6 +96,7 @@ fn fit_manipulation(word_32_bit: u32) -> u32 {
     println!("{:0>32b}", n2);
     let answer = n0 ^ n1 ^ n2;
     println!("{answer}");
+    answer
 }
 
 fn concatenate_bytes(bytes: &[u32; 4]) -> u32 {
