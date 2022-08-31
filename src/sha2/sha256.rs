@@ -60,14 +60,25 @@ pub fn test(value: &str) {
     decimal_256.iter().for_each(|f| println!("{}", f));
     println!("Big endian value: {:?}", big_endian_rep.as_bytes());
     println!("Length: {}", decimal_256.len());
-    
+
     for chunk in decimal_256.chunks_mut(64) {
         mutate_chunk(chunk);
     }
 }
 
 fn mutate_chunk(decimals: &mut [u8]) {
-    let mut w:[u8; 64] = [0; 64]; 
+    // TODO: Is this the best way??
+    let mut w: Vec<String> = vec![format!("{:0>32b}", 0); 64];
+    
+    let mut i: usize = 0;
+    decimals
+        .windows(4)
+        .step_by(4)
+        .for_each(|t| {
+            w[i] = format!("{:0>8b}{:0>8b}{:0>8b}{:0>8b}", t[0], t[1], t[2], t[3]);
+            i += 1;
+        });
+    w.windows(2).step_by(2).for_each(|f| println!("{} {}", f[0], f[1]));
 }
 
 mod test {

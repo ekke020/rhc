@@ -12,14 +12,14 @@ fn main() {
     // gpu_test();
 
     // Sha224
-    let H_0 = "c1059ed8";
-    let H_1 = "367cd507";
-    let H_2 = "3070dd17";
-    let H_3 = "f70e5939";
-    let H_4 = "ffc00b31";
-    let H_5 = "68581511";
-    let H_6 = "64f98fa7";
-    let H_7 = "befa4fa4";
+    // let H_0 = "c1059ed8";
+    // let H_1 = "367cd507";
+    // let H_2 = "3070dd17";
+    // let H_3 = "f70e5939";
+    // let H_4 = "ffc00b31";
+    // let H_5 = "68581511";
+    // let H_6 = "64f98fa7";
+    // let H_7 = "befa4fa4";
     sha2::sha256::test("hello world");
 
 }
