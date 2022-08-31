@@ -62,23 +62,100 @@ pub fn test(value: &str) {
     println!("Length: {}", decimal_256.len());
 
     for chunk in decimal_256.chunks_mut(64) {
-        mutate_chunk(chunk);
+        // mutate_chunk(chunk);
     }
 }
+pub fn mutate_chunk_new(decimals: &[u8]) {
+    let mut word_32_bit: [u32; 64] = [0; 64];
+    let mut i = 0;
+    decimals.windows(4).step_by(4).for_each(|t| {
+        word_32_bit[i] = concatenate_bytes(&[t[0] as u32, t[1] as u32, t[2] as u32, t[3] as u32]);
+        i += 1;
+    });
+    word_32_bit
+        .windows(2)
+        .step_by(2)
+        .for_each(|f| println!("{:?} {:?}", f[0], f[1]));
+    let n0 = right_rotate(word_32_bit[1], 7);
+    let n1 = right_rotate(word_32_bit[1], 18);
+    let n2 = right_shift(word_32_bit[1], 3);
+    println!("{:0>32b}", n0);
+    println!("{:0>32b}", n1);
+    println!("{:0>32b}", n2);
+    let answer = n0 ^ n1 ^ n2;
+    println!("{answer}");
+}
 
-fn mutate_chunk(decimals: &mut [u8]) {
-    // TODO: Is this the best way??
-    let mut w: Vec<String> = vec![format!("{:0>32b}", 0); 64];
-    
-    let mut i: usize = 0;
-    decimals
-        .windows(4)
-        .step_by(4)
-        .for_each(|t| {
-            w[i] = format!("{:0>8b}{:0>8b}{:0>8b}{:0>8b}", t[0], t[1], t[2], t[3]);
-            i += 1;
-        });
-    w.windows(2).step_by(2).for_each(|f| println!("{} {}", f[0], f[1]));
+fn fit_manipulation(word_32_bit: u32) -> u32 {
+    let n0 = right_rotate(word_32_bit, 7);
+    let n1 = right_rotate(word_32_bit, 18);
+    let n2 = right_shift(word_32_bit, 3);
+    println!("{:0>32b}", n0);
+    println!("{:0>32b}", n1);
+    println!("{:0>32b}", n2);
+    let answer = n0 ^ n1 ^ n2;
+    println!("{answer}");
+}
+
+fn concatenate_bytes(bytes: &[u32; 4]) -> u32 {
+    let mut decimal_rep: u32 = bytes[0].into();
+    decimal_rep = (decimal_rep << 8) | bytes[1];
+    decimal_rep = (decimal_rep << 8) | bytes[2];
+    decimal_rep = (decimal_rep << 8) | bytes[3];
+    decimal_rep
+}
+
+fn right_rotate(n: u32, d: u8) -> u32 {
+    (n >> d) | (n << (32 - d))
+}
+
+fn right_shift(n: u32, d: u8) -> u32 { 
+    n >> d
+}
+// fn mutate_chunk(decimals: &mut [u8]) {
+//     let mut w: Vec<String> = vec![format!("{:0>32b}", 0); 64];
+//     let mut test: [[u8; 4]; 64] = [[0; 4]; 64];
+//     let mut i: usize = 0;
+//     decimals.windows(4).step_by(4).for_each(|t| {
+//         println!("Deciam array: {:?}", t);
+//         test[i] = [t[0], t[1], t[2], t[3]];
+//         w[i] = format!("{:0>8b}{:0>8b}{:0>8b}{:0>8b}", t[0], t[1], t[2], t[3]);
+//         i += 1;
+//     });
+//     test.windows(2)
+//         .step_by(2)
+//         .for_each(|f| println!("{:?} {:?}", f[0], f[1]));
+//     w.windows(2)
+//         .step_by(2)
+//         .for_each(|f| println!("{} {}", f[0], f[1]));
+
+//     println!("Result: {:0>8b} {:0>8b} {:0>8b} {:0>8b}", 111, 32, 119, 111);
+//     let result = right_rotate([111, 32, 119, 111], 7);
+//     println!(
+//         "Result: {} {} {} {}",
+//         result[0], result[1], result[2], result[3]
+//     );
+//     println!(
+//         "Result: {:0>8b} {:0>8b} {:0>8b} {:0>8b}",
+//         result[0], result[1], result[2], result[3]
+//     );
+
+//     for i in 16..63 {
+//         let s0 = "";
+//         let s1 = "";
+//         let s2 = w[i - 16].clone();
+//         w[i] = format!("{}{}{}", s2, s0, s1);
+//     }
+
+//     w.iter_mut().enumerate().skip(16).for_each(|(i, f)| {
+//         // s0 := (w[i-15] rightrotate  7) xor (w[i-15] rightrotate 18) xor (w[i-15] rightshift  3)
+//         // s1 := (w[i-2] rightrotate 17) xor (w[i-2] rightrotate 19) xor (w[i-2] rightshift 10)
+//         // w[i] := w[i-16] + s0 + w[i-7] + s1
+//     });
+// }
+
+fn left_rotate(n: u8, d: u8) -> u8 {
+    (n << d) | (n >> (8 - d))
 }
 
 mod test {

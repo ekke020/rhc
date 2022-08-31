@@ -1,6 +1,6 @@
 mod core;
-mod systems;
 mod sha2;
+mod systems;
 use vulkano::buffer::{BufferContents, BufferUsage, CpuAccessibleBuffer};
 use vulkano::device::physical::PhysicalDevice;
 use vulkano::device::{Device, DeviceCreateInfo, Features, QueueCreateInfo};
@@ -20,8 +20,24 @@ fn main() {
     // let H_5 = "68581511";
     // let H_6 = "64f98fa7";
     // let H_7 = "befa4fa4";
-    sha2::sha256::test("hello world");
+    // sha2::sha256::test("hello world");
+    // TODO: GOAL IS: 6F20776F = Hex
+    // TODO: 01101111001000000111011101101111 = Binary
+    // TODO: 1864398703 = Decimal
 
+    // let binary_rep = 0b01101111 << 0b00100000; //+ 0b01110111 + 0b01101111;
+    println!("{:b}", 111u8);
+    let mut decimal_rep = 111;
+    decimal_rep = (decimal_rep << 8) | 32;
+    decimal_rep = (decimal_rep << 8) | 119;
+    decimal_rep = (decimal_rep << 8) | 111;
+    // let decimal_rep: u16 = (111u8 << 8u8 | 32u8).into() ; //+ 0b01110111 + 0b01101111;
+    println!("{}", decimal_rep);
+    let hex_rep = 0x6F + 0x20 + 0x77 + 0x6F;
+
+    let decimals = &[104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 128];
+
+    sha2::sha256::mutate_chunk_new(decimals);
 }
 
 fn gpu_test() {
