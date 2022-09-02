@@ -23,12 +23,9 @@ fn main() {
     // let H_6 = "64f98fa7";
     // let H_7 = "befa4fa4";
     // sha2::sha256::test("hello world");
-    // TODO: GOAL IS: 6F20776F = Hex
-    // TODO: 01101111001000000111011101101111 = Binary
-    // TODO: 1864398703 = Decimal
-    // sha2::sha256::test("hello world");
-    let k = 2_u64.pow(32);
-    println!("{k}")
+    sha2::sha256::test("abc");
+    // let k = 2_u64.pow(32);
+    // println!("{k}")
 }
 
 fn gpu_test() {
