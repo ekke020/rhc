@@ -6,6 +6,8 @@ use vulkano::device::physical::PhysicalDevice;
 use vulkano::device::{Device, DeviceCreateInfo, Features, QueueCreateInfo};
 use vulkano::instance::{Instance, InstanceCreateInfo};
 use vulkano::sync::{self, GpuFuture};
+use std::env;
+
 fn main() {
     // let password_info = systems::input::take();
     // systems::spawner::run_threads(password_info);
@@ -24,20 +26,9 @@ fn main() {
     // TODO: GOAL IS: 6F20776F = Hex
     // TODO: 01101111001000000111011101101111 = Binary
     // TODO: 1864398703 = Decimal
-
-    // let binary_rep = 0b01101111 << 0b00100000; //+ 0b01110111 + 0b01101111;
-    println!("{:b}", 111u8);
-    let mut decimal_rep = 111;
-    decimal_rep = (decimal_rep << 8) | 32;
-    decimal_rep = (decimal_rep << 8) | 119;
-    decimal_rep = (decimal_rep << 8) | 111;
-    // let decimal_rep: u16 = (111u8 << 8u8 | 32u8).into() ; //+ 0b01110111 + 0b01101111;
-    println!("{}", decimal_rep);
-    let hex_rep = 0x6F + 0x20 + 0x77 + 0x6F;
-
-    let decimals = &[104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 128];
-
-    sha2::sha256::mutate_chunk_new(decimals);
+    // sha2::sha256::test("hello world");
+    let k = 2_u64.pow(32);
+    println!("{k}")
 }
 
 fn gpu_test() {
