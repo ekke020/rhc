@@ -36,8 +36,35 @@ macro_rules! lazy_array {
     }};
 }
 
-pub fn test(value: &str) {
-    let bytes = value.as_bytes();
+pub struct Sha256<'a> {
+    hash: &'a str,        // The value were looking for.
+    value: &'a [u8],      // The value that was provided.
+    compressed: [u32; 8], // The final hash from the value.
+}
+
+impl<'a> Sha256<'a> {
+    pub fn new(hash: &'a str, value: &'a [u8]) -> Self {
+        Self {
+            hash,
+            value,
+            compressed: [0x00; 8],
+        }
+    }
+    pub fn run(&mut self) -> Option<[u32; 8]> {
+        let mut decimal = get_decimals(self.value);
+        for chunk in decimal.chunks_mut(64) {
+            let word_32_bit = mutate_chunk(chunk);
+            self.compressed = compression(word_32_bit);
+        }
+        // TODO: Compare the hash with the value and return an Option instead.
+        // TODO: Access the global decimal array and compare with that?
+        self.compressed.iter().for_each(|f| print!("{} ", f));
+        println!("");
+        None
+    }
+}
+
+fn get_decimals(bytes: &[u8]) -> Vec<u8> {
     let mut decimal_256 = lazy_array!(bytes.len(), 64);
     let decimal_len = decimal_256.len() - 1;
 
@@ -51,18 +78,15 @@ pub fn test(value: &str) {
     decimal_256[bytes.len()] = 0x80;
 
     // Get the big endian representation of the length of value.
-    let big_endian_rep = bytes.len() * 8;
-    for (i, byte) in big_endian_rep.as_bytes().iter().enumerate() {
+    // TODO: This should be big endian and not little endian?
+    let big_endian_rep = (bytes.len() * 8).to_le_bytes();
+    for (i, byte) in big_endian_rep.iter().enumerate() {
         decimal_256[decimal_len - i] = *byte;
     }
-
-    // Mutate each 512 bit chunk.
-    for chunk in decimal_256.chunks_mut(64) {
-        mutate_chunk(chunk);
-    }
+    decimal_256
 }
 
-fn mutate_chunk(decimals: &[u8]) {
+fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
     let mut word_32_bit: [u32; 64] = [0; 64];
     let mut i = 0;
 
@@ -76,21 +100,13 @@ fn mutate_chunk(decimals: &[u8]) {
     for i in 16..64 {
         let s0: u32 = bit_manipulation(&word_32_bit[i - 15], 7, 18, 3);
         let s1: u32 = bit_manipulation(&word_32_bit[i - 2], 17, 19, 10);
-        let t: u32 = addition_with_overflow(s0, s1);
-        let t1: u32 = addition_with_overflow(word_32_bit[i - 16], word_32_bit[i - 7]);
-        word_32_bit[i] = addition_with_overflow(t, t1);
+        let [s2, s3] = [word_32_bit[i - 16], word_32_bit[i - 7]];
+        word_32_bit[i] = addition_with_overflow(&[s0, s1, s2, s3]);
     }
-
     word_32_bit
-        .windows(2)
-        .step_by(2)
-        .for_each(|f| println!("{:0>32b} {:0>32b}", f[0], f[1]));
-
-    compression(word_32_bit);
 }
 
-fn compression(mutated: [u32; 64]) {
-    // TODO: Refactor this.
+fn compression(mutated: [u32; 64]) -> [u32; 8] {
     let mut a: u32 = H0;
     let mut b: u32 = H1;
     let mut c: u32 = H2;
@@ -103,37 +119,37 @@ fn compression(mutated: [u32; 64]) {
     for i in 0..64 {
         let s1 = right_rotate(&e, 6) ^ right_rotate(&e, 11) ^ right_rotate(&e, 25);
         let ch = (e & f) ^ ((!e) & g);
-        let mut temp1 = addition_with_overflow(h, s1);
-        temp1 = addition_with_overflow(temp1, ch);
-        temp1 = addition_with_overflow(temp1, K[i]);
-        temp1 = addition_with_overflow(temp1, mutated[i]);
+        let temp1 = addition_with_overflow(&[h, s1, ch, K[i], mutated[i]]);
         let s0 = right_rotate(&a, 2) ^ right_rotate(&a, 13) ^ right_rotate(&a, 22);
         let maj = (a & b) ^ (a & c) ^ (b & c);
-        let temp2 = addition_with_overflow(s0, maj);
+        let temp2 = addition_with_overflow(&[s0, maj]);
         h = g;
         g = f;
         f = e;
-        e = addition_with_overflow(d, temp1);
+        e = addition_with_overflow(&[d, temp1]);
         d = c;
         c = b;
         b = a;
-        a = addition_with_overflow(temp1, temp2);
+        a = addition_with_overflow(&[temp1, temp2]);
     }
-    let v0 = addition_with_overflow(H0, a);
-    let v1 = addition_with_overflow(H1, b);
-    let v2 = addition_with_overflow(H2, c);
-    let v3 = addition_with_overflow(H3, d);
-    let v4 = addition_with_overflow(H4, e);
-    let v5 = addition_with_overflow(H5, f);
-    let v6 = addition_with_overflow(H6, g);
-    let v7 = addition_with_overflow(H7, h);
-
-    let answer = format!("{:x}{:x}{:x}{:x}{:x}{:x}{:x}{:x}", v0, v1, v2, v3, v4, v5, v6, v7);
-    println!("{answer}");
+    let compressed: [u32; 8] = [
+        addition_with_overflow(&[H0, a]),
+        addition_with_overflow(&[H1, b]),
+        addition_with_overflow(&[H2, c]),
+        addition_with_overflow(&[H3, d]),
+        addition_with_overflow(&[H4, e]),
+        addition_with_overflow(&[H5, f]),
+        addition_with_overflow(&[H6, g]),
+        addition_with_overflow(&[H7, h]),
+    ];
+    compressed
 }
 
-fn addition_with_overflow(y: u32, x: u32) -> u32 {
-    ((y as u64 + x as u64) % ADDITION_OVERFLOW) as u32
+fn addition_with_overflow(args: &[u32]) -> u32 {
+    args.iter()
+        .map(|arg| *arg as u64)
+        .reduce(|total, arg| (total + arg) % ADDITION_OVERFLOW)
+        .expect("Empty array is not allowed") as u32
 }
 
 fn bit_manipulation(word_32_bit: &u32, r1: u8, r2: u8, r3: u8) -> u32 {
@@ -159,10 +175,6 @@ fn right_shift(n: &u32, d: u8) -> u32 {
     n >> d
 }
 
-fn left_rotate(n: u8, d: u8) -> u8 {
-    (n << d) | (n >> (8 - d))
-}
-
 mod test {
     use super::*;
     // "abc" in sha256 hash.
@@ -176,7 +188,7 @@ mod test {
     }
 
     #[test]
-    fn test_right_shit() {
+    fn test_right_shift() {
         assert_eq!(right_shift(&0x9B05688C, 7), 0x1360AD1);
         assert_eq!(right_shift(&0x9B05688C, 10), 0x26C15A);
         assert_ne!(right_shift(&0x9B05688C, 2), 0x9B05688);
@@ -197,7 +209,65 @@ mod test {
 
     #[test]
     fn test_addition_with_overflow() {
-        assert_eq!(addition_with_overflow(0x74657374, 0x676F6F64), 0xDBD4E2D8);
-        assert_ne!(addition_with_overflow(0x7361640A, 0x6C75636B), 0xDBD4E2D8);
+        assert_eq!(
+            addition_with_overflow(&[0x74657374, 0x676F6F64]),
+            0xDBD4E2D8
+        );
+        assert_ne!(
+            addition_with_overflow(&[0x7361640A, 0x6C75636B]),
+            0xDBD4E2D8
+        );
+    }
+
+    #[test]
+    fn test_get_decimals() {
+        let test = "test";
+        let k = get_decimals(test.as_bytes());
+        assert_eq!([k[0], k[1], k[2], k[3], k[4]], [116, 101, 115, 116, 128]);
+        assert_eq!(k[63], 32)
+    }
+
+    #[test]
+    fn test_mutate_chunk() {
+        // Decimals of "test"
+        let decimals: Vec<u8> = vec![
+            0x74, 0x65, 0x73, 0x74, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20,
+        ];
+        let correct: [u32; 64] = [
+            0x74657374, 0x80000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x20, 0x85659374, 0x80140000, 0x7bf58b7a, 0x80205508, 0x74cc8fe6, 0x20055801,
+            0xd612c7fc, 0x8c6e48c8, 0xbb48757a, 0x6953d7a2, 0xb45d2dd8, 0x60bbd5c, 0x537fb3ef,
+            0x7f16c927, 0xfc14e508, 0x166c6386, 0xedd657cc, 0x8b7f453f, 0x776c519d, 0xff4489c8,
+            0xe705110d, 0x448e3765, 0x29c4f03b, 0x56d4fa86, 0xe8e882ae, 0xaf5bb0c4, 0x5c74ac3c,
+            0xd394c0d8, 0x4ef1cf66, 0xd857da58, 0x4737038f, 0x2738a62e, 0xbe10843f, 0x50331a18,
+            0x4a1ce75b, 0x7fff59c9, 0xfe72c27a, 0x22ed8860, 0xc321f5c0, 0xea81a878, 0x6e0938fe,
+            0x32bbcc5b, 0x33d3040f, 0x284c1f19, 0xb0964602, 0xfe6ad1fb, 0x8ec8c416, 0x11f0d783,
+        ];
+        let mutated = mutate_chunk(&decimals);
+        assert_eq!(mutated, correct);
+    }
+
+    #[test]
+    fn test_compression() {
+        // mutated string of "test"
+        let chunk: [u32; 64] = [
+            0x74657374, 0x80000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x20, 0x85659374, 0x80140000, 0x7bf58b7a, 0x80205508, 0x74cc8fe6, 0x20055801,
+            0xd612c7fc, 0x8c6e48c8, 0xbb48757a, 0x6953d7a2, 0xb45d2dd8, 0x60bbd5c, 0x537fb3ef,
+            0x7f16c927, 0xfc14e508, 0x166c6386, 0xedd657cc, 0x8b7f453f, 0x776c519d, 0xff4489c8,
+            0xe705110d, 0x448e3765, 0x29c4f03b, 0x56d4fa86, 0xe8e882ae, 0xaf5bb0c4, 0x5c74ac3c,
+            0xd394c0d8, 0x4ef1cf66, 0xd857da58, 0x4737038f, 0x2738a62e, 0xbe10843f, 0x50331a18,
+            0x4a1ce75b, 0x7fff59c9, 0xfe72c27a, 0x22ed8860, 0xc321f5c0, 0xea81a878, 0x6e0938fe,
+            0x32bbcc5b, 0x33d3040f, 0x284c1f19, 0xb0964602, 0xfe6ad1fb, 0x8ec8c416, 0x11f0d783,
+        ];
+        // correct result of compression
+        let correct: [u32; 8] = [
+            0x9f86d081, 0x884c7d65, 0x9a2feaa0, 0xc55ad015, 0xa3bf4f1b, 0x2b0b822c, 0xd15d6c15,
+            0xb0f00a08,
+        ];
+        assert_eq!(compression(chunk), correct);
     }
 }
