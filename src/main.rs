@@ -1,13 +1,13 @@
 mod core;
 mod sha2;
 mod systems;
+use std::convert::TryInto;
+use std::env;
 use vulkano::buffer::{BufferContents, BufferUsage, CpuAccessibleBuffer};
 use vulkano::device::physical::PhysicalDevice;
 use vulkano::device::{Device, DeviceCreateInfo, Features, QueueCreateInfo};
 use vulkano::instance::{Instance, InstanceCreateInfo};
 use vulkano::sync::{self, GpuFuture};
-use std::env;
-
 fn main() {
     // let password_info = systems::input::take();
     // systems::spawner::run_threads(password_info);
@@ -23,11 +23,29 @@ fn main() {
     // let H_6 = "64f98fa7";
     // let H_7 = "befa4fa4";
     // sha2::sha256::test("hello world");
-    sha2::sha256::test("abc");
+    let hash = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
+    convert_to_decimal_array(hash);
+    println!("");
+    let test = "test".as_bytes();
+    let mut k = sha2::Sha256::new(hash, test);
+    k.run();
     // let k = 2_u64.pow(32);
     // println!("{k}")
 }
-
+// TODO: Implement a global value with the decimal array?
+fn convert_to_decimal_array(hash: &str) {
+    use std::u32;
+    let test: Vec<u32> = hash
+        .chars()
+        .collect::<Vec<char>>()
+        .chunks(8)
+        .map(|c| c.iter().collect::<String>())
+        .collect::<Vec<String>>()
+        .iter()
+        .map(|s| u32::from_str_radix(s, 16).unwrap())
+        .collect();
+    test.iter().for_each(|f| print!("{} ", f));
+}
 fn gpu_test() {
     let instance = Instance::new(InstanceCreateInfo::default()).expect("failed to create instance");
 
