@@ -1,5 +1,3 @@
-use vulkano::buffer::BufferContents;
-
 // round constants for sha256
 const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -37,13 +35,13 @@ macro_rules! lazy_array {
 }
 
 pub struct Sha256<'a> {
-    hash: &'a str,        // The value were looking for.
+    hash: Vec<u32>,       // The value were looking for.
     value: &'a [u8],      // The value that was provided.
     compressed: [u32; 8], // The final hash from the value.
 }
 
 impl<'a> Sha256<'a> {
-    pub fn new(hash: &'a str, value: &'a [u8]) -> Self {
+    pub fn new(hash: Vec<u32>, value: &'a [u8]) -> Self {
         Self {
             hash,
             value,
@@ -56,11 +54,10 @@ impl<'a> Sha256<'a> {
             let word_32_bit = mutate_chunk(chunk);
             self.compressed = compression(word_32_bit);
         }
-        // TODO: Compare the hash with the value and return an Option instead.
-        // TODO: Access the global decimal array and compare with that?
-        self.compressed.iter().for_each(|f| print!("{} ", f));
-        println!("");
-        None
+        match self.compressed.eq(&self.hash[..8]) {
+            true => Some(self.compressed),
+            false => None,
+        }
     }
 }
 
@@ -176,9 +173,7 @@ fn right_shift(n: &u32, d: u8) -> u32 {
 }
 
 mod test {
-    use super::*;
-    // "abc" in sha256 hash.
-    // const ABC: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+    use crate::sha2::sha256_core::*;
 
     #[test]
     fn test_right_rotate() {

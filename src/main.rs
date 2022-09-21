@@ -13,29 +13,18 @@ fn main() {
     // systems::spawner::run_threads(password_info);
     // gpu_test();
 
-    // Sha224
-    // let H_0 = "c1059ed8";
-    // let H_1 = "367cd507";
-    // let H_2 = "3070dd17";
-    // let H_3 = "f70e5939";
-    // let H_4 = "ffc00b31";
-    // let H_5 = "68581511";
-    // let H_6 = "64f98fa7";
-    // let H_7 = "befa4fa4";
     // sha2::sha256::test("hello world");
     let hash = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
-    convert_to_decimal_array(hash);
-    println!("");
+    let hash = convert_to_decimal_array(hash);
     let test = "test".as_bytes();
     let mut k = sha2::Sha256::new(hash, test);
-    k.run();
-    // let k = 2_u64.pow(32);
-    // println!("{k}")
+    let result = k.run();
+    println!("{:?}", result.unwrap());
 }
 // TODO: Implement a global value with the decimal array?
-fn convert_to_decimal_array(hash: &str) {
+fn convert_to_decimal_array(hash: &str) -> Vec<u32> {
     use std::u32;
-    let test: Vec<u32> = hash
+    hash
         .chars()
         .collect::<Vec<char>>()
         .chunks(8)
@@ -43,9 +32,9 @@ fn convert_to_decimal_array(hash: &str) {
         .collect::<Vec<String>>()
         .iter()
         .map(|s| u32::from_str_radix(s, 16).unwrap())
-        .collect();
-    test.iter().for_each(|f| print!("{} ", f));
+        .collect::<Vec<u32>>()
 }
+
 fn gpu_test() {
     let instance = Instance::new(InstanceCreateInfo::default()).expect("failed to create instance");
 
