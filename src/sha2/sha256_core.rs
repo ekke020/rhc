@@ -39,7 +39,7 @@ pub struct Sha256<'a> {
     compressed: [u32; 8], // The final hash from the value.
 }
 
-impl <'a>Sha256<'a> {
+impl<'a> Sha256<'a> {
     pub fn new(value: &'a [u8]) -> Self {
         Self {
             value,
@@ -51,28 +51,79 @@ impl <'a>Sha256<'a> {
         for chunk in decimal.chunks_mut(64) {
             let word_32_bit = mutate_chunk(chunk);
             self.compressed = compression(word_32_bit);
-        };
+        }
         Some(self.compressed)
         // TODO: Dont compare in here, just send the compressed value back
     }
 }
 
 pub struct Sha224<'a> {
-    value: &'a [u8],      // The value that was provided.
-    compressed: [u32; 7], // The final hash from the value.
+    value: &'a [u8], // The value that was provided.
+    state: State256,
+    compressed: Option<U28>,
 }
-
-use crate::sha2::wrapper::Hash;
-impl <'a>Hash<[u32; 7]> for Sha224<'a> {
-    fn reload() {
+impl<'a> Sha224<'a> {
+    pub fn new(value: &'a [u8]) -> Self {
+        Self {
+            value,
+            state: H256_224,
+            compressed: None,
+        }
     }
+    fn compression(&self, mutated: [u32; 64]) -> U28 {
+        let mut v = self.state;
+
+        for i in 0..64 {
+            let s1 = right_rotate(&v[4], 6) ^ right_rotate(&v[4], 11) ^ right_rotate(&v[4], 25);
+            let ch = (v[4] & v[5]) ^ ((!v[4]) & v[6]);
+            let temp1 = addition_with_overflow(&[v[7], s1, ch, K[i], mutated[i]]);
+            let s0 = right_rotate(&v[0], 2) ^ right_rotate(&v[0], 13) ^ right_rotate(&v[0], 22);
+            let maj = (v[0] & v[1]) ^ (v[0] & v[2]) ^ (v[1] & v[2]);
+            let temp2 = addition_with_overflow(&[s0, maj]);
+            v[7] = v[6];
+            v[6] = v[5];
+            v[5] = v[4];
+            v[4] = addition_with_overflow(&[v[3], temp1]);
+            v[3] = v[2];
+            v[2] = v[2];
+            v[1] = v[0];
+            v[0] = addition_with_overflow(&[temp1, temp2]);
+        }
+        let compressed: [u32; 8] = [
+            addition_with_overflow(&[H0, v[0]]),
+            addition_with_overflow(&[H1, v[1]]),
+            addition_with_overflow(&[H2, v[2]]),
+            addition_with_overflow(&[H3, v[3]]),
+            addition_with_overflow(&[H4, v[4]]),
+            addition_with_overflow(&[H5, v[5]]),
+            addition_with_overflow(&[H6, v[6]]),
+            addition_with_overflow(&[H7, v[7]]),
+        ];
+        U28::transform(compressed)
+    }
+}
+use super::{
+    consts::{State256, H256_224},
+    wrapper::{CompressionSize, U28},
+};
+use crate::sha2::wrapper::Hash;
+impl<'a> Hash<U28> for Sha224<'a> {
+    fn reload() {}
 
     fn run(&mut self) {
-        todo!()
+        let mut decimal = get_decimals(self.value);
+        for chunk in decimal.chunks_mut(64) {
+            let word_32_bit = mutate_chunk(chunk);
+            self.compressed = Some(self.compression(word_32_bit));
+        }
     }
 
-    fn extract() -> [u32; 7] {
-        todo!()
+    fn extract(&mut self) -> U28 {
+        let content = self
+            .compressed
+            .take()
+            .expect("Can't extract before running hash");
+        content
     }
 }
 fn get_decimals(bytes: &[u8]) -> Vec<u8> {

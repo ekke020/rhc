@@ -1,14 +1,32 @@
+use std::convert::TryInto;
+
 pub struct Sha256;
 pub struct Sha512;
-pub trait Hash<const T: usize> {
+pub trait CompressionSize<T: Sized, const N: usize> {
+    fn transform(compressed: [T; N]) -> Self;
+}
+pub struct U32([u32; 8]);
+impl<T, const N: usize> CompressionSize<u32, 8> for U32 
+{
+    fn transform(compressed: [T; N]) -> Self {
+        U32(compressed)
+    }
+}
+pub struct U28([u32; 7]);
+impl<T, const N: usize> CompressionSize<u32, 7> for U28 {
+    fn transform(compressed: [T; N]) -> Self {
+        U28(compressed)
+    }
+}
+
+pub trait Hash<T: CompressionSize<u32, 2>> {
     fn reload();
 
     fn run(&mut self);
 
-    fn extract() -> [u32; T];
+    fn extract(&mut self) -> T;
 
-    fn compression<const N: usize>(mutated: [u32; N]) -> T;
-
+    // fn compression(mutated: [u32; 64]) -> T;
 }
 
 // pub struct Wrapper<T, Variables>
