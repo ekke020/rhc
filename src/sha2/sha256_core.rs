@@ -35,15 +35,13 @@ macro_rules! lazy_array {
 }
 
 pub struct Sha256<'a> {
-    hash: Vec<u32>,       // The value were looking for.
     value: &'a [u8],      // The value that was provided.
     compressed: [u32; 8], // The final hash from the value.
 }
 
-impl<'a> Sha256<'a> {
-    pub fn new(hash: Vec<u32>, value: &'a [u8]) -> Self {
+impl <'a>Sha256<'a> {
+    pub fn new(value: &'a [u8]) -> Self {
         Self {
-            hash,
             value,
             compressed: [0x00; 8],
         }
@@ -53,14 +51,30 @@ impl<'a> Sha256<'a> {
         for chunk in decimal.chunks_mut(64) {
             let word_32_bit = mutate_chunk(chunk);
             self.compressed = compression(word_32_bit);
-        }
-        match self.compressed.eq(&self.hash[..8]) {
-            true => Some(self.compressed),
-            false => None,
-        }
+        };
+        Some(self.compressed)
+        // TODO: Dont compare in here, just send the compressed value back
     }
 }
 
+pub struct Sha224<'a> {
+    value: &'a [u8],      // The value that was provided.
+    compressed: [u32; 7], // The final hash from the value.
+}
+
+use crate::sha2::wrapper::Hash;
+impl <'a>Hash<[u32; 7]> for Sha224<'a> {
+    fn reload() {
+    }
+
+    fn run(&mut self) {
+        todo!()
+    }
+
+    fn extract() -> [u32; 7] {
+        todo!()
+    }
+}
 fn get_decimals(bytes: &[u8]) -> Vec<u8> {
     let mut decimal_256 = lazy_array!(bytes.len(), 64);
     let decimal_len = decimal_256.len() - 1;
