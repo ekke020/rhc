@@ -71,6 +71,7 @@ impl<'a> Sha224<'a> {
         }
     }
     fn compression(&self, mutated: [u32; 64]) -> U28 {
+        // TODO: Move this out of impl block
         let mut v = self.state;
 
         for i in 0..64 {
@@ -108,7 +109,9 @@ use super::{
 };
 use crate::sha2::wrapper::Hash;
 impl<'a> Hash<U28> for Sha224<'a> {
-    fn reload() {}
+    fn reload() {
+        todo!()
+    }
 
     fn run(&mut self) {
         let mut decimal = get_decimals(self.value);
