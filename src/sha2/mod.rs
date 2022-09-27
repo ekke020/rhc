@@ -1,10 +1,8 @@
-mod base_256;
-mod base_512;
+mod bit_utils;
 mod consts;
-pub mod wrapper;
 mod sha256_core;
-// TODO: Wrap this with something so it can access consts?
-// TODO: Maybe take a whole new direction?
+pub mod wrapper;
+// TODO: Wrap sha256_core and create helper functions so not to exposed the underlying API.
 // Make seperate structs and implementations for 224 & 256?
 pub type Sha256<'a> = sha256_core::Sha256<'a>;
 pub type Sha224<'a> = sha256_core::Sha224<'a>;
