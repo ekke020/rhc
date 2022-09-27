@@ -12,6 +12,11 @@ impl CompressionSize<u32, 8> for U32 {
     }
 }
 pub struct U28([u32; 7]);
+impl U28 {
+    pub fn take(&mut self) -> [u32; 7] {
+        self.0
+    }
+}
 impl CompressionSize<u32, 8> for U28 {
     fn transform(compressed: [u32; 8]) -> Self {
         U28(compressed[0..7].try_into().unwrap())

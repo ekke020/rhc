@@ -61,7 +61,6 @@ fn get_hash(password: &str, hash_type: &HashType) -> String {
     }
 }
 
-
 fn get_sha512(password: &str) -> String {
     let mut sha512 = sha2::Sha512::new();
     sha512.update(password);

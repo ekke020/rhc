@@ -73,7 +73,7 @@ impl<'a> Sha224<'a> {
     fn compression(&self, mutated: [u32; 64]) -> U28 {
         // TODO: Move this out of impl block
         let mut v = self.state;
-
+    
         for i in 0..64 {
             let s1 = right_rotate(&v[4], 6) ^ right_rotate(&v[4], 11) ^ right_rotate(&v[4], 25);
             let ch = (v[4] & v[5]) ^ ((!v[4]) & v[6]);
@@ -86,19 +86,19 @@ impl<'a> Sha224<'a> {
             v[5] = v[4];
             v[4] = addition_with_overflow(&[v[3], temp1]);
             v[3] = v[2];
-            v[2] = v[2];
+            v[2] = v[1];
             v[1] = v[0];
             v[0] = addition_with_overflow(&[temp1, temp2]);
         }
         let compressed: [u32; 8] = [
-            addition_with_overflow(&[H0, v[0]]),
-            addition_with_overflow(&[H1, v[1]]),
-            addition_with_overflow(&[H2, v[2]]),
-            addition_with_overflow(&[H3, v[3]]),
-            addition_with_overflow(&[H4, v[4]]),
-            addition_with_overflow(&[H5, v[5]]),
-            addition_with_overflow(&[H6, v[6]]),
-            addition_with_overflow(&[H7, v[7]]),
+            addition_with_overflow(&[self.state[0], v[0]]),
+            addition_with_overflow(&[self.state[1], v[1]]),
+            addition_with_overflow(&[self.state[2], v[2]]),
+            addition_with_overflow(&[self.state[3], v[3]]),
+            addition_with_overflow(&[self.state[4], v[4]]),
+            addition_with_overflow(&[self.state[5], v[5]]),
+            addition_with_overflow(&[self.state[6], v[6]]),
+            addition_with_overflow(&[self.state[7], v[7]]),
         ];
         U28::transform(compressed)
     }
