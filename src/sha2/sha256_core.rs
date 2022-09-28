@@ -22,18 +22,6 @@ const H7: u32 = 0x5be0cd19;
 
 const ADDITION_OVERFLOW: u64 = 4294967296;
 
-macro_rules! lazy_array {
-    ($length:expr, $size:expr) => {{
-        let m: usize = ($length + 8) / $size;
-        let capacity: usize = ((m + 1) * ($size)) - 8;
-        let mut temp: Vec<u8> = Vec::with_capacity(capacity);
-        for _ in 0..capacity {
-            temp.push(0x00);
-        }
-        temp
-    }};
-}
-
 pub struct Sha256<'a> {
     value: &'a [u8], // The value that was provided.
     state: State256,
@@ -112,7 +100,7 @@ use super::{
     consts::{State256, H256_224, H256_256},
     wrapper::{CompressionSize, U28},
 };
-use crate::sha2::wrapper::Hash;
+use crate::sha2::{wrapper::Hash, bit_utils::lazy_vector};
 impl<'a> Hash<U28> for Sha224<'a> {
     fn reload() {
         todo!()
@@ -144,7 +132,7 @@ fn find_multiple(len: usize) -> usize {
 
 fn get_decimals(bytes: &[u8]) -> Vec<u8> {
     find_multiple(bytes.len());
-    let mut decimal_256 = lazy_array!(bytes.len(), 64);
+    let mut decimal_256 = lazy_vector!(bytes.len(), 64);
 
     // Add the binary values to the array.
     bytes
