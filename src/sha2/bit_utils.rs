@@ -28,5 +28,22 @@ macro_rules! lazy_vector {
         temp
     }};
 }
-
 pub(crate) use lazy_vector;
+const SHA_256_MAX: u64 = 4294967296;
+fn addition_with_overflow<T: Sized>(args: &[u32]) -> u32
+// where T: Sized
+{
+    args.iter()
+        .map(|arg| *arg as u64)
+        .reduce(|total, arg| (total + arg) % SHA_256_MAX)
+        .expect("Empty array is not allowed") as u32
+}
+
+fn right_rotate(n: &u32, d: u8) -> u32 {
+    (n >> d) | (n << (32 - d))
+}
+
+fn right_shift(n: &u32, d: u8) -> u32 {
+    n >> d
+}
+
