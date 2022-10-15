@@ -98,7 +98,7 @@ impl<'a> Sha224<'a> {
 }
 use super::{
     consts::{State256, H256_224, H256_256},
-    wrapper::{CompressionSize, U28},
+    wrapper::{CompressionSize, U28}, bit_utils::u32_addition,
 };
 use crate::sha2::{wrapper::Hash, bit_utils::lazy_vector};
 impl<'a> Hash<U28> for Sha224<'a> {
@@ -171,7 +171,7 @@ fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
         let s0: u32 = bit_manipulation(&word_32_bit[i - 15], 7, 18, 3);
         let s1: u32 = bit_manipulation(&word_32_bit[i - 2], 17, 19, 10);
         let [s2, s3] = [word_32_bit[i - 16], word_32_bit[i - 7]];
-        word_32_bit[i] = addition_with_overflow(&[s0, s1, s2, s3]);
+        word_32_bit[i] = u32_addition!(s0, s1, s2, s3);
     }
     word_32_bit
 }
@@ -189,28 +189,28 @@ fn compression(mutated: [u32; 64], test: [u32; 8]) -> [u32; 8] {
     for i in 0..64 {
         let s1 = right_rotate(&e, 6) ^ right_rotate(&e, 11) ^ right_rotate(&e, 25);
         let ch = (e & f) ^ ((!e) & g);
-        let temp1 = addition_with_overflow(&[h, s1, ch, K[i], mutated[i]]);
+        let temp1 = u32_addition!(h, s1, ch, K[i], mutated[i]);
         let s0 = right_rotate(&a, 2) ^ right_rotate(&a, 13) ^ right_rotate(&a, 22);
         let maj = (a & b) ^ (a & c) ^ (b & c);
-        let temp2 = addition_with_overflow(&[s0, maj]);
+        let temp2 = u32_addition!(s0, maj);
         h = g;
         g = f;
         f = e;
-        e = addition_with_overflow(&[d, temp1]);
+        e = u32_addition!(d, temp1);
         d = c;
         c = b;
         b = a;
-        a = addition_with_overflow(&[temp1, temp2]);
+        a = u32_addition!(temp1, temp2);
     }
     let compressed: [u32; 8] = [
-        addition_with_overflow(&[test[0], a]),
-        addition_with_overflow(&[test[1], b]),
-        addition_with_overflow(&[test[2], c]),
-        addition_with_overflow(&[test[3], d]),
-        addition_with_overflow(&[test[4], e]),
-        addition_with_overflow(&[test[5], f]),
-        addition_with_overflow(&[test[6], g]),
-        addition_with_overflow(&[test[7], h]),
+        u32_addition!(test[0], a),
+        u32_addition!(test[1], b),
+        u32_addition!(test[2], c),
+        u32_addition!(test[3], d),
+        u32_addition!(test[4], e),
+        u32_addition!(test[5], f),
+        u32_addition!(test[6], g),
+        u32_addition!(test[7], h),
     ];
     compressed
 }

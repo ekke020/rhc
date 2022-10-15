@@ -8,11 +8,12 @@ use vulkano::device::physical::PhysicalDevice;
 use vulkano::device::{Device, DeviceCreateInfo, Features, QueueCreateInfo};
 use vulkano::instance::{Instance, InstanceCreateInfo};
 use vulkano::sync::{self, GpuFuture};
+
+use crate::systems::printer::print;
 fn main() {
     // let password_info = systems::input::take();
     // systems::spawner::run_threads(password_info);
     // gpu_test();
-    // TODO: For some reason hash is incorrect after 55 chars
     let hash_224 = "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809";
     let hash_224 = convert_to_decimal_array(hash_224);
     let hash_256 = "49b794dcbb3afbe1a4c6602e86a193986eb0a6283740cfd032239560e1c9cc79";
@@ -21,6 +22,7 @@ fn main() {
     let mut sha256 = sha2::Sha256::new(test);
     let result = sha256.run().unwrap();
     println!("256: {:x?}", result);
+    // use crate::u32_addition;
     // use crate::sha2::wrapper::Hash;
     // let mut sha224 = sha2::Sha224::new(test);
     // sha224.run();
