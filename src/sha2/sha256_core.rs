@@ -25,31 +25,41 @@ const ADDITION_OVERFLOW: u64 = 4294967296;
 pub struct Sha256<'a> {
     value: &'a [u8], // The value that was provided.
     state: State256,
-    compressed: [u32; 8], // The final hash from the value.
+    compressed: Option<U32>, // The final hash from the value.
 }
 
-impl<'a> Sha256<'a> {
+impl <'a>Sha256<'a> {
     pub fn new(value: &'a [u8]) -> Self {
         Self {
             value,
             state: H256_256,
-            compressed: [
-                0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
-                0x5be0cd19,
-            ],
+            compressed: None,
         }
-    }
-    pub fn run(&mut self) -> Option<[u32; 8]> {
-        let mut decimal = get_decimals(self.value);
-        for chunk in decimal.chunks_mut(64) {
-            let word_32_bit = mutate_chunk(chunk);
-            self.compressed = compression(word_32_bit, self.compressed);
-        }
-        Some(self.compressed)
-        // TODO: Dont compare in here, just send the compressed value back
     }
 }
 
+impl <'a>Hash<'a, U32> for Sha256<'a> {
+    fn reload(&mut self, value: &'a [u8]) {
+        self.value = value;
+    }
+
+    fn run(&mut self) {
+        let mut decimal = get_decimals(self.value);
+        let mut compressed = self.state;
+        for chunk in decimal.chunks_mut(64) {
+            let word_32_bit = mutate_chunk(chunk);
+            compressed = compression(word_32_bit, compressed);
+        }
+        self.compressed = Some(U32::transform(compressed));
+    }
+
+    fn extract(&mut self) -> U32 {
+        self
+            .compressed
+            .take()
+            .expect("Can't extract before running hash")
+    }
+}
 pub struct Sha224<'a> {
     value: &'a [u8], // The value that was provided.
     state: State256,
@@ -96,13 +106,16 @@ impl<'a> Sha224<'a> {
         U28::transform(compressed)
     }
 }
+use lazy_static::__Deref;
+
 use super::{
     consts::{State256, H256_224, H256_256},
-    wrapper::{CompressionSize, U28}, bit_utils::u32_addition,
+    wrapper::{CompressionSize, U28, U32}, bit_utils::u32_addition,
 };
 use crate::sha2::{wrapper::Hash, bit_utils::lazy_vector};
-impl<'a> Hash<U28> for Sha224<'a> {
-    fn reload() {
+impl<'a> Hash<'a, U28> for Sha224<'a> {
+
+    fn reload(&mut self, value: &[u8]) {
         todo!()
     }
 
@@ -121,17 +134,10 @@ impl<'a> Hash<U28> for Sha224<'a> {
             .expect("Can't extract before running hash");
         content
     }
-}
 
-fn find_multiple(len: usize) -> usize {
-    let m = (len) / (56);
-    let cap = (m + 1) * 56;
-    println!("{}", cap);
-    cap
 }
 
 fn get_decimals(bytes: &[u8]) -> Vec<u8> {
-    find_multiple(bytes.len());
     let mut decimal_256 = lazy_vector!(bytes.len(), 64);
 
     // Add the binary values to the array.
@@ -176,15 +182,8 @@ fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
     word_32_bit
 }
 
-fn compression(mutated: [u32; 64], test: [u32; 8]) -> [u32; 8] {
-    let mut a: u32 = test[0];
-    let mut b: u32 = test[1];
-    let mut c: u32 = test[2];
-    let mut d: u32 = test[3];
-    let mut e: u32 = test[4];
-    let mut f: u32 = test[5];
-    let mut g: u32 = test[6];
-    let mut h: u32 = test[7];
+fn compression(mutated: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
+    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h ] = compressed;
 
     for i in 0..64 {
         let s1 = right_rotate(&e, 6) ^ right_rotate(&e, 11) ^ right_rotate(&e, 25);
@@ -203,14 +202,14 @@ fn compression(mutated: [u32; 64], test: [u32; 8]) -> [u32; 8] {
         a = u32_addition!(temp1, temp2);
     }
     let compressed: [u32; 8] = [
-        u32_addition!(test[0], a),
-        u32_addition!(test[1], b),
-        u32_addition!(test[2], c),
-        u32_addition!(test[3], d),
-        u32_addition!(test[4], e),
-        u32_addition!(test[5], f),
-        u32_addition!(test[6], g),
-        u32_addition!(test[7], h),
+        u32_addition!(compressed[0], a),
+        u32_addition!(compressed[1], b),
+        u32_addition!(compressed[2], c),
+        u32_addition!(compressed[3], d),
+        u32_addition!(compressed[4], e),
+        u32_addition!(compressed[5], f),
+        u32_addition!(compressed[6], g),
+        u32_addition!(compressed[7], h),
     ];
     compressed
 }

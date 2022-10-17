@@ -23,8 +23,8 @@ impl CompressionSize<u32, 8> for U28 {
     }
 }
 
-pub trait Hash<T: CompressionSize<u32, 8>> {
-    fn reload();
+pub trait Hash<'a, T: CompressionSize<u32, 8>> {
+    fn reload(&mut self, value: &'a [u8]);
 
     fn run(&mut self);
 

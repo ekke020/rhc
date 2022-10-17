@@ -18,10 +18,10 @@ fn main() {
     let hash_224 = convert_to_decimal_array(hash_224);
     let hash_256 = "49b794dcbb3afbe1a4c6602e86a193986eb0a6283740cfd032239560e1c9cc79";
     let hash_256 = convert_to_decimal_array(hash_256);
-    let test = "iawbdjnawdjnajdadjawndadkadwakdajkdanjkdnjakdnjawkdkanjdnk.adnkawnkjdnjadnanjkdanjdnwanjdnjnjawnjdnjawdnjnjdnjadnjwanjdanjdnjadnjnjawndjnanwdnjanjdjnawdnjnadjnawjdnjwanjdanjdnkajwdnkjdnjnjawnjdanjk.dnanj.wd.njdnj.anjwdnjadnjnjadnjawndjanjdnjwanjdanjkdnjkawnjk.dwndjwadwnajwdnj".as_bytes();
-    let mut sha256 = sha2::Sha256::new(test);
-    let result = sha256.run().unwrap();
-    println!("256: {:x?}", result);
+    let test = "iawbdjnawdjnajdadjawndadkadwakdajkdanjkdnjakdnjawkdkanjdnk.adnkawnkjdnjadnanjkdanjdnwanjdnjnjawnjdnjawdnjnjdnjadnjwanjdanjdnjadnjnjawndjnanwdnjanjdjnawdnjnadjnawjdnjwanjdanjdnkajwdnkjdnjnjawnjdanjk.dnanj.wd.njdnj.anjwdnjadnjnjadnjawndjanjdnjwanjdanjkdnjkawnjk.dwndjwadwnajwdnj";
+    let mut sha256 = sha2::Sha256::new(test.as_bytes());
+    sha256.run();
+    // println!("256: {:x?}", result);
     // use crate::u32_addition;
     // use crate::sha2::wrapper::Hash;
     // let mut sha224 = sha2::Sha224::new(test);
