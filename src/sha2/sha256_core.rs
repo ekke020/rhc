@@ -21,15 +21,15 @@ const H6: u32 = 0x1f83d9ab;
 const H7: u32 = 0x5be0cd19;
 
 const ADDITION_OVERFLOW: u64 = 4294967296;
-
-pub struct Sha256<'a> {
-    value: &'a [u8], // The value that was provided.
+// TODO: Refactor 224 so it uses the same implementation as 256.
+pub struct Sha256 {
+    value: Vec<u8>, // The value that was provided.
     state: State256,
     compressed: Option<U32>, // The final hash from the value.
 }
 
-impl <'a>Sha256<'a> {
-    pub fn new(value: &'a [u8]) -> Self {
+impl Sha for Sha256 {
+    fn new(value: Vec<u8>) -> Self {
         Self {
             value,
             state: H256_256,
@@ -38,15 +38,15 @@ impl <'a>Sha256<'a> {
     }
 }
 
-impl <'a>Hash<'a, U32> for Sha256<'a> {
-    fn reload(&mut self, value: &'a [u8]) {
+impl Hash<U32> for Sha256 {
+    fn reload(&mut self, value: Vec<u8>) {
         self.value = value;
+        todo!()
     }
 
     fn run(&mut self) {
-        let mut decimal = get_decimals(self.value);
         let mut compressed = self.state;
-        for chunk in decimal.chunks_mut(64) {
+        for chunk in self.value.chunks_mut(64) {
             let word_32_bit = mutate_chunk(chunk);
             compressed = compression(word_32_bit, compressed);
         }
@@ -54,8 +54,7 @@ impl <'a>Hash<'a, U32> for Sha256<'a> {
     }
 
     fn extract(&mut self) -> U32 {
-        self
-            .compressed
+        self.compressed
             .take()
             .expect("Can't extract before running hash")
     }
@@ -109,13 +108,13 @@ impl<'a> Sha224<'a> {
 use lazy_static::__Deref;
 
 use super::{
+    bit_utils::u32_addition,
     consts::{State256, H256_224, H256_256},
-    wrapper::{CompressionSize, U28, U32}, bit_utils::u32_addition,
+    wrapper::{CompressionSize, Sha, U28, U32},
 };
-use crate::sha2::{wrapper::Hash, bit_utils::lazy_vector};
-impl<'a> Hash<'a, U28> for Sha224<'a> {
-
-    fn reload(&mut self, value: &[u8]) {
+use crate::sha2::{bit_utils::lazy_vector, wrapper::Hash};
+impl<'a> Hash<U28> for Sha224<'a> {
+    fn reload(&mut self, value: Vec<u8>) {
         todo!()
     }
 
@@ -134,7 +133,6 @@ impl<'a> Hash<'a, U28> for Sha224<'a> {
             .expect("Can't extract before running hash");
         content
     }
-
 }
 
 fn get_decimals(bytes: &[u8]) -> Vec<u8> {
@@ -150,15 +148,11 @@ fn get_decimals(bytes: &[u8]) -> Vec<u8> {
     decimal_256[bytes.len()] = 0x80;
 
     // Get the big endian representation of the length of value.
-    println!("before adding big endian rep: {:x?}", decimal_256);
-    println!("Length: {}", decimal_256.len());
     let big_endian_rep = (bytes.len() * 8).to_be_bytes();
     big_endian_rep
         .iter()
         .for_each(|byte| decimal_256.push(*byte));
-
-    println!("When done: {:x?}", decimal_256);
-    println!("Length: {}", decimal_256.len());
+    println!("Decimal rep of the bytes: {:?}", decimal_256);
     decimal_256
 }
 
@@ -183,7 +177,7 @@ fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
 }
 
 fn compression(mutated: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h ] = compressed;
+    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = compressed;
 
     for i in 0..64 {
         let s1 = right_rotate(&e, 6) ^ right_rotate(&e, 11) ^ right_rotate(&e, 25);
