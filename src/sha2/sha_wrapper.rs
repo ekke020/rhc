@@ -1,29 +1,49 @@
-use crate::sha2::wrapper::{Hash, CompressionSize, U32};
+use super::{
+    sha256_core::Sha256,
+    wrapper::{Extract, Sha},
+};
+use crate::sha2::wrapper::{CompressionSize, Hash, U32};
 use std::marker::PhantomData;
-use super::{sha256_core::Sha256, wrapper::Sha};
-pub struct ShaWrapper<T, U>
-{
+pub struct ShaWrapper<T, U> {
     sha2: T,
-    compression: PhantomData<U>
+    compression: PhantomData<U>,
 }
-// TODO: Implement reload & extract from core.
 // TODO: Think of a better name for the wrapper.
 impl<T, U> ShaWrapper<T, U>
-where T: Hash<U>,
-U: CompressionSize<u32, 8>
+where
+    T: Hash<U>,
+    U: CompressionSize<u32, 8>,
 {
     pub fn run(&mut self) {
         self.sha2.run();
     }
+
+    pub fn reload(&mut self, data: impl AsRef<[u8]>) {
+        self.sha2.reload(get_decimals(data.as_ref()))
+    }
 }
 
-impl<'a, T, U> ShaWrapper<T, U>
-where T: Sha
+impl<T, U> ShaWrapper<T, U>
+where
+    T: Hash<U>,
+    U: CompressionSize<u32, 8> + Extract<u32, 8>,
 {
-    pub fn new(value: impl AsRef<[u8]>) -> Self {
+    // TODO: Figure out how to make this more generic
+    // TODO: Wrapper has an implementation for this and it might be bad...
+    pub fn extract(&mut self) -> [u32; 8] {
+        let value = self.sha2.extract();
+        value.take()
+    }
+}
+
+impl<T, U> ShaWrapper<T, U>
+where
+    T: Sha,
+{
+    pub fn new(data: impl AsRef<[u8]>) -> Self {
         Self {
-            sha2: T::new(get_decimals(value.as_ref())),
-            compression: PhantomData
+            sha2: T::new(get_decimals(data.as_ref())),
+            compression: PhantomData,
         }
     }
 }

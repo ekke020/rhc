@@ -21,6 +21,7 @@ fn main() {
     let test = "iawbdjnawdjnajdadjawndadkadwakdajkdanjkdnjakdnjawkdkanjdnk.adnkawnkjdnjadnanjkdanjdnwanjdnjnjawnjdnjawdnjnjdnjadnjwanjdanjdnjadnjnjawndjnanwdnjanjdjnawdnjnadjnawjdnjwanjdanjdnkajwdnkjdnjnjawnjdanjk.dnanj.wd.njdnj.anjwdnjadnjnjadnjawndjanjdnjwanjdanjkdnjkawnjk.dwndjwadwnajwdnj";
     let mut sha256 = sha2::Sha256::new("");
     sha256.run();
+    sha256.extract();
     // println!("256: {:x?}", result);
     // use crate::u32_addition;
     // use crate::sha2::wrapper::Hash;
