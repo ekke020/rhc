@@ -40,7 +40,7 @@ macro_rules! lazy_vector {
 /// Sha256 & sha224 calculates addition using the formula (modulo 2³²)
 ///
 /// ## Why
-/// This macro enables the restricted addition required by the sha 224 & 256 hashes. 
+/// This macro enables the restricted addition required by the sha 224 & 256 hashes.
 /// It also works as a variadic function for better readability.
 ///
 macro_rules! u32_addition {
@@ -53,11 +53,31 @@ macro_rules! u32_addition {
 
 }
 
-fn right_rotate(n: &u32, d: u8) -> u32 {
+pub fn right_rotate(n: &u32, d: u8) -> u32 {
     (n >> d) | (n << (32 - d))
 }
 
-fn right_shift(n: &u32, d: u8) -> u32 {
+pub fn right_shift(n: &u32, d: u8) -> u32 {
     n >> d
 }
 pub(crate) use {lazy_vector, u32_addition};
+
+#[test]
+fn test_u32_addition() {
+    assert_eq!(u32_addition!(0x74657374, 0x676F6F64), 0xDBD4E2D8);
+    assert_ne!(u32_addition!(0x7361640A, 0x6C75636B), 0xDBD4E2D8);
+}
+
+#[test]
+fn test_right_rotate() {
+    assert_eq!(right_rotate(&0x9B05688C, 5), 0x64D82B44);
+    assert_eq!(right_rotate(&0x9B05688C, 10), 0x2326C15A);
+    assert_ne!(right_rotate(&0x9B05688C, 2), 0x4464D82B);
+}
+
+#[test]
+fn test_right_shift() {
+    assert_eq!(right_shift(&0x9B05688C, 7), 0x1360AD1);
+    assert_eq!(right_shift(&0x9B05688C, 10), 0x26C15A);
+    assert_ne!(right_shift(&0x9B05688C, 2), 0x9B05688);
+}
