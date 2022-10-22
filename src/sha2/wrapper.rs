@@ -1,8 +1,5 @@
-use super::{
-    sha256_core::Sha256,
-    implementation::{Extract, Sha},
-};
-use crate::sha2::implementation::{CompressionSize, Hash, U32};
+use super::implementation::{Extract, Sha};
+use crate::sha2::implementation::{CompressionSize, Hash};
 use std::marker::PhantomData;
 pub struct Wrapper<T, U> {
     sha2: T,
@@ -11,7 +8,7 @@ pub struct Wrapper<T, U> {
 impl<T, U> Wrapper<T, U>
 where
     T: Hash<U>,
-    U: CompressionSize<u32, 8>,
+    U: CompressionSize,
 {
     pub fn run(&mut self) {
         self.sha2.run();
@@ -25,13 +22,21 @@ where
 impl<T, U> Wrapper<T, U>
 where
     T: Hash<U>,
-    U: CompressionSize<u32, 8> + Extract<u32, 8>,
+    U: CompressionSize + Extract,
 {
-    // TODO: Figure out how to make this more generic
-    // TODO: Wrapper has an implementation for this and it might be bad...
-    pub fn extract(&mut self) -> [u32; 8] {
+    pub fn extract(&mut self) -> Vec<<U as Extract>::Size> {
         let value = self.sha2.extract();
         value.take()
+    }
+
+    pub fn extract_as_lower_hex(&mut self) -> String {
+        let value = self.extract();
+        value.iter().map(|dec| format!("{:x}", dec)).collect()
+    }
+
+    pub fn extract_as_upper_hex(&mut self) -> String {
+        let value = self.extract();
+        value.iter().map(|dec| format!("{:X}", dec)).collect()
     }
 }
 
@@ -65,7 +70,6 @@ fn get_decimals(bytes: &[u8]) -> Vec<u8> {
     big_endian_rep
         .iter()
         .for_each(|byte| decimal_256.push(*byte));
-    println!("Decimal rep of the bytes: {:?}", decimal_256);
     decimal_256
 }
 

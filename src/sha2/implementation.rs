@@ -1,36 +1,67 @@
-use std::convert::TryInto;
-// TODO: Think of a better name for this file.
-pub trait CompressionSize<T: Sized, const N: usize> {
-    fn transform(compressed: [T; N]) -> Self;
-
+use std::{convert::TryInto, fmt::{LowerHex, UpperHex}};
+pub trait CompressionSize {
+    type Size: Sized;
+    fn transform(compressed: [Self::Size; 8]) -> Self;
 }
-pub trait Extract<T: Sized, const N: usize> {
-    fn take(self) -> [T; N];
+pub trait Extract {
+    type Size: Sized + LowerHex + UpperHex;
+    fn take(self) -> Vec<Self::Size>;
+}
+pub struct U64([u64; 8]);
+impl CompressionSize for U64 {
+    type Size = u64;
+    fn transform(compressed: [u64; 8]) -> Self {
+        U64(compressed)
+    }
+}
+impl Extract for U64 {
+    type Size = u64;
+    fn take(self) -> Vec<u64> {
+        self.0.into() 
+    }
+}
+pub struct U48([u64; 6]);
+impl CompressionSize for U48 {
+    type Size = u64;
+    fn transform(compressed: [u64; 8]) -> Self {
+        U48(compressed[0..6].try_into().unwrap())
+    }
+}
+impl Extract for U48 {
+    type Size = u64;
+    fn take(self) -> Vec<u64> {
+        self.0.into() 
+    }
 }
 pub struct U32([u32; 8]);
-impl CompressionSize<u32, 8> for U32 {
+impl CompressionSize for U32 {
+    type Size = u32;
     fn transform(compressed: [u32; 8]) -> Self {
         U32(compressed)
     }
 }
-impl Extract<u32, 8> for U32 {
-    fn take(self) -> [u32; 8] {
-        self.0
+impl Extract for U32 {
+    type Size = u32;
+    fn take(self) -> Vec<u32> {
+        self.0.into() 
     }
 }
 pub struct U28([u32; 7]);
-impl CompressionSize<u32, 8> for U28 {
+impl CompressionSize for U28 {
+    type Size = u32;
     fn transform(compressed: [u32; 8]) -> Self {
         U28(compressed[0..7].try_into().unwrap())
     }
 }
-impl Extract<u32, 7> for U28 {
-    fn take(self) -> [u32; 7] {
-        self.0
+impl Extract for U28 {
+    type Size = u32; 
+    fn take(self) -> Vec<u32> {
+        self.0.into()
     }
 }
-
-pub trait Hash<T: CompressionSize<u32, 8>> {
+pub trait Hash<T>
+where T: CompressionSize
+{
     fn reload(&mut self, value: Vec<u8>);
 
     fn run(&mut self);
@@ -38,7 +69,6 @@ pub trait Hash<T: CompressionSize<u32, 8>> {
     fn extract(&mut self) -> T;
 
 }
-
 pub trait Sha {
     fn new(value: Vec<u8>) -> Self;
 
