@@ -1,4 +1,6 @@
 use std::{convert::TryInto, fmt::{LowerHex, UpperHex}};
+use super::consts::ByteSize;
+
 pub trait CompressionSize {
     type Size: Sized;
     fn transform(compressed: [Self::Size; 8]) -> Self;

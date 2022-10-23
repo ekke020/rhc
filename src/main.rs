@@ -17,17 +17,20 @@ fn main() {
     // gpu_test();
     let hashed_256_value_of_test = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
     let hashed_224_value_of_test = "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809";
-    let test = "hej123";
-    let mut sha256 = sha2::Sha256::new(test);
-    sha256.run();
-    let result = sha256.extract_as_upper_hex();
-    println!("256: {}", result);
-    println!("256: {:?}", sha2::convert_to_decimal_array(hashed_256_value_of_test));
-    let mut sha224 = sha2::Sha224::new(test);
-    sha224.run();
-    let result = sha224.extract_as_lower_hex();
-    println!("224: {}", result);
-    println!("224: {:?}", sha2::convert_to_decimal_array(hashed_224_value_of_test));
+    let test = "test";
+    // let mut sha256 = sha2::Sha256::new(test);
+    // sha256.run();
+    // let result = sha256.extract_as_upper_hex();
+    // println!("256: {}", result);
+    // println!("256: {:?}", sha2::convert_to_decimal_array(hashed_256_value_of_test));
+    // let mut sha224 = sha2::Sha224::new(test);
+    // sha224.run();
+    // let result = sha224.extract_as_lower_hex();
+    // println!("224: {}", result);
+    // println!("224: {:?}", sha2::convert_to_decimal_array(hashed_224_value_of_test));
+
+    let mut sha512 = sha2::Sha512::new(test);
+    sha512.run();
 }
 
 fn gpu_test() {
