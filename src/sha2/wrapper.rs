@@ -53,24 +53,28 @@ where
 }
 
 use crate::sha2::bit_utils::lazy_vector;
-fn get_decimals(bytes: &[u8]) -> Vec<u8> {
-    let mut decimal_256 = lazy_vector!(bytes.len(), 64);
+type ByteSize = usize;
+const BYTE_SIZE_64: ByteSize = 64;
+const BYTE_SIZE_128: ByteSize = 128;
+
+fn get_decimals(bytes: &[u8], size: ByteSize) -> Vec<u8> {
+    let mut decimal = lazy_vector!(bytes.len(), size);
 
     // Add the binary values to the array.
     bytes
         .iter()
         .enumerate()
-        .for_each(|(i, byte)| decimal_256[i] = *byte);
+        .for_each(|(i, byte)| decimal[i] = *byte);
 
     // Append a single bit after the last binary.
-    decimal_256[bytes.len()] = 0x80;
+    decimal[bytes.len()] = 0x80;
 
     // Get the big endian representation of the length of value.
     let big_endian_rep = (bytes.len() * 8).to_be_bytes();
     big_endian_rep
         .iter()
-        .for_each(|byte| decimal_256.push(*byte));
-    decimal_256
+        .for_each(|byte| decimal.push(*byte));
+    decimal
 }
 
 #[test]

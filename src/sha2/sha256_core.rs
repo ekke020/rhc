@@ -21,7 +21,6 @@ impl Sha for Sha256 {
 impl Hash<U32> for Sha256 {
     fn reload(&mut self, value: Vec<u8>) {
         self.value = value;
-        todo!()
     }
 
     fn run(&mut self) {
@@ -59,7 +58,6 @@ impl Sha for Sha224 {
 impl Hash<U28> for Sha224 {
     fn reload(&mut self, value: Vec<u8>) {
         self.value = value;
-        todo!()
     }
 
     fn run(&mut self) {
