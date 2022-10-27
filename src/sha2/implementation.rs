@@ -1,5 +1,5 @@
 use std::{convert::TryInto, fmt::{LowerHex, UpperHex}};
-use super::consts::ByteSize;
+use super::consts::{ByteSize, BYTE_SIZE_64, BYTE_SIZE_128};
 
 pub trait CompressionSize {
     type Size: Sized;
@@ -8,6 +8,7 @@ pub trait CompressionSize {
 pub trait Extract {
     type Size: Sized + LowerHex + UpperHex;
     fn take(self) -> Vec<Self::Size>;
+    fn get_byte_size() -> ByteSize;
 }
 pub struct U64([u64; 8]);
 impl CompressionSize for U64 {
@@ -20,6 +21,9 @@ impl Extract for U64 {
     type Size = u64;
     fn take(self) -> Vec<u64> {
         self.0.into() 
+    }
+    fn get_byte_size() -> ByteSize {
+        BYTE_SIZE_128
     }
 }
 pub struct U48([u64; 6]);
@@ -34,6 +38,9 @@ impl Extract for U48 {
     fn take(self) -> Vec<u64> {
         self.0.into() 
     }
+    fn get_byte_size() -> ByteSize {
+        BYTE_SIZE_128
+    }
 }
 pub struct U32([u32; 8]);
 impl CompressionSize for U32 {
@@ -47,6 +54,9 @@ impl Extract for U32 {
     fn take(self) -> Vec<u32> {
         self.0.into() 
     }
+    fn get_byte_size() -> ByteSize {
+        BYTE_SIZE_64
+    }
 }
 pub struct U28([u32; 7]);
 impl CompressionSize for U28 {
@@ -59,6 +69,9 @@ impl Extract for U28 {
     type Size = u32; 
     fn take(self) -> Vec<u32> {
         self.0.into()
+    }
+    fn get_byte_size() -> ByteSize {
+        BYTE_SIZE_64
     }
 }
 pub trait Hash<T>

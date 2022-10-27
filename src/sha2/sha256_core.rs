@@ -79,13 +79,12 @@ impl Hash<U28> for Sha224 {
 fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
     let mut word_32_bit: [u32; 64] = [0; 64];
     let mut i = 0;
-
     // Concatenate 4 bytes into a 32bit word.
     decimals.windows(4).step_by(4).for_each(|bytes| {
         word_32_bit[i] = concatenate_bytes(bytes);
         i += 1;
     });
-
+    println!("Before manip 32:\n{:?}", word_32_bit);
     // Manipulate the bits after index 15.
     for i in 16..64 {
         let s0: u32 = bit_manipulation(&word_32_bit[i - 15], 7, 18, 3);
@@ -93,6 +92,7 @@ fn mutate_chunk(decimals: &[u8]) -> [u32; 64] {
         let [s2, s3] = [word_32_bit[i - 16], word_32_bit[i - 7]];
         word_32_bit[i] = u32_addition!(s0, s1, s2, s3);
     }
+    println!("After manip 32:\n{:?}\n", word_32_bit);
     word_32_bit
 }
 
@@ -105,9 +105,9 @@ fn concatenate_bytes(bytes: &[u8]) -> u32 {
 }
 
 fn bit_manipulation(word_32_bit: &u32, r1: u8, r2: u8, r3: u8) -> u32 {
-    let n0 = right_rotate(word_32_bit, r1);
-    let n1 = right_rotate(word_32_bit, r2);
-    let n2 = right_shift(word_32_bit, r3);
+    let n0 = right_rotate!(word_32_bit, r1, u32);
+    let n1 = right_rotate!(word_32_bit, r2, u32);
+    let n2 = right_shift!(word_32_bit, r3);
     n0 ^ n1 ^ n2
 }
 
@@ -115,10 +115,10 @@ fn compression(mutated: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = compressed;
 
     for i in 0..64 {
-        let s1 = right_rotate(&e, 6) ^ right_rotate(&e, 11) ^ right_rotate(&e, 25);
+        let s1 = right_rotate!(&e, 6, u32) ^ right_rotate!(&e, 11, u32) ^ right_rotate!(&e, 25, u32);
         let ch = (e & f) ^ ((!e) & g);
         let temp1 = u32_addition!(h, s1, ch, K32[i], mutated[i]);
-        let s0 = right_rotate(&a, 2) ^ right_rotate(&a, 13) ^ right_rotate(&a, 22);
+        let s0 = right_rotate!(&a, 2, u32) ^ right_rotate!(&a, 13, u32) ^ right_rotate!(&a, 22, u32);
         let maj = (a & b) ^ (a & c) ^ (b & c);
         let temp2 = u32_addition!(s0, maj);
         h = g;

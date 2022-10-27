@@ -53,14 +53,38 @@ macro_rules! u32_addition {
 
 }
 
-pub fn right_rotate(n: &u32, d: u8) -> u32 {
+macro_rules! u64_addition {
+    ($x:expr, $y:expr) => {
+        (($x as u128 + $y as u128) % (u64::MAX as u128 + 1)) as u64
+    };
+    ($x:expr $( , $y:expr)*) => {
+        (($x as u128 + u64_addition!($($y),*) as u128) % (u64::MAX as u128 + 1)) as u64
+    };
+}
+
+macro_rules! right_rotate {
+    ($n:expr, $d:expr, u32) => {
+        ($n >> $d) | ($n << (32 - $d))
+    };
+    ($n:expr, $d:expr, u64) => {
+        ($n >> $d) | ($n << (64 - $d))
+    };
+}
+
+macro_rules! right_shift {
+    ($n:expr, $d:expr) => {
+        $n >> $d
+    };
+}
+
+fn _right_rotate(n: &u32, d: u8) -> u32 {
     (n >> d) | (n << (32 - d))
 }
 
-pub fn right_shift(n: &u32, d: u8) -> u32 {
+fn _right_shift(n: &u32, d: u8) -> u32 {
     n >> d
 }
-pub(crate) use {lazy_vector, u32_addition};
+pub(crate) use {lazy_vector, u32_addition, u64_addition, right_shift, right_rotate};
 
 #[test]
 fn test_u32_addition() {
@@ -70,14 +94,14 @@ fn test_u32_addition() {
 
 #[test]
 fn test_right_rotate() {
-    assert_eq!(right_rotate(&0x9B05688C, 5), 0x64D82B44);
-    assert_eq!(right_rotate(&0x9B05688C, 10), 0x2326C15A);
-    assert_ne!(right_rotate(&0x9B05688C, 2), 0x4464D82B);
+    assert_eq!(_right_rotate(&0x9B05688C, 5), 0x64D82B44);
+    assert_eq!(_right_rotate(&0x9B05688C, 10), 0x2326C15A);
+    assert_ne!(_right_rotate(&0x9B05688C, 2), 0x4464D82B);
 }
 
 #[test]
 fn test_right_shift() {
-    assert_eq!(right_shift(&0x9B05688C, 7), 0x1360AD1);
-    assert_eq!(right_shift(&0x9B05688C, 10), 0x26C15A);
-    assert_ne!(right_shift(&0x9B05688C, 2), 0x9B05688);
+    assert_eq!(_right_shift(&0x9B05688C, 7), 0x1360AD1);
+    assert_eq!(_right_shift(&0x9B05688C, 10), 0x26C15A);
+    assert_ne!(_right_shift(&0x9B05688C, 2), 0x9B05688);
 }

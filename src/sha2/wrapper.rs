@@ -1,5 +1,5 @@
 use super::{
-    consts::{ByteSize, BYTE_SIZE_64, BYTE_SIZE_128},
+    consts::{ByteSize, BYTE_SIZE_128, BYTE_SIZE_64},
     implementation::{Extract, Sha},
 };
 use crate::sha2::implementation::{CompressionSize, Hash};
@@ -46,19 +46,13 @@ where
 impl<T, U> Wrapper<T, U>
 where
     T: Sha,
-    U: Extract + 'static,
+    U: Extract,
 {
     pub fn new(data: impl AsRef<[u8]>) -> Self {
+        let size = <U as Extract>::get_byte_size();
         Self {
-            sha2: T::new(get_decimals(data.as_ref(), Self::get_size())),
+            sha2: T::new(get_decimals(data.as_ref(), size)),
             compression: PhantomData,
-        }
-    }
-    fn get_size() -> usize {
-        match TypeId::of::<<U as Extract>::Size> {
-            u32 => BYTE_SIZE_64,
-            u64 => BYTE_SIZE_128,
-            _ => panic!("The typeId should never be anything other than u32 or u64!"),
         }
     }
 }
@@ -80,6 +74,8 @@ fn get_decimals(bytes: &[u8], size: ByteSize) -> Vec<u8> {
     // Get the big endian representation of the length of value.
     let big_endian_rep = (bytes.len() * 8).to_be_bytes();
     big_endian_rep.iter().for_each(|byte| decimal.push(*byte));
+
+    // println!("decimal: {:?}", decimal);
     decimal
 }
 
