@@ -20,6 +20,7 @@ fn main() {
     let test = "test";
     let mut sha256 = sha2::Sha256::new(test);
     sha256.run();
+    assert_eq!(hashed_256_value_of_test, sha256.extract_as_lower_hex());
     // let result = sha256.extract_as_upper_hex();
     // println!("256: {:?}", sha2::convert_to_decimal_array(hashed_256_value_of_test));
     // let mut sha224 = sha2::Sha224::new(test);
@@ -31,6 +32,10 @@ fn main() {
     let mut sha512 = sha2::Sha512::new(test);
     sha512.run();
     assert_eq!(correct, sha512.extract_as_lower_hex());
+    // let correct = "768412320f7b0aa5812fce428dc4706b3cae50e02a64caa16a782249bfe8efc4b7ef1ccb126255d196047dfedf17a0a9";
+    // let mut sha384 = sha2::Sha384::new(test);
+    // sha384.run();
+    // assert_eq!(correct, sha384.extract_as_lower_hex());
     //ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db2
     //7ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
 }

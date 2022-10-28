@@ -52,7 +52,21 @@ macro_rules! u32_addition {
     };
 
 }
-
+/// Performs u64 addition with overflow
+///
+/// ## Arguments
+///
+/// * `x` - The first u64.
+/// * `y` - The second u64.
+/// * `variadic` - Can accept any number of arguments greater than two.
+///
+/// ## About
+/// Sha512, 384, 512_224 & 512_256 calculates addition using the formula (modulo 2⁶⁴)
+///
+/// ## Why
+/// This macro enables the restricted addition required by the sha 512 hashes.
+/// It also works as a variadic function for better readability.
+///
 macro_rules! u64_addition {
     ($x:expr, $y:expr) => {
         (($x as u128 + $y as u128) % (u64::MAX as u128 + 1)) as u64
@@ -62,29 +76,21 @@ macro_rules! u64_addition {
     };
 }
 
-macro_rules! right_rotate {
-    ($n:expr, $d:expr, u32) => {
-        ($n >> $d) | ($n << (32 - $d))
-    };
-    ($n:expr, $d:expr, u64) => {
-        ($n >> $d) | ($n << (64 - $d))
-    };
-}
-
 macro_rules! right_shift {
     ($n:expr, $d:expr) => {
         $n >> $d
     };
 }
 
-fn _right_rotate(n: &u32, d: u8) -> u32 {
+pub fn u64_rotate(n: &u64, d: u8) -> u64 {
+    (n >> d) | (n << (64 - d))
+}
+
+pub fn u32_rotate(n: &u32, d: u8) -> u32 {
     (n >> d) | (n << (32 - d))
 }
 
-fn _right_shift(n: &u32, d: u8) -> u32 {
-    n >> d
-}
-pub(crate) use {lazy_vector, u32_addition, u64_addition, right_shift, right_rotate};
+pub(crate) use {lazy_vector, u32_addition, u64_addition, right_shift};
 
 #[test]
 fn test_u32_addition() {
@@ -94,14 +100,14 @@ fn test_u32_addition() {
 
 #[test]
 fn test_right_rotate() {
-    assert_eq!(_right_rotate(&0x9B05688C, 5), 0x64D82B44);
-    assert_eq!(_right_rotate(&0x9B05688C, 10), 0x2326C15A);
-    assert_ne!(_right_rotate(&0x9B05688C, 2), 0x4464D82B);
+    assert_eq!(u32_rotate(&0x9B05688C, 5), 0x64D82B44);
+    assert_eq!(u32_rotate(&0x9B05688C, 10), 0x2326C15A);
+    assert_ne!(u32_rotate(&0x9B05688C, 2), 0x4464D82B);
 }
 
 #[test]
 fn test_right_shift() {
-    assert_eq!(_right_shift(&0x9B05688C, 7), 0x1360AD1);
-    assert_eq!(_right_shift(&0x9B05688C, 10), 0x26C15A);
-    assert_ne!(_right_shift(&0x9B05688C, 2), 0x9B05688);
+    assert_eq!(right_shift!(0x9B05688C as u32, 7), 0x1360AD1);
+    assert_eq!(right_shift!(0x9B05688C as u32, 10), 0x26C15A);
+    assert_ne!(right_shift!(0x9B05688C as u32, 2), 0x9B05688);
 }

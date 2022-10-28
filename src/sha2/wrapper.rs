@@ -1,9 +1,10 @@
 use super::{
+    bit_utils::lazy_vector,
     consts::{ByteSize, BYTE_SIZE_128, BYTE_SIZE_64},
-    implementation::{Extract, Sha},
+    implementation::{CompressionSize, Extract, Hash, Sha},
 };
-use crate::sha2::implementation::{CompressionSize, Hash};
-use std::{any::TypeId, marker::PhantomData};
+use std::marker::PhantomData;
+
 pub struct Wrapper<T, U> {
     sha2: T,
     compression: PhantomData<U>,
@@ -18,7 +19,7 @@ where
     }
 
     pub fn reload(&mut self, data: impl AsRef<[u8]>) {
-        self.sha2.reload(get_decimals(data.as_ref(), 2))
+        self.sha2.reload(pad(data.as_ref(), 2))
     }
 }
 
@@ -51,15 +52,13 @@ where
     pub fn new(data: impl AsRef<[u8]>) -> Self {
         let size = <U as Extract>::get_byte_size();
         Self {
-            sha2: T::new(get_decimals(data.as_ref(), size)),
+            sha2: T::new(pad(data.as_ref(), size)),
             compression: PhantomData,
         }
     }
 }
 
-use crate::sha2::bit_utils::lazy_vector;
-
-fn get_decimals(bytes: &[u8], size: ByteSize) -> Vec<u8> {
+fn pad(bytes: &[u8], size: ByteSize) -> Vec<u8> {
     let mut decimal = lazy_vector!(bytes.len(), size);
 
     // Add the binary values to the array.
@@ -70,19 +69,17 @@ fn get_decimals(bytes: &[u8], size: ByteSize) -> Vec<u8> {
 
     // Append a single bit after the last binary.
     decimal[bytes.len()] = 0x80;
-
     // Get the big endian representation of the length of value.
     let big_endian_rep = (bytes.len() * 8).to_be_bytes();
     big_endian_rep.iter().for_each(|byte| decimal.push(*byte));
 
-    // println!("decimal: {:?}", decimal);
     decimal
 }
 
 #[test]
-fn test_get_decimals() {
+fn test_pad() {
     let test = "test";
-    let k = get_decimals(test.as_bytes(), BYTE_SIZE_64);
+    let k = pad(test.as_bytes(), BYTE_SIZE_64);
     assert_eq!([k[0], k[1], k[2], k[3], k[4]], [116, 101, 115, 116, 128]);
     assert_eq!(k[63], 32)
 }
