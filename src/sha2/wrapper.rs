@@ -72,7 +72,6 @@ fn pad(bytes: &[u8], size: ByteSize) -> Vec<u8> {
     // Get the big endian representation of the length of value.
     let big_endian_rep = (bytes.len() * 8).to_be_bytes();
     big_endian_rep.iter().for_each(|byte| decimal.push(*byte));
-
     decimal
 }
 

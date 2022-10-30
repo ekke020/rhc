@@ -99,10 +99,23 @@ fn test_u32_addition() {
 }
 
 #[test]
-fn test_right_rotate() {
+fn test_u64_addition() {
+    assert_eq!(u64_addition!(0x5468697349734154657374466F7255, 0x36344164646974696F6E), 0x95c9d7ddbad8e1c3);
+    assert_ne!(u64_addition!(0x7361640A, 0x6C75636B), 0xDBD4E2D8);
+}
+
+#[test]
+fn test_u32_rotate() {
     assert_eq!(u32_rotate(&0x9B05688C, 5), 0x64D82B44);
     assert_eq!(u32_rotate(&0x9B05688C, 10), 0x2326C15A);
     assert_ne!(u32_rotate(&0x9B05688C, 2), 0x4464D82B);
+}
+
+#[test]
+fn test_u64_rotate() {
+    assert_eq!(u64_rotate(&0x9B05688C, 5), 0x6000000004d82b44);
+    assert_eq!(u64_rotate(&0x9B05688C, 10), 0x230000000026c15a);
+    assert_ne!(u64_rotate(&0x9B05688C, 2), 0x26c15a24);
 }
 
 #[test]

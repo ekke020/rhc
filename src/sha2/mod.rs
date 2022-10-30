@@ -13,7 +13,8 @@ pub type Sha224 = Wrapper<ShaCore224, U28>;
 pub type Sha256 = Wrapper<ShaCore256, U32>;
 pub type Sha384 = Wrapper<ShaCore384, U48>;
 pub type Sha512 = Wrapper<ShaCore512, U64>;
-
+pub type Sha512_224 = Wrapper<ShaCore512, U64>;
+pub type Sha512_256 = Wrapper<ShaCore512, U64>;
 pub fn convert_to_decimal_array(hash: &str) -> Vec<u32> {
     hash
         .chars()
