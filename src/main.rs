@@ -1,3 +1,4 @@
+#![allow(warnings)]
 mod core;
 mod sha2;
 mod systems;
@@ -8,44 +9,44 @@ use vulkano::device::physical::PhysicalDevice;
 use vulkano::device::{Device, DeviceCreateInfo, Features, QueueCreateInfo};
 use vulkano::instance::{Instance, InstanceCreateInfo};
 use vulkano::sync::{self, GpuFuture};
+
+use crate::systems::printer::print;
 fn main() {
     // let password_info = systems::input::take();
     // systems::spawner::run_threads(password_info);
     // gpu_test();
+    let hashed_256_value_of_test = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
+    let hashed_224_value_of_test = "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809";
+    let test = "test";
+    // let mut sha256 = sha2::Sha256::new(test);
+    // sha256.run();
+    // assert_eq!(hashed_256_value_of_test, sha256.extract_as_lower_hex());
+    // let result = sha256.extract_as_upper_hex();
+    // println!("256: {:?}", sha2::convert_to_decimal_array(hashed_256_value_of_test));
+    // let mut sha224 = sha2::Sha224::new(test);
+    // sha224.run();
+    // let result = sha224.extract_as_lower_hex();
+    // println!("224: {}", result);
+    // println!("224: {:?}", sha2::convert_to_decimal_array(hashed_224_value_of_test));
+    let correct = "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff";
+    let mut sha512 = sha2::Sha512::new(test);
+    sha512.run();
+    assert_eq!(correct, sha512.extract_as_lower_hex());
+    let correct = "768412320f7b0aa5812fce428dc4706b3cae50e02a64caa16a782249bfe8efc4b7ef1ccb126255d196047dfedf17a0a9";
+    let mut sha384 = sha2::Sha384::new(test);
+    sha384.run();
+    assert_eq!(correct, sha384.extract_as_lower_hex());
+    //ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db2
+    //7ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
+    let correct = "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23";
+    let mut sha512_256 = sha2::Sha512_256::new("abc");
+    // NOT IMPLEMENTED!
+    // sha512_256.run();
+    // let extracted = sha512_256.extract_as_lower_hex();
+    // println!("hash: {}", extracted);
+    // assert_eq!(correct.len(), extracted.len());
+}
 
-    // Sha224
-    // let H_0 = "c1059ed8";
-    // let H_1 = "367cd507";
-    // let H_2 = "3070dd17";
-    // let H_3 = "f70e5939";
-    // let H_4 = "ffc00b31";
-    // let H_5 = "68581511";
-    // let H_6 = "64f98fa7";
-    // let H_7 = "befa4fa4";
-    // sha2::sha256::test("hello world");
-    let hash = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
-    convert_to_decimal_array(hash);
-    println!("");
-    let test = "test".as_bytes();
-    let mut k = sha2::Sha256::new(hash, test);
-    k.run();
-    // let k = 2_u64.pow(32);
-    // println!("{k}")
-}
-// TODO: Implement a global value with the decimal array?
-fn convert_to_decimal_array(hash: &str) {
-    use std::u32;
-    let test: Vec<u32> = hash
-        .chars()
-        .collect::<Vec<char>>()
-        .chunks(8)
-        .map(|c| c.iter().collect::<String>())
-        .collect::<Vec<String>>()
-        .iter()
-        .map(|s| u32::from_str_radix(s, 16).unwrap())
-        .collect();
-    test.iter().for_each(|f| print!("{} ", f));
-}
 fn gpu_test() {
     let instance = Instance::new(InstanceCreateInfo::default()).expect("failed to create instance");
 
