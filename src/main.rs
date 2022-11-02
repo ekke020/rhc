@@ -17,7 +17,7 @@ fn main() {
     // gpu_test();
     let hashed_256_value_of_test = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
     let hashed_224_value_of_test = "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809";
-    // let test = "test";
+    let test = "test";
     // let mut sha256 = sha2::Sha256::new(test);
     // sha256.run();
     // assert_eq!(hashed_256_value_of_test, sha256.extract_as_lower_hex());
@@ -28,21 +28,23 @@ fn main() {
     // let result = sha224.extract_as_lower_hex();
     // println!("224: {}", result);
     // println!("224: {:?}", sha2::convert_to_decimal_array(hashed_224_value_of_test));
-    // let correct = "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff";
-    // let mut sha512 = sha2::Sha512::new(test);
-    // sha512.run();
-    // assert_eq!(correct, sha512.extract_as_lower_hex());
-    // let correct = "768412320f7b0aa5812fce428dc4706b3cae50e02a64caa16a782249bfe8efc4b7ef1ccb126255d196047dfedf17a0a9";
-    // let mut sha384 = sha2::Sha384::new(test);
-    // sha384.run();
-    // assert_eq!(correct, sha384.extract_as_lower_hex());
+    let correct = "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff";
+    let mut sha512 = sha2::Sha512::new(test);
+    sha512.run();
+    assert_eq!(correct, sha512.extract_as_lower_hex());
+    let correct = "768412320f7b0aa5812fce428dc4706b3cae50e02a64caa16a782249bfe8efc4b7ef1ccb126255d196047dfedf17a0a9";
+    let mut sha384 = sha2::Sha384::new(test);
+    sha384.run();
+    assert_eq!(correct, sha384.extract_as_lower_hex());
     //ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db2
     //7ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
-    let correct = "06001bf08dfb17d2b54925116823be230e98b5c6c278303bc4909a8c";
+    let correct = "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23";
     let mut sha512_256 = sha2::Sha512_256::new("abc");
-    sha512_256.run();
-    println!("hash: {:x?}", sha512_256.extract());
-    // assert_eq!(correct, sha512_256.extract_as_lower_hex());
+    // NOT IMPLEMENTED!
+    // sha512_256.run();
+    // let extracted = sha512_256.extract_as_lower_hex();
+    // println!("hash: {}", extracted);
+    // assert_eq!(correct.len(), extracted.len());
 }
 
 fn gpu_test() {

@@ -7,3 +7,6 @@ target/
 
 # Windows specific
 *.pdb
+
+# Mac specific
+.DS_Store
