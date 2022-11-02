@@ -166,7 +166,6 @@ fn compression(message: [u64; 80], compressed: [u64; 8]) -> [u64; 8] {
         c = b;
         b = a;
         a = u64_addition!(temp1, temp2);
-        println!("{}: {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x}",i ,a ,b ,c ,d ,e ,f ,g ,h);
     }
     let compressed: [u64; 8] = [
         u64_addition!(compressed[0], a),
@@ -231,25 +230,27 @@ fn test_mutate_chunk() {
 fn test_compression() {
     // mutated string of "test"
     let chunk: [u64; 80] = [
-        0x7465737480000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
-        0x20, 0x7465737480000000, 0x4000000000100, 0xa2fa00e57c6e9003, 0x100080000804, 0xc75b9b77369995d0,
-        0x100004400005000, 0xb7bad3f1b782e22, 0x76697575900a0140, 0x5e38c623520b73c7, 0x95b40199f52d200a,
-        0x9ec649c585d7e1b8, 0xd35329f685282041, 0x97e4517f19132f8, 0xa957e6b8b1e3a04c, 0x3f245f9abf72e89,
-        0xd4fadbc8c0990ebf, 0x46847b366d6be19, 0xf7b727ef943ee840, 0x6eddef1536ef7b48, 0x1fd273446f02e673,
-        0x973852112c0207f, 0xceb550baa04cd3cd, 0xabda905f95b47ca5, 0xd0b9d0c606c55cf8, 0x6b4428a7b8d309d5,
-        0x2865da4bccab56bd, 0xa32c17832b662601, 0x2c42f9849e3cc11, 0xd0afd96cf86ec984, 0xcdd7f76fd26a91ac,
-        0x87b9675f77841fda, 0x1b351c9bb31d1acf, 0x23bffc311b3a4c49, 0x955ea4f7b9896eda, 0xc363a7f55e3c638b,
-        0x719fb25717fca4b4, 0x96b6bd96d556b4d4, 0xe12d41fb58260c4c, 0xb9b273a3b88d9fea, 0x2000cc19db102c83,
-        0xa67514cfb1578d8f, 0xc2530a38e224937b, 0x65b1ac76e66f5172, 0xa9f6fb27c656e54, 0x43d088c78746b74f,
-        0x18fa6498ac7f5df8, 0xb3d4f146fd2046f4, 0xc6753dd090fd1886, 0xbda07892e4b75bc, 0xfaa5ab3eb30657f8,
-        0x8aa966d1637bcf95, 0x7089903a48b16eb2, 0x1bfa1bb4965b3efb, 0xf46f0c0b2c84a5d4, 0x4be86f823565e88c,
-        0xbdbe2be23aea3a30, 0x200784e34a9c9efb, 0x35b425e3c883ba8a, 0xbaeeb0244129c5ad, 0xeeec7aa0ed6ee178, 
-        0x19bf5e7401e48e9b, 0xba1852fbff133824, 0xb2528cc5a6c7736c, 0x559c9257052c10e8
+        0x7465737480000000, 0x0, 0x0, 0x0, 0x0, 
+        0x0, 0x0, 0x0, 0x0, 0x0, 
+        0x0, 0x0, 0x0, 0x0, 0x0, 
+        0x20, 0x7465737480000000, 0x4000000000100, 0xa2fa00e57c6e9003, 0x100080000804, 
+        0xc75b9b77369995d0, 0x100004400005000, 0xb7bad3f1b782e22, 0x76697575900a0140, 0x5e38c623520b73c7, 
+        0x95b40199f52d200a, 0x9ec649c585d7e1b8, 0xd35329f685282041, 0x97e4517f19132f8, 0xa957e6b8b1e3a04c, 
+        0x3f245f9abf72e89, 0xd4fadbc8c0990ebf, 0x46847b366d6be19, 0xf7b727ef943ee840, 0x6eddef1536ef7b48, 
+        0x1fd273446f02e673, 0x973852112c0207f, 0xceb550baa04cd3cd, 0xabda905f95b47ca5, 0xd0b9d0c606c55cf8, 
+        0x6b4428a7b8d309d5, 0x2865da4bccab56bd, 0xa32c17832b662601, 0x2c42f9849e3cc11, 0xd0afd96cf86ec984, 
+        0xcdd7f76fd26a91ac, 0x87b9675f77841fda, 0x1b351c9bb31d1acf, 0x23bffc311b3a4c49, 0x955ea4f7b9896eda, 
+        0xc363a7f55e3c638b, 0x719fb25717fca4b4, 0x96b6bd96d556b4d4, 0xe12d41fb58260c4c, 0xb9b273a3b88d9fea, 
+        0x2000cc19db102c83, 0xa67514cfb1578d8f, 0xc2530a38e224937b, 0x65b1ac76e66f5172, 0xa9f6fb27c656e54, 
+        0x43d088c78746b74f, 0x18fa6498ac7f5df8, 0xb3d4f146fd2046f4, 0xc6753dd090fd1886, 0xbda07892e4b75bc, 
+        0xfaa5ab3eb30657f8, 0x8aa966d1637bcf95, 0x7089903a48b16eb2, 0x1bfa1bb4965b3efb, 0xf46f0c0b2c84a5d4, 
+        0x4be86f823565e88c, 0xbdbe2be23aea3a30, 0x200784e34a9c9efb, 0x35b425e3c883ba8a, 0xbaeeb0244129c5ad, 
+        0xeeec7aa0ed6ee178, 0x19bf5e7401e48e9b, 0xba1852fbff133824, 0xb2528cc5a6c7736c, 0x559c9257052c10e8, 
     ];
     // correct result of compression
     let correct: [u64; 8] = [
-        0x9f86d081, 0x884c7d65, 0x9a2feaa0, 0xc55ad015, 0xa3bf4f1b, 0x2b0b822c, 0xd15d6c15,
-        0xb0f00a08,
+        0xee26b0dd4af7e749, 0xaa1a8ee3c10ae992, 0x3f618980772e473f, 0x8819a5d4940e0db2,
+        0x7ac185f8a0e1d5f8, 0x4f88bc887fd67b14, 0x3732c304cc5fa9ad, 0x8e6f57f50028a8ff,
     ];
     assert_eq!(compression(chunk, H512_512), correct);
 }
