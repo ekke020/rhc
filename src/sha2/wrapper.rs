@@ -34,15 +34,16 @@ where
     }
 
     pub fn extract_as_lower_hex(&mut self) -> String {
-        let value = self.extract();
-        // TODO: The 16 can't be hardcoded.
-        value.iter().map(|dec| format!("{:x}", dec)).collect()
+        self.extract().iter()
+            .map(|dec| format!("{:x}", dec))
+            .collect()
         // value.iter().map(|dec| format!("{:01$x}", dec, 16)).collect()
     }
 
     pub fn extract_as_upper_hex(&mut self) -> String {
-        let value = self.extract();
-        value.iter().map(|dec| format!("{:X}", dec)).collect()
+        self.extract().iter()
+            .map(|dec| format!("{:X}", dec))
+            .collect()
     }
 }
 

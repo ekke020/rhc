@@ -6,11 +6,8 @@ pub trait CompressionSize {
     fn transform(compressed: [Self::Size; 8]) -> Self;
 }
 pub trait Extract {
-    type Size: Sized + LowerHex + UpperHex;
-    const N: usize;
-    // TODO: Come up with a way to make the size of the returned array generic.
-    // fn take(self) -> [u8; Self::N];
-    fn take(self) -> [u8; 64];
+    const S: usize;
+    fn take<const N: usize>(self) -> [u8; N];
 }
 pub struct U64([u8; 64]);
 impl CompressionSize for U64 {
@@ -21,6 +18,7 @@ impl CompressionSize for U64 {
         for value in compressed {
             for byte in value.to_be_bytes() {
                 test[i] = byte;
+                i += 1;
             }
         }
     //    let test: [u8; 64] = compressed.iter()
@@ -37,13 +35,83 @@ impl CompressionSize for U64 {
     }
 }
 impl Extract for U64 {
-    type Size = u8;
-    const N: usize = 64;
-    fn take(self) -> [Self::Size; Self::N] {
-        todo!()
+    const S: usize = 64;
+    fn take<const N: usize>(self) -> [u8; N] {
+        self.0[0..N].try_into().unwrap()
+    }
+}
+
+pub trait Hash<T>
+where T: CompressionSize
+{
+    fn reload(&mut self, value: &[u8]);
+
+    fn run(&mut self);
+
+    fn extract(&mut self) -> T;
+
+}
+pub trait Sha {
+    fn new(value: &[u8]) -> Self;
+}
+
+use std::marker::PhantomData;
+
+pub struct Test<T, U, const N: usize> {
+    sha2: T,
+    compression: PhantomData<U>,
+}
+
+impl<T, U, const N: usize> Test<T, U, N>
+where
+    T: Hash<U>,
+    U: CompressionSize,
+{
+    pub fn run(&mut self) {
+        self.sha2.run();
     }
 
-    // fn take::<64>(self) -> [u8; 64] {
-    //     self.0
-    // }
+    pub fn reload(&mut self, data: impl AsRef<[u8]>) {
+        self.sha2.reload(data.as_ref());
+    }
+}
+
+impl<T, U, const N: usize> Test<T, U, N>
+where
+    T: Hash<U>,
+    U: CompressionSize + Extract,
+{
+    pub fn extract(&mut self) -> [u8; N] {
+        let value = self.sha2.extract();
+        value.take::<N>()
+    }
+
+    pub fn extract_as_lower_hex(&mut self) -> String {
+        self.extract()
+            .iter()
+            .map(|c| c.to_be_bytes())
+            .flat_map(|byte| byte)
+            .map(|f| format!("{:01$x}", f, 2))
+            .collect()
+        // value.iter().map(|dec| format!("{:01$x?}", dec, 16)).collect()
+    }
+
+    pub fn extract_as_upper_hex(&mut self) -> String {
+        self.extract().iter()
+            .map(|dec| format!("{:X}", dec))
+            .collect()
+    }
+}
+
+impl<T, U, const N: usize> Test<T, U, N>
+where
+    T: Sha,
+    U: Extract,
+{
+    pub fn new(data: impl AsRef<[u8]>) -> Self {
+        Self {
+            sha2: T::new(data.as_ref()),
+            compression: PhantomData,
+        }
+    }
 }

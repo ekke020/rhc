@@ -6,10 +6,10 @@ use super::implementation::{CompressionSize, Hash, Sha, U48, U64, U32, U64_32, U
 pub struct Sha512 {
     value: Vec<u8>, // The value that was provided.
     state: State512,
-    compressed: Option<U64>, // The final hash from the value.
+    compressed: Option<super::testing::U64>, // The final hash from the value.
 }
 
-impl Sha for Sha512 {
+impl super::testing::Sha for Sha512 {
     fn new(value: &[u8]) -> Self {
         Self {
             value: pad::<128>(value),
@@ -19,7 +19,7 @@ impl Sha for Sha512 {
     }
 }
 
-impl Hash<U64> for Sha512 {
+impl super::testing::Hash<super::testing::U64> for Sha512 {
     fn reload(&mut self, value: &[u8]) {
         self.value = pad::<128>(value);
     }
@@ -30,10 +30,10 @@ impl Hash<U64> for Sha512 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U64::transform(buffer));
+        self.compressed = Some(<super::testing::U64 as super::testing::CompressionSize>::transform(buffer));
     }
 
-    fn extract(&mut self) -> U64 {
+    fn extract(&mut self) -> super::testing::U64 {
         self.compressed
             .take()
             .expect("Can't extract before running hash")
