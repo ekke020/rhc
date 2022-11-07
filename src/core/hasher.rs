@@ -1,6 +1,6 @@
 use std::fmt;
 
-use sha2::Digest;
+// use sha2::Digest;
 #[derive(Debug, Clone, PartialEq, Default)]
 pub enum HashType {
     Sha224(String),
@@ -62,37 +62,43 @@ fn get_hash(password: &str, hash_type: &HashType) -> String {
 }
 
 fn get_sha512(password: &str) -> String {
-    let mut sha512 = sha2::Sha512::new();
-    sha512.update(password);
-    format!("{:X}", sha512.finalize())
+    // let mut sha512 = sha2::Sha512::new();
+    // sha512.update(password);
+    // format!("{:X}", sha512.finalize())
+    String::from("value")
 }
 
 fn get_sha256(password: &str) -> String {
-    let mut sha256 = sha2::Sha256::new();
-    sha256.update(password);
-    format!("{:X}", sha256.finalize())
+    // let mut sha256 = sha2::Sha256::new();
+    // sha256.update(password);
+    // format!("{:X}", sha256.finalize())
+    String::from("value")
 }
 
 fn get_sha224(password: &str) -> String {
-    let mut sha224 = sha2::Sha224::new();
-    sha224.update(password);
-    format!("{:X}", sha224.finalize())
+    // let mut sha224 = sha2::Sha224::new();
+    // sha224.update(password);
+    // format!("{:X}", sha224.finalize())
+    String::from("value")
 }
 
 fn get_sha384(password: &str) -> String {
-    let mut sha384 = sha2::Sha384::new();
-    sha384.update(password);
-    format!("{:X}", sha384.finalize())
+    // let mut sha384 = sha2::Sha384::new();
+    // sha384.update(password);
+    // format!("{:X}", sha384.finalize())
+    String::from("value")
 }
 
 fn get_sha512_224(password: &str) -> String {
-    let mut sha512_224 = sha2::Sha512_224::new();
-    sha512_224.update(password);
-    format!("{:X}", sha512_224.finalize())
+    // let mut sha512_224 = sha2::Sha512_224::new();
+    // sha512_224.update(password);
+    // format!("{:X}", sha512_224.finalize())
+    String::from("value")
 }
 
 fn get_sha512_256(password: &str) -> String {
-    let mut sha512_256 = sha2::Sha512_256::new();
-    sha512_256.update(password);
-    format!("{:X}", sha512_256.finalize())
+    // let mut sha512_256 = sha2::Sha512_256::new();
+    // sha512_256.update(password);
+    // format!("{:X}", sha512_256.finalize())
+    String::from("value")
 }
