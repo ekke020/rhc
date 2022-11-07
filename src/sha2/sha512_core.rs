@@ -1,8 +1,8 @@
 use crate::sha2::bit_utils::u64_addition;
 
-use super::bit_utils::{right_shift, u64_rotate};
-use super::consts::{State512, H512_384, H512_512, K64, H256_256, State256, H512_256};
-use super::implementation::{CompressionSize, Hash, Sha, U48, U64, U32};
+use super::bit_utils::{pad, right_shift, u64_rotate};
+use super::consts::{State512, H512_384, H512_512, K64, H256_256, State256, H512_256, H512_224};
+use super::implementation::{CompressionSize, Hash, Sha, U48, U64, U32, U64_32, U64_28};
 pub struct Sha512 {
     value: Vec<u8>, // The value that was provided.
     state: State512,
@@ -10,9 +10,9 @@ pub struct Sha512 {
 }
 
 impl Sha for Sha512 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<128>(value),
             state: H512_512,
             compressed: None,
         }
@@ -20,8 +20,8 @@ impl Sha for Sha512 {
 }
 
 impl Hash<U64> for Sha512 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<128>(value);
     }
 
     fn run(&mut self) {
@@ -47,9 +47,9 @@ pub struct Sha384 {
 }
 
 impl Sha for Sha384 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<128>(value),
             state: H512_384,
             compressed: None,
         }
@@ -57,8 +57,8 @@ impl Sha for Sha384 {
 }
 
 impl Hash<U48> for Sha384 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<128>(value);
     }
 
     fn run(&mut self) {
@@ -77,25 +77,25 @@ impl Hash<U48> for Sha384 {
     }
 }
 
-pub struct Sha512_256 {
+pub struct Sha512_224 {
     value: Vec<u8>, // The value that was provided.
     state: State512,
-    compressed: Option<U64>, // The final hash from the value.
+    compressed: Option<U64_28>, // The final hash from the value.
 }
 
-impl Sha for Sha512_256 {
-    fn new(value: Vec<u8>) -> Self {
+impl Sha for Sha512_224 {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
-            state: H512_256,
+            value: pad::<128>(value),
+            state: H512_224,
             compressed: None,
         }
     }
 }
 
-impl Hash<U64> for Sha512_256 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+impl Hash<U64_28> for Sha512_224 {
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<128>(value);
     }
 
     fn run(&mut self) {
@@ -104,10 +104,47 @@ impl Hash<U64> for Sha512_256 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U64::transform(buffer));
+        self.compressed = Some(U64_28::transform(buffer));
     }
 
-    fn extract(&mut self) -> U64 {
+    fn extract(&mut self) -> U64_28 {
+        self.compressed
+            .take()
+            .expect("Can't extract before running hash")
+    }
+}
+
+pub struct Sha512_256 {
+    value: Vec<u8>, // The value that was provided.
+    state: State512,
+    compressed: Option<U64_32>, // The final hash from the value.
+}
+
+impl Sha for Sha512_256 {
+    fn new(value: &[u8]) -> Self {
+        Self {
+            value: pad::<128>(value),
+            state: H512_256,
+            compressed: None,
+        }
+    }
+}
+
+impl Hash<U64_32> for Sha512_256 {
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<128>(value);
+    }
+
+    fn run(&mut self) {
+        let mut buffer = self.state;
+        for chunk in self.value.chunks_mut(128) {
+            let message = mutate_chunk(chunk);
+            buffer = compression(message, buffer);
+        }
+        self.compressed = Some(U64_32::transform(buffer));
+    }
+
+    fn extract(&mut self) -> U64_32 {
         self.compressed
             .take()
             .expect("Can't extract before running hash")

@@ -1,4 +1,4 @@
-use super::bit_utils::{right_shift, u32_addition, u32_rotate};
+use super::bit_utils::{pad, right_shift, u32_addition, u32_rotate};
 use super::consts::{State256, H256_224, H256_256, K32};
 use super::implementation::{CompressionSize, Hash, Sha, U28, U32};
 
@@ -9,18 +9,17 @@ pub struct Sha256 {
 }
 
 impl Sha for Sha256 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<64>(value),
             state: H256_256,
             compressed: None,
         }
     }
 }
-
 impl Hash<U32> for Sha256 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<64>(value);
     }
 
     fn run(&mut self) {
@@ -46,9 +45,9 @@ pub struct Sha224 {
 }
 
 impl Sha for Sha224 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<64>(value),
             state: H256_224,
             compressed: None,
         }
@@ -56,8 +55,8 @@ impl Sha for Sha224 {
 }
 
 impl Hash<U28> for Sha224 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<64>(value);
     }
 
     fn run(&mut self) {
