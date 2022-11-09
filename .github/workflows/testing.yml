@@ -1,0 +1,20 @@
+name: Testing api call
+on:
+  push:
+    branches: [ "refactoring" ]
+jobs:
+  wave:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Hello
+       run: echo hello
+
+  wait:
+    runs-on: ubuntu-latest
+    environment: testing
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Bye
+       run: echo Bye
