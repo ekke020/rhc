@@ -8,11 +8,12 @@ jobs:
     steps:
      - name: Hello
        run: echo hello
-
   wait:
     runs-on: ubuntu-latest
     environment: testing
-
+    steps:
+     - name: Waiting
+       run: echo waiting
   go:
     runs-on: ubuntu-latest
     steps:
