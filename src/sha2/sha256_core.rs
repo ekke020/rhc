@@ -28,9 +28,9 @@ impl Hash<U32> for Sha256 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U32::new(buffer));
+        let bytes = to_bytes::<32>(&buffer);
+        self.compressed = Some(U32::new(&bytes));
     }
-
     fn extract(&mut self) -> U32 {
         self.compressed
             .take()
@@ -65,7 +65,8 @@ impl Hash<U28> for Sha224 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U28::new(buffer));
+        let bytes = to_bytes::<28>(&buffer);
+        self.compressed = Some(U28::new(&bytes));
     }
 
     fn extract(&mut self) -> U28 {
@@ -140,6 +141,29 @@ fn compression(message: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
         u32_addition!(compressed[7], h),
     ];
     compressed
+}
+
+fn to_bytes<const N: usize>(buffer: &[u32; 8]) -> [u8; N] {
+    buffer.iter()
+        .flat_map(|v| v.to_be_bytes())
+        .take(N)
+        .collect::<Vec<u8>>()
+        .try_into()
+        .unwrap_or_else(| err: Vec<u8>| panic!("N was {N} when it should not exceed {}", err.len()))
+}
+
+#[test]
+#[should_panic]
+fn test_to_bytes() {
+    let result = to_bytes::<32>(&[
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
+    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171, 91, 224, 205, 25]);
+    let result = to_bytes::<28>(&[
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
+    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171]);
+    to_bytes::<48>(&[0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
 }
 
 #[test]

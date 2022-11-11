@@ -30,7 +30,8 @@ impl Hash<U64> for Sha512 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U64::new(buffer));
+        let bytes = to_bytes::<64>(&buffer);
+        self.compressed = Some(U64::new(&bytes));
     }
 
     fn extract(&mut self) -> U64 {
@@ -67,7 +68,8 @@ impl Hash<U48> for Sha384 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U48::new(buffer));
+        let bytes = to_bytes::<48>(&buffer);
+        self.compressed = Some(U48::new(&bytes));
     }
 
     fn extract(&mut self) -> U48 {
@@ -104,7 +106,8 @@ impl Hash<U28> for Sha512_224 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U28::new(buffer));
+        let bytes = to_bytes::<28>(&buffer);
+        self.compressed = Some(U28::new(&bytes));
     }
 
     fn extract(&mut self) -> U28 {
@@ -141,7 +144,8 @@ impl Hash<U32> for Sha512_256 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U32::new(buffer));
+        let bytes = to_bytes::<32>(&buffer);
+        self.compressed = Some(U32::new(&bytes));
     }
 
     fn extract(&mut self) -> U32 {
@@ -215,6 +219,30 @@ fn compression(message: [u64; 80], compressed: [u64; 8]) -> [u64; 8] {
         u64_addition!(compressed[7], h),
     ];
     compressed
+}
+
+fn to_bytes<const N: usize>(buffer: &[u64; 8]) -> [u8; N] {
+    buffer.iter()
+        .flat_map(|v| v.to_be_bytes())
+        .take(N)
+        .collect::<Vec<u8>>()
+        .try_into()
+        .unwrap_or_else(| err: Vec<u8>| panic!("N was {N} when it should not exceed {}", err.len()))
+}
+
+#[test]
+#[should_panic]
+fn test_to_bytes() {
+    let result = to_bytes::<64>(&[
+        0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
+        0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179,]);
+        println!("result: {:?}", result);
+    assert_eq!(result, [106, 9, 230, 103, 243, 188, 201, 8, 187, 103, 174, 133, 132, 202, 167, 59, 60, 110, 243, 114, 254, 148, 248, 43, 165, 79, 245, 58, 95, 29, 54, 241, 81, 14, 82, 127, 173, 230, 130, 209, 155, 5, 104, 140, 43, 62, 108, 31, 31, 131, 217, 171, 251, 65, 189, 107, 91, 224, 205, 25, 19, 126, 33, 121]);
+    let result = to_bytes::<48>(&[
+        0xcbbb9d5dc1059ed8, 0x629a292a367cd507, 0x9159015a3070dd17, 0x152fecd8f70e5939,
+        0x67332667ffc00b31, 0x8eb44a8768581511, 0xdb0c2e0d64f98fa7, 0x47b5481dbefa4fa4,]);
+    assert_eq!(result, [203, 187, 157, 93, 193, 5, 158, 216, 98, 154, 41, 42, 54, 124, 213, 7, 145, 89, 1, 90, 48, 112, 221, 23, 21, 47, 236, 216, 247, 14, 89, 57, 103, 51, 38, 103, 255, 192, 11, 49, 142, 180, 74, 135, 104, 88, 21, 17]);
+    to_bytes::<128>(&[0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
 }
 
 #[test]

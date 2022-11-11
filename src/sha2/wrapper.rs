@@ -5,11 +5,11 @@ use super::{
 };
 use std::marker::PhantomData;
 
-pub struct Wrapper<T, U> {
+pub struct Wrapper<T, U, const N: usize> {
     sha2: T,
-    compression: PhantomData<U>,
+    size: PhantomData<U>,
 }
-impl<T, U> Wrapper<T, U>
+impl<T, U, const N: usize> Wrapper<T, U, N>
 where
     T: Hash<U>,
     U: CompressionSize,
@@ -23,19 +23,23 @@ where
     }
 }
 
-impl<T, U> Wrapper<T, U>
+impl<T, U, const N: usize> Wrapper<T, U, N>
 where
     T: Hash<U>,
-    U: CompressionSize + Extract,
+    U: CompressionSize + Extract<N>
 {
-    pub fn extract(&mut self) -> Vec<<U as Extract>::Size> {
-        let value = self.sha2.extract();
-        value.take()
+    pub fn extract(&mut self) -> [u8; N] {
+        let sha = self.sha2.extract();
+        sha.take()
+        // &sha.take::<{ <U as Extract>::S }>()
+        // let t = value.take::<{self.size}>();
+        // t
     }
 
     pub fn extract_as_lower_hex(&mut self) -> String {
-        self.extract().iter()
-            .map(|dec| format!("{:x}", dec))
+        self.extract()
+            .iter()
+            .map(|byte| format!("{:01$x}", byte, 2))
             .collect()
         // value.iter().map(|dec| format!("{:01$x}", dec, 16)).collect()
     }
@@ -47,15 +51,15 @@ where
     }
 }
 
-impl<T, U> Wrapper<T, U>
+impl<T, U, const N: usize> Wrapper<T, U, N>
 where
     T: Sha,
-    U: Extract,
+    // U: Extract,
 {
     pub fn new(data: impl AsRef<[u8]>) -> Self {
         Self {
             sha2: T::new(data.as_ref()),
-            compression: PhantomData,
+            size: PhantomData,
         }
     }
 }
