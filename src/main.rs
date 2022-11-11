@@ -30,9 +30,6 @@ fn main() {
     // sha512.run();
     // sha512.extract().iter().for_each(|c| print!("{:01$x?} ", c.to_be_bytes(), 2));
 
-    let mut testing = sha2::Testing::new(test);
-    testing.run();
-    println!("{}", testing.extract_as_lower_hex());
     // assert_eq!(sha512.extract_as_lower_hex(), hashed_512_value_of_test);
     // let mut sha512_256 = sha2::Sha512_256::new(test);
     // sha512_256.run();

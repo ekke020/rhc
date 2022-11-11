@@ -28,7 +28,7 @@ impl Hash<U32> for Sha256 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U32::transform(buffer));
+        self.compressed = Some(U32::new(buffer));
     }
 
     fn extract(&mut self) -> U32 {
@@ -65,7 +65,7 @@ impl Hash<U28> for Sha224 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U28::transform(buffer));
+        self.compressed = Some(U28::new(buffer));
     }
 
     fn extract(&mut self) -> U28 {
