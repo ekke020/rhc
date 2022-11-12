@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: ⚙️ Install Rust 
+    - name: ⚙️ Install Rust ⚙️
       uses: actions-rs/toolchain@v1
       with:
         profile: minimal
         toolchain: stable
         override: true
         components: rustfmt, clippy
-    - name: 💾 Set up cargo cache
+    - name: 💾 cache 💾 
       uses: actions/cache@v3
       continue-on-error: false
       with:
@@ -33,5 +33,5 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-
     - name: 💎 Build 💎 
       run: cargo build 
-    - name: 💣 Run tests
+    - name: 🙏 Run tests 🙏
       run: cargo test 
