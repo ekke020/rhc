@@ -10,3 +10,5 @@ target/
 
 # Mac specific
 .DS_Store
+
+.VSCodeCounter/

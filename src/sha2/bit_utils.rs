@@ -92,6 +92,22 @@ pub fn u32_rotate(n: &u32, d: u8) -> u32 {
 
 pub(crate) use {lazy_vector, u32_addition, u64_addition, right_shift};
 
+pub fn pad<const N: usize>(bytes: &[u8]) -> Vec<u8> {
+    let mut decimal = lazy_vector!(bytes.len(), N);
+    // Add the binary values to the array.
+    bytes
+        .iter()
+        .enumerate()
+        .for_each(|(i, byte)| decimal[i] = *byte);
+
+    // Append a single bit after the last binary.
+    decimal[bytes.len()] = 0x80;
+    // Get the big endian representation of the length of value.
+    let big_endian_rep = (bytes.len() * 8).to_be_bytes();
+    big_endian_rep.iter().for_each(|byte| decimal.push(*byte));
+    decimal
+}
+
 #[test]
 fn test_u32_addition() {
     assert_eq!(u32_addition!(0x74657374, 0x676F6F64), 0xDBD4E2D8);
@@ -123,4 +139,15 @@ fn test_right_shift() {
     assert_eq!(right_shift!(0x9B05688C as u32, 7), 0x1360AD1);
     assert_eq!(right_shift!(0x9B05688C as u32, 10), 0x26C15A);
     assert_ne!(right_shift!(0x9B05688C as u32, 2), 0x9B05688);
+}
+
+#[test]
+fn test_pad() {
+    let test = "test";
+    let k = pad::<64>(test.as_bytes());
+    assert_eq!([k[0], k[1], k[2], k[3], k[4]], [116, 101, 115, 116, 128]);
+    assert_eq!(k[63], 32);
+    let k = pad::<128>(test.as_bytes());
+    assert_eq!([k[0], k[1], k[2], k[3], k[4]], [116, 101, 115, 116, 128]);
+    assert_eq!(k[127], 32);
 }

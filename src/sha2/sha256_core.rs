@@ -1,4 +1,4 @@
-use super::bit_utils::{right_shift, u32_addition, u32_rotate};
+use super::bit_utils::{pad, right_shift, u32_addition, u32_rotate};
 use super::consts::{State256, H256_224, H256_256, K32};
 use super::implementation::{CompressionSize, Hash, Sha, U28, U32};
 
@@ -9,18 +9,17 @@ pub struct Sha256 {
 }
 
 impl Sha for Sha256 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<64>(value),
             state: H256_256,
             compressed: None,
         }
     }
 }
-
 impl Hash<U32> for Sha256 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<64>(value);
     }
 
     fn run(&mut self) {
@@ -29,9 +28,9 @@ impl Hash<U32> for Sha256 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U32::transform(buffer));
+        let bytes = to_bytes::<32>(&buffer);
+        self.compressed = Some(U32::new(&bytes));
     }
-
     fn extract(&mut self) -> U32 {
         self.compressed
             .take()
@@ -46,9 +45,9 @@ pub struct Sha224 {
 }
 
 impl Sha for Sha224 {
-    fn new(value: Vec<u8>) -> Self {
+    fn new(value: &[u8]) -> Self {
         Self {
-            value,
+            value: pad::<64>(value),
             state: H256_224,
             compressed: None,
         }
@@ -56,8 +55,8 @@ impl Sha for Sha224 {
 }
 
 impl Hash<U28> for Sha224 {
-    fn reload(&mut self, value: Vec<u8>) {
-        self.value = value;
+    fn reload(&mut self, value: &[u8]) {
+        self.value = pad::<64>(value);
     }
 
     fn run(&mut self) {
@@ -66,7 +65,8 @@ impl Hash<U28> for Sha224 {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
-        self.compressed = Some(U28::transform(buffer));
+        let bytes = to_bytes::<28>(&buffer);
+        self.compressed = Some(U28::new(&bytes));
     }
 
     fn extract(&mut self) -> U28 {
@@ -141,6 +141,29 @@ fn compression(message: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
         u32_addition!(compressed[7], h),
     ];
     compressed
+}
+
+fn to_bytes<const N: usize>(buffer: &[u32; 8]) -> [u8; N] {
+    buffer.iter()
+        .flat_map(|v| v.to_be_bytes())
+        .take(N)
+        .collect::<Vec<u8>>()
+        .try_into()
+        .unwrap_or_else(| err: Vec<u8>| panic!("N was {N} when it should not exceed {}", err.len()))
+}
+
+#[test]
+#[should_panic]
+fn test_to_bytes() {
+    let result = to_bytes::<32>(&[
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
+    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171, 91, 224, 205, 25]);
+    let result = to_bytes::<28>(&[
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
+    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171]);
+    to_bytes::<48>(&[0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
 }
 
 #[test]

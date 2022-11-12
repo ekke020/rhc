@@ -63,22 +63,22 @@ fn try_password(password: &str, hash_type: &HashType) -> Option<Cracked> {
 }
 
 
-#[cfg(test)]
-mod tests {
-    use crate::core::cracker;
-    use crate::core::hasher::HashType;
+// #[cfg(test)]
+// mod tests {
+//     use crate::core::cracker;
+//     use crate::core::hasher::HashType;
 
-    #[test]
-    fn password_matches() {
-        let sha_224 =
-            HashType::Sha224("a7470858e79c282bc2f6adfd831b132672dfd1224c1e78cbf5bcd057".to_owned());
-        let should_be_some = cracker::try_password("12345", &sha_224);
-        assert!(should_be_some.is_some());
-    }
-    #[test]
-    fn password_does_not_match() {
-        let sha_512 = HashType::Sha512("3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79".to_owned());
-        let should_be_none = cracker::try_password("1234", &sha_512);
-        assert!(should_be_none.is_none());
-    }
-}
+//     #[test]
+//     fn password_matches() {
+//         let sha_224 =
+//             HashType::Sha224("a7470858e79c282bc2f6adfd831b132672dfd1224c1e78cbf5bcd057".to_owned());
+//         let should_be_some = cracker::try_password("12345", &sha_224);
+//         assert!(should_be_some.is_some());
+//     }
+//     #[test]
+//     fn password_does_not_match() {
+//         let sha_512 = HashType::Sha512("3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79".to_owned());
+//         let should_be_none = cracker::try_password("1234", &sha_512);
+//         assert!(should_be_none.is_none());
+//     }
+// }
