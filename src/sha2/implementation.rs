@@ -1,7 +1,4 @@
-#![feature(const_generics)]
-#![feature(const_evaluatable_checked)]
 use std::{convert::TryInto, fmt::{LowerHex, UpperHex}};
-use super::consts::{ByteSize, BYTE_SIZE_64, BYTE_SIZE_128};
 
 pub trait CompressionSize {
     fn new(compressed: &[u8]) -> Self;
@@ -22,7 +19,6 @@ impl CompressionSize for U64 {
 impl Extract<64> for U64 {
     const S: usize = 64;
     fn take(self) -> [u8; 64] {
-        // self.0[0..N].try_into().unwrap()
         self.0
     }
 }
@@ -38,7 +34,6 @@ impl Extract<48> for U48 {
     const S: usize = 48;
     fn take(self) -> [u8; 48] {
         self.0
-        // self.0[0..N].try_into().unwrap()
     }
 }
 pub struct U32([u8; 32]);
@@ -53,7 +48,6 @@ impl Extract<32> for U32 {
     const S: usize = 32;
     fn take(self) -> [u8; 32] {
         self.0
-        // self.0[0..N].try_into().unwrap()
     }
 }
 pub struct U28([u8; 28]);
