@@ -1,0 +1,21 @@
+#version 450
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout(set = 0, binding = 0) buffer Data {
+    uint data[];
+} buf;
+
+void pad(uvec2 data) {
+    
+}
+
+float arraySum10( float A[10] ) {
+    float sum = 0.0;
+    for ( int i = 0; i < 10; i++ ) {
+        sum += A[i];
+    }
+    return sum;
+}
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    buf.data[idx] *= 2;
+}
