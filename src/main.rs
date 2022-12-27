@@ -18,10 +18,13 @@ const ASCII_TABLE: [char; 95] = [
     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~',
 ];
 fn main() {
-    // vulkan::test("test".as_bytes());
-    const size: usize = 1_usize.pow(95);
-    let data:[[u8; 3]; size];
-    add_length_specific::<3>(0, &String::new());
+    let mut tes = sha2::Sha224::new("test");
+    tes.run();
+    println!("{}", tes.extract_as_lower_hex());
+    // // vulkan::test("test".as_bytes());
+    // const size: usize = 1_usize.pow(95);
+    // let data:[[u8; 3]; size];
+    // add_length_specific::<3>(0, &String::new());
 }
 
 pub fn run_threads() {

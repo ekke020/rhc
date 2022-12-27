@@ -1,0 +1,4 @@
+GLSL - https://math.hws.edu/graphicsbook/c6/s3.html
+SHA 512 - https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA512.pdf
+SHA 512/256 - https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA512_256.pdf
+SHS - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf 
