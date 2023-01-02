@@ -4,8 +4,8 @@ pub struct Arg {
     required: bool,
     takes_input: bool,
     full_name: String,
-    short_name: Option<char>,
-    help_text: Option<String>,
+    short_name: char,
+    help_text: String,
 }
 
 impl Arg {
@@ -15,6 +15,10 @@ impl Arg {
 
     pub fn get_id(&self) -> u64 {
         self.id
+    }
+
+    pub fn get_short_name(&self) -> char {
+        self.short_name
     }
 
     fn name(mut self, value: &str) -> Self {
@@ -34,22 +38,25 @@ impl Arg {
     }
 
     pub fn short_name(mut self, short_name: char) -> Self {
-        self.short_name = Some(short_name);
+        self.short_name = short_name;
         self
     }
 
     pub fn help_text(mut self, text: &str) -> Self {
-        self.help_text = Some(text.to_owned());
+        self.help_text = text.to_owned();
         self
     }
 
     pub fn describe(&self) -> String {
-        let mut description = String::new();
-        let help_text = self.help_text.as_deref().ok_or("").unwrap();
-        let short_name = self.short_name.ok_or("\t").unwrap();
-        format!("  -{}, --{} \t\t{}", short_name, self.full_name, help_text)
+        let mut help_text = String::from("\t\t");
+        let mut short_name = String::from("    ");
+        help_text.push_str(&self.help_text);
+        self.short_name.ne(&'\x00')
+            .then(|| short_name = format!(" -{},", self.short_name));
+        format!("{} --{} {}", short_name, self.full_name, help_text)
     }
 }
+
 impl Default for Arg {
     fn default() -> Self {
         Self {
@@ -57,8 +64,8 @@ impl Default for Arg {
             required: false,
             takes_input: false,
             full_name: Default::default(),
-            short_name: None,
-            help_text: None,
+            short_name: Default::default(),
+            help_text: Default::default(),
         }
     }
 }
