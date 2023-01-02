@@ -1,4 +1,7 @@
-use super::{arg::Arg, argument_error::NO_ARGUMENT_ERROR};
+use super::{
+    arg::Arg,
+    argument_error::{ArgumentError, NO_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, MISSING_INPUT_ERROR},
+};
 use std::{collections::HashMap, fmt::format, process, rc::Rc};
 
 pub struct Cli {
@@ -69,10 +72,18 @@ OPTIONS:
     }
 
     pub fn run(&self, args: Vec<String>) {
-        match args.get(0).ok_or_else(|| NO_ARGUMENT_ERROR) {
-            Ok(_) => parse(args, 0),
-            Err(err) => err.exit(0x40),
+        // match args.get(0).ok_or_else(|| NO_ARGUMENT_ERROR) {
+        //     Ok(_) => parse(args, 0),
+        //     Err(err) => err.exit(0x40),
+        // };
+        let do_steps = || -> Result<(), ArgumentError> {
+            parse(args, 0)?;
+            Ok(())
         };
+
+        if let Err(err) = do_steps() {
+            err.exit(0x40)
+        }
     }
 }
 
@@ -88,8 +99,17 @@ impl Default for Cli {
     }
 }
 
+use regex::Regex;
 
-fn parse(args: Vec<String>, index: usize) {
+fn parse(args: Vec<String>, index: usize) -> Result<(), ArgumentError<'static>> {
     // TODO: Implement logic for argument parsing
     // A CLI can have multiple arguments & arguments can have their own CLIs
+    let flag = args.get(index).ok_or_else(|| MALFORMED_ARGUMENT_ERROR)?;
+    let re = Regex::new(r"^--?[aA-zZ]+").unwrap();
+    let option_name = re
+        .find(flag)
+        .ok_or_else(|| NO_ARGUMENT_ERROR)?
+        .as_str();
+    println!("{}", option_name);
+    Ok(())
 }
