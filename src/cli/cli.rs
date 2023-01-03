@@ -3,16 +3,17 @@ use super::{
     argument_error::{ArgumentError, NO_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, MISSING_INPUT_ERROR},
 };
 use std::{collections::HashMap, fmt::format, process, rc::Rc};
+use regex::Regex;
 
-pub struct Cli {
+pub struct Cli<'a> {
     title: String,
     version: String,
     usage: String,
-    arguments: HashMap<char, Arg>,
+    arguments: HashMap<&'a str, &'a Arg>,
     options: Rc<Vec<String>>,
 }
 
-impl Cli {
+impl <'a>Cli<'a> {
     pub fn new(title: &str, version: &str) -> Self {
         Self::default()
             .name(title.to_owned())
@@ -48,7 +49,8 @@ impl Cli {
     fn add_arg(mut self, arg: Arg) -> Self {
         let mut vec = Rc::make_mut(&mut self.options);
         vec.push(format!("{}\n", arg.describe()));
-        self.arguments.insert(arg.get_short_name(), arg);
+        self.arguments.insert(arg.get_name(), &arg);
+        arg.has_shorthand().then(|| self.arguments.insert(arg.get_shorthand(), &arg));
         self
     }
 
@@ -72,10 +74,6 @@ OPTIONS:
     }
 
     pub fn run(&self, args: Vec<String>) {
-        // match args.get(0).ok_or_else(|| NO_ARGUMENT_ERROR) {
-        //     Ok(_) => parse(args, 0),
-        //     Err(err) => err.exit(0x40),
-        // };
         let do_steps = || -> Result<(), ArgumentError> {
             parse(args, 0)?;
             Ok(())
@@ -98,8 +96,6 @@ impl Default for Cli {
         }
     }
 }
-
-use regex::Regex;
 
 fn parse(args: Vec<String>, index: usize) -> Result<(), ArgumentError<'static>> {
     // TODO: Implement logic for argument parsing

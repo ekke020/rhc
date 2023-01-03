@@ -3,8 +3,8 @@ pub struct Arg {
     id: u64,
     required: bool,
     takes_input: bool,
-    full_name: String,
-    short_name: char,
+    name: String,
+    shorhand: char,
     help_text: String,
 }
 
@@ -17,13 +17,22 @@ impl Arg {
         self.id
     }
 
-    pub fn get_short_name(&self) -> char {
-        self.short_name
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
+
+    pub fn has_shorthand(&self) -> bool {
+        self.shorhand.ne(&'\x00')
+    }
+
+    pub fn get_shorthand(&self) -> char {
+        self.shorhand
+    }
+    
 
     fn name(mut self, value: &str) -> Self {
         self.id = compute(&value);
-        self.full_name = value.to_owned();
+        self.name = value.to_owned();
         self
     }
 
@@ -38,7 +47,7 @@ impl Arg {
     }
 
     pub fn short_name(mut self, short_name: char) -> Self {
-        self.short_name = short_name;
+        self.shorhand = short_name;
         self
     }
 
@@ -51,9 +60,9 @@ impl Arg {
         let mut help_text = String::from("\t\t");
         let mut short_name = String::from("    ");
         help_text.push_str(&self.help_text);
-        self.short_name.ne(&'\x00')
-            .then(|| short_name = format!(" -{},", self.short_name));
-        format!("{} --{} {}", short_name, self.full_name, help_text)
+        self.shorhand.ne(&'\x00')
+            .then(|| short_name = format!(" -{},", self.shorhand));
+        format!("{} --{} {}", short_name, self.name, help_text)
     }
 }
 
@@ -63,12 +72,20 @@ impl Default for Arg {
             id: Default::default(),
             required: false,
             takes_input: false,
-            full_name: Default::default(),
-            short_name: Default::default(),
+            name: Default::default(),
+            shorhand: Default::default(),
             help_text: Default::default(),
         }
     }
 }
+
+
+
+struct Flag {
+    name: String,
+    shorthand: char
+}
+
 
 fn compute(value: impl AsRef<[u8]>) -> u64 {
     let input: Vec<u64> = value.as_ref().iter().map(|b| u64::from(*b)).collect();
