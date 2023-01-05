@@ -1,11 +1,9 @@
-mod arg;
-mod argument_error;
-mod cli;
+mod builder;
+mod errors;
 use std::env;
-
+use builder::cli_builder::CliBuilder;
 pub fn entrypoint() {
-    let cli = cli::Cli::new("test title", "0.0.1");
+    let cli = CliBuilder::new("test title", Some("0.0.1")).build();
     let args = env::args().into_iter().skip(1).collect::<Vec<String>>();
-    // cli.run(args);
-    println!("{}", cli.get_help());
+    cli.run(args);
 }
