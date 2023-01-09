@@ -52,11 +52,41 @@ impl<'help> argument<'help> for HelpArgument {
     }
 }
 
+#[derive(Copy, Clone)]
+struct Char(char, [u8; 4]);
+impl Char {
+    fn from(char: char) -> Self {
+        let mut binding: [u8; 4] = [0; 4];
+        char.encode_utf8(&mut binding);
+        Self(char, binding)
+    }
+}
+
+impl AsRef<[u8]> for Char {
+    fn as_ref(&self) -> &[u8] {
+        &self.1
+    }
+}
+
+impl<'a> From<Option<&'a [u8]>> for Char {
+    fn from(_: Option<&'a [u8]>) -> Self {
+        todo!()
+    }
+}
+
+fn is_match<'a, T: argument<'a>>(t: T, arg: impl AsRef<[u8]>) -> bool {
+    t.get_shorthand().map_or(false, |x| {
+        let mut binding: [u8; 4] = [0; 4];
+        let te = x.encode_utf8(&mut [0; 4]).as_bytes();
+        binding.eq(arg.as_ref())
+    })
+}
 
 fn main() {
-    let test = Char::from('a');
-    println!("{:?}", test.1);
-    'e' as u8;
+    let test = Char::from('h');
+    let test2 = String::from("hell");
+    println!("{}",is_match(HelpArgument, test));
+    println!("{}",is_match(HelpArgument, test2));
     // let args = env::args().into_iter().skip(1).collect::<Vec<String>>();
     // let mut args = VecDeque::from(args);
     // let mut flag = args.pop_front().ok_or_else(|| NO_ARGUMENT_ERROR);
@@ -103,5 +133,3 @@ fn describe<'a, T: argument<'a>>(arg: T) -> String {
     };
     format!("{} --{} {}", short_name, arg.get_name(), help_text)
 }
-
-
