@@ -1,4 +1,6 @@
-use super::{arg::Arg, cli::Cli};
+use crate::cli::arg::Arg;
+
+use super:: cli::Cli;
 use std::{collections::HashMap, rc::Rc};
 
 pub struct CliBuilder {
@@ -41,7 +43,7 @@ impl CliBuilder {
             usage: "todo!()".to_owned(),
             arguments,
             options,
-            shorthands
+            shorthands: Default::default(),
         }
     }
 }
@@ -54,7 +56,7 @@ impl Default for CliBuilder {
             usage: Default::default(),
             arguments: vec![Arg::new("help")
                 .short_name('h')
-                .help_text("Print help information")],
+                .help("Print help information")],
         }
     }
 }
@@ -75,13 +77,14 @@ fn evaluate_names(arguments: Vec<Arg>) -> HashMap<String, Arg> {
     map
 }
 
-fn evaluate_shorthands(arguments: &Vec<Arg>) -> HashMap<char, String> {
+fn evaluate_shorthands(arguments: &Vec<Arg>) -> HashMap<&char, String> {
     let mut shorthands = HashMap::new();
 
     let pairs = arguments
         .iter()
         .map(|arg| (arg.get_shorthand(), arg.get_name().to_owned()))
-        .filter(|(char, _)| char.ne(&'\x00'));
+        .filter(|(char, _)| char.is_some())
+        .map(|(short, name)| (short.unwrap(), name));
 
     for (shorthand, name) in pairs {
         if shorthands.contains_key(&shorthand) {

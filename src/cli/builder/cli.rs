@@ -1,10 +1,14 @@
 use regex::Regex;
-use std::{collections::HashMap, fmt::format, process, rc::Rc};
-
-use super::arg::Arg;
-use crate::cli::errors::argument_error::{
-    ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
+use std::{
+    collections::{HashMap, VecDeque},
+    fmt::format,
+    process,
+    rc::Rc,
 };
+
+use crate::cli::{errors::argument_error::{
+    ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
+}, arg::Arg};
 
 pub struct Cli {
     pub title: String,
@@ -40,19 +44,21 @@ OPTIONS:
         )
     }
 
-    pub fn run(&self, args: Vec<String>) {
-        let do_steps = || -> Result<(), ArgumentError> {
-            let (arg, index) = parse_arg(args, 0)?;
-            let argument = self.lookup_arg(arg)?;
-            println!("{}", argument.describe());
-            // TODO: Check if the args vector is empty and stop parsing.
-            // TODO: Send args vector over to the next argument
-            Ok(())
-        };
+    pub fn run(&mut self, args: &mut VecDeque<String>) -> Result<Vec<&Arg>, ArgumentError> {
+        let mut argument_inputs = Vec::new();
 
-        if let Err(err) = do_steps() {
-            err.exit(0x40)
+        let mut flag = args.pop_front().ok_or_else(|| NO_ARGUMENT_ERROR)?;
+
+        loop {
+            let arg = parse_flag(flag)?;
+            let argument = self.lookup_arg(arg)?;
+            argument_inputs.push(argument);
+            if args.is_empty() {
+                break;
+            };
+            flag = args.pop_front().unwrap();
         }
+        Ok(argument_inputs)
     }
 
     fn lookup_arg(&self, arg: String) -> Result<&Arg, ArgumentError> {
@@ -60,15 +66,16 @@ OPTIONS:
             let char = arg.chars().next().unwrap();
             self.shorthands
                 .get(&char)
-                .ok_or_else(|| ArgumentError::custom(format!("Invalid shorthand argument: {}", char), true))?
+                .ok_or_else(|| {
+                    ArgumentError::custom(format!("Invalid shorthand argument: {}", char), true)
+                })?
                 .as_str()
         } else {
             &arg
         };
-        let value = self
-            .arguments
-            .get(argument)
-            .ok_or_else(|| ArgumentError::custom(format!("Invalid argument: {}", argument), true))?;
+        let value = self.arguments.get(argument).ok_or_else(|| {
+            ArgumentError::custom(format!("Invalid argument: {}", argument), true)
+        })?;
 
         Ok(value)
     }
@@ -86,20 +93,18 @@ impl Default for Cli {
     }
 }
 
-fn parse_arg(args: Vec<String>, index: usize) -> Result<(String, usize), ArgumentError<'static>> {
-    // TODO: Make the args vector mutable and remove each parsed value.
-    let flag = args.get(index).ok_or_else(|| NO_ARGUMENT_ERROR)?;
+fn parse_flag(flag: String) -> Result<String, ArgumentError<'static>> {
     let re = Regex::new(r"^--?").unwrap();
-    re.is_match(flag)
+    re.is_match(&flag)
         .then(|| true)
         .ok_or_else(|| MALFORMED_ARGUMENT_ERROR)?;
 
     let re = Regex::new(r"[aA-zZ]+").unwrap();
     let option = re
-        .find(flag)
+        .find(&flag)
         .ok_or_else(|| INVALID_ARGUMENT_ERROR)?
         .as_str()
         .to_owned();
 
-    Ok((option, index + 1))
+    Ok(option)
 }
