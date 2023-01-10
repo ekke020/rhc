@@ -2,28 +2,40 @@ use std::error;
 use std::fmt;
 use std::process;
 
-pub const NO_ARGUMENT_ERROR: ArgumentError = ArgumentError::new("No argument specified", true);
+pub const NO_ARGUMENT_ERROR: ArgumentError = ArgumentError {
+    text: "No argument specified",
+    append_help: true,
+};
 
-pub const INVALID_ARGUMENT_ERROR: ArgumentError =
-    ArgumentError::new("Invalid argument passed", true);
+pub const INVALID_ARGUMENT_ERROR: ArgumentError = ArgumentError {
+    text: "Invalid argument passed",
+    append_help: true,
+};
 
-pub const MALFORMED_ARGUMENT_ERROR: ArgumentError =
-    ArgumentError::new("Argument is malformed\nAll arguments must start with either one or two hyphen('-')\nExample: -h, --help", false);
+pub const MALFORMED_ARGUMENT_ERROR: ArgumentError = ArgumentError {
+    text: "Argument is malformed\nAll arguments must start with either one or two hyphen('-')\nExample: -h, --help", 
+    append_help: false,
+};
 
-pub const INVALID_INPUT_ERROR: ArgumentError =
-    ArgumentError::new("Invalid input passed after argument", true);
+pub const INVALID_INPUT_ERROR: ArgumentError = ArgumentError {
+    text: "Invalid input passed after argument",
+    append_help: true,
+};
 
-pub const MISSING_INPUT_ERROR: ArgumentError = ArgumentError::new("Argument requires input", true);
+pub const MISSING_INPUT_ERROR: ArgumentError = ArgumentError {
+    text: "Argument requires input",
+    append_help: true,
+};
 
 #[derive(Debug)]
-pub struct ArgumentError<'a> {
-    text: &'a str,
+pub struct ArgumentError {
+    text: &'static str,
     append_help: bool,
 }
-impl<'a> ArgumentError<'a> {
-    const fn new(text: &'a str, append_help: bool) -> Self {
-        Self { text, append_help }
-    }
+impl ArgumentError {
+    // const fn new(text: &str, append_help: bool) -> Self {
+    //     Self { text, append_help }
+    // }
 
     pub fn custom(text: String, append_help: bool) -> Self {
         let text = Box::leak(text.into_boxed_str());
@@ -40,18 +52,15 @@ impl<'a> ArgumentError<'a> {
     }
 }
 
-impl<'a> fmt::Display for ArgumentError<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for ArgumentError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.text)
     }
 }
 
-impl error::Error for ArgumentError<'_> {
-    fn description(&self) -> &str {
-        self.text
-    }
+impl error::Error for ArgumentError {}
 
-    fn cause(&self) -> Option<&dyn error::Error> {
-        None
-    }
+#[derive(Debug)]
+pub struct MyError {
+    msg: &'static str,
 }

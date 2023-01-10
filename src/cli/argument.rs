@@ -1,45 +1,33 @@
 use regex::Regex;
+use std::collections::HashMap;
+use std::fmt::Display;
 
-use super::errors::argument_error::{ArgumentError, MALFORMED_ARGUMENT_ERROR, INVALID_ARGUMENT_ERROR};
+use super::errors::argument_error::{
+    ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR,
+};
 
-enum ArgumentType {
-    Input(String),
-    Empty,
-    Informational,
+pub struct ArgumentInfo {
+    help: &'static str,
+    help_long: &'static str,
+    shorthand: Option<char>,
+    name: &'static str,
 }
-
-trait argument<'help> {
-    const SHORTHAND: Option<char>;
-    const ARG_TYPE: ArgumentType;
-    const HELP: Option<&'help str>;
-    fn get_name(&self) -> &str;
-    fn get_help(&self) -> Option<&str>;
-    fn get_shorthand(&self) -> Option<&char>;
-}
-
-struct HelpArgument;
-struct HashInputArgument;
-
-impl<'help> argument<'help> for HelpArgument {
-    const SHORTHAND: Option<char> = Some('h');
-    const ARG_TYPE: ArgumentType = ArgumentType::Informational;
-    const HELP: Option<&'help str> = Some("help");
-
+impl ArgumentInfo {
     fn get_name(&self) -> &str {
-        "help"
+        &self.name
     }
 
-    fn get_help(&self) -> Option<&str> {
-        Self::HELP
+    fn get_help(&self) -> &str {
+        self.help
     }
 
     fn get_shorthand(&self) -> Option<&char> {
-        Self::SHORTHAND.as_ref()
+        self.shorthand.as_ref()
     }
 }
 
 #[derive(Copy, Clone)]
-struct Char(char, [u8; 4]);
+pub struct Char(char, [u8; 4]);
 impl Char {
     fn from(char: char) -> Self {
         let mut binding: [u8; 4] = [0; 4];
@@ -54,39 +42,88 @@ impl AsRef<[u8]> for Char {
     }
 }
 
-
-// TODO: Fix this compare function so it can take a &str and a Char type
-fn is_match<'a, T: argument<'a>>(t: T, arg: impl AsRef<[u8]> + Into<Option<&'a [u8]>>) -> bool {
-    // arg.map_or(false, |x| x.contains(t.as_ref()))
-    false
-}
-
-
-
-fn parse_flag(flag: String) -> Result<String, ArgumentError<'static>> {
-    let re = Regex::new(r"^--?").unwrap();
-    re.is_match(&flag)
-        .then(|| true)
-        .ok_or_else(|| MALFORMED_ARGUMENT_ERROR)?;
-
-    let re = Regex::new(r"[aA-zZ]+").unwrap();
-    let option = re
-        .find(&flag)
-        .ok_or_else(|| INVALID_ARGUMENT_ERROR)?
-        .as_str()
-        .to_owned();
-
-    Ok(option)
-}
-
-fn describe<'a, T: argument<'a>>(arg: T) -> String {
-    let mut help_text = String::from("\t\t");
-    let mut short_name = String::from("    ");
-    if let Some(text) = arg.get_help() {
-        help_text.push_str(text);
+impl Display for Char {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
+}
+
+// pub fn is_match<'a, T: argument>(argument: T, flag: impl AsRef<[u8]>) -> bool {
+//     let shorthand_match = argument
+//         .get_shorthand()
+//         .map_or(false, |s| match_shorthand(s, flag.as_ref()));
+//     let name_match = match_name(argument.get_name(), flag.as_ref());
+//     shorthand_match || name_match
+// }
+
+fn match_shorthand(shorthand: &Char, flag: &[u8]) -> bool {
+    shorthand.1 == flag
+}
+
+fn match_name(name: &str, flag: &[u8]) -> bool {
+    name.as_bytes().eq(flag)
+}
+
+pub fn describe(arg: ArgumentInfo) -> String {
+    let mut short_name = String::from("    ");
     if let Some(shorthand) = arg.get_shorthand() {
         short_name = format!(" -{},", shorthand);
     };
-    format!("{} --{} {}", short_name, arg.get_name(), help_text)
+    format!("{} --{} \t\t{}", short_name, arg.get_name(), arg.get_help())
+}
+
+pub mod info {
+    use super::ArgumentInfo;
+
+    pub const ARGUMENTS: [ArgumentInfo; 5] = [HELP_ARG, INPUT_ARG, TYPE_ARG, LENGTH_ARG, VERSION_ARG];
+
+    const HELP_MSG: &str = "INPUT TEST";
+    const HELP_LONG_MSG: &str = "INPUT TEST";
+    const HELP_NAME: &str = "help";
+    const HELP_ARG: ArgumentInfo = ArgumentInfo {
+        help: HELP_MSG,
+        shorthand: Some('h'),
+        name: HELP_NAME,
+        help_long: HELP_LONG_MSG,
+    };
+
+    const INPUT_MSG: &str = "INPUT TEST";
+    const INPUT_LONG_MSG: &str = "INPUT TEST";
+    const INPUT_NAME: &str = "input";
+    const INPUT_ARG: ArgumentInfo = ArgumentInfo {
+        help: INPUT_MSG,
+        shorthand: Some('i'),
+        name: INPUT_NAME,
+        help_long: INPUT_LONG_MSG,
+    };
+
+    const TYPE_MSG: &str = "INPUT TEST";
+    const TYPE_LONG_MSG: &str = "INPUT TEST";
+    const TYPE_NAME: &str = "type";
+    const TYPE_ARG: ArgumentInfo = ArgumentInfo {
+        help: TYPE_MSG,
+        shorthand: Some('t'),
+        name: TYPE_NAME,
+        help_long: TYPE_LONG_MSG,
+    };
+
+    const LENGTH_MSG: &str = "INPUT TEST";
+    const LENGTH_LONG_MSG: &str = "INPUT TEST";
+    const LENGTH_NAME: &str = "length";
+    const LENGTH_ARG: ArgumentInfo = ArgumentInfo {
+        help: LENGTH_MSG,
+        shorthand: Some('l'),
+        name: LENGTH_NAME,
+        help_long: LENGTH_LONG_MSG,
+    };
+
+    const VERSION_MSG: &str = "INPUT TEST";
+    const VERSION_LONG_MSG: &str = "INPUT TEST";
+    const VERSION_NAME: &str = "version";
+    const VERSION_ARG: ArgumentInfo = ArgumentInfo {
+        help: VERSION_MSG,
+        shorthand: Some('v'),
+        name: VERSION_NAME,
+        help_long: VERSION_LONG_MSG,
+    };
 }
