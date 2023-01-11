@@ -1,1 +1,2 @@
-pub mod argument_error;
+pub mod argument;
+pub mod flag;
