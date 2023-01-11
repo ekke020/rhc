@@ -5,6 +5,9 @@ mod sha2;
 mod systems;
 
 fn main() {
-    cli::entrypoint();
+    if let Err(e) = cli::entrypoint() {
+        println!("{}", e);
+        std::process::exit(e.get_exit_code())
+    }
 }
 
