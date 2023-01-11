@@ -2,9 +2,6 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fmt::Display;
 
-use super::errors::argument_error::{
-    ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR,
-};
 
 pub struct ArgumentInfo {
     help: &'static str,
@@ -77,6 +74,7 @@ pub mod info {
 
     pub const ARGUMENTS: [ArgumentInfo; 5] = [HELP_ARG, INPUT_ARG, TYPE_ARG, LENGTH_ARG, VERSION_ARG];
 
+    pub const HELP: usize = 0;
     const HELP_MSG: &str = "INPUT TEST";
     const HELP_LONG_MSG: &str = "INPUT TEST";
     const HELP_NAME: &str = "help";
@@ -87,6 +85,7 @@ pub mod info {
         help_long: HELP_LONG_MSG,
     };
 
+    pub const INPUT: usize = 1;
     const INPUT_MSG: &str = "INPUT TEST";
     const INPUT_LONG_MSG: &str = "INPUT TEST";
     const INPUT_NAME: &str = "input";
@@ -97,6 +96,7 @@ pub mod info {
         help_long: INPUT_LONG_MSG,
     };
 
+    pub const TYPE: usize = 2;
     const TYPE_MSG: &str = "INPUT TEST";
     const TYPE_LONG_MSG: &str = "INPUT TEST";
     const TYPE_NAME: &str = "type";
@@ -107,6 +107,7 @@ pub mod info {
         help_long: TYPE_LONG_MSG,
     };
 
+    pub const LENGTH: usize = 3;
     const LENGTH_MSG: &str = "INPUT TEST";
     const LENGTH_LONG_MSG: &str = "INPUT TEST";
     const LENGTH_NAME: &str = "length";
@@ -117,6 +118,7 @@ pub mod info {
         help_long: LENGTH_LONG_MSG,
     };
 
+    pub const VERSION: usize = 4;
     const VERSION_MSG: &str = "INPUT TEST";
     const VERSION_LONG_MSG: &str = "INPUT TEST";
     const VERSION_NAME: &str = "version";
