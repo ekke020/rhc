@@ -2,17 +2,20 @@ use std::{collections::VecDeque, env};
 
 use regex::Regex;
 
-use super::{errors::argument_error::{
-    ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
-}, flag::{FlagInfo, Flag, FlagType}};
+use super::{
+    errors::argument::{
+        INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR, ArgumentError,
+    },
+    flag::{Flag, FlagInfo, FlagType},
+};
 
-pub fn entry() -> VecDeque<String> {
+pub fn entry() -> Result<VecDeque<String>, ArgumentError> {
     let mut args = env::args()
         .into_iter()
         .skip(1)
         .collect::<VecDeque<String>>();
-    args.get(0).is_none().then(|| NO_ARGUMENT_ERROR.exit(0x40));
-    args
+    args.get(0).ok_or(NO_ARGUMENT_ERROR)?;
+    Ok(args)
 }
 
 pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<FlagInfo>, ArgumentError> {
@@ -42,6 +45,7 @@ pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<FlagInfo>, ArgumentE
     Ok(flags)
 }
 
+// TODO: Change the hardcoded flags to the ones defined in the argument info module
 fn match_flag(arg: &str) -> Result<Flag, ArgumentError> {
     match arg {
         "-h" | "--help" => Ok(Flag::Help),
@@ -53,7 +57,7 @@ fn match_flag(arg: &str) -> Result<Flag, ArgumentError> {
     }
 }
 
-pub fn parse_value(value: &str) -> Result<FlagType, ArgumentError> {
+fn parse_value(value: &str) -> Result<FlagType, ArgumentError> {
     let input = Regex::new(r"^[aA-zZ]+").unwrap();
     let option = Regex::new(r"^--?[aA-zZ]+").unwrap();
     let help = Regex::new(r"^--help|^-h").unwrap();
