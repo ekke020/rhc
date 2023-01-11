@@ -3,6 +3,7 @@ const TYPE_HELP_MSG: &str = "TYPE TEST";
 const LENGTH_HELP_MSG: &str = "LENGTH TEST";
 const VERSION: &str = "0.0.1";
 
+// TODO: Maybe change these so they are connected to the argument info?
 #[derive(Eq, Hash, PartialEq, Debug)]
 pub enum Flag {
     Input,
@@ -52,5 +53,9 @@ impl FlagInfo {
 
     pub fn toggle_help(&mut self) {
         self.help = !self.help;
+    }
+
+    pub fn get_flag(&self) -> &Flag {
+        &self.flag
     }
 }
