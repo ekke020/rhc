@@ -4,7 +4,7 @@ use regex::Regex;
 
 use super::{
     errors::argument::{
-        INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR, ArgumentError,
+        ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
     },
     flag::{Flag, FlagInfo, FlagType},
 };
@@ -18,8 +18,8 @@ pub fn entry() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<FlagInfo>, ArgumentError> {
-    let mut flags: Vec<FlagInfo> = vec![FlagInfo::from(Flag::Help)];
+pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<Flag>, ArgumentError> {
+    let mut flags: Vec<Flag> = vec![Flag::from("--help").unwrap()];
     let mut previous_flag = flags.last_mut();
     while !args.is_empty() {
         let arg = args.pop_front().unwrap();
@@ -27,16 +27,16 @@ pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<FlagInfo>, ArgumentE
 
         match parsed {
             FlagType::Option(v) => {
-                let flag = match_flag(&v)?;
-                flags.push(FlagInfo::from(flag));
+                let flag = Flag::from(&v).ok_or(INVALID_ARGUMENT_ERROR)?;
+                flags.push(flag);
                 previous_flag = flags.last_mut();
             }
             FlagType::Input(v) => {
-                let flaginfo = previous_flag.as_mut().ok_or(MALFORMED_ARGUMENT_ERROR)?;
-                flaginfo.set_input(Some(v));
+                let flag = previous_flag.as_mut().ok_or(MALFORMED_ARGUMENT_ERROR)?;
+                flag.set_input(&v);
                 previous_flag = None;
             }
-            FlagType::Toggle => {
+            FlagType::Help => {
                 let flaginfo = previous_flag.as_mut().ok_or(INVALID_ARGUMENT_ERROR)?;
                 flaginfo.toggle_help();
             }
@@ -45,25 +45,13 @@ pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<FlagInfo>, ArgumentE
     Ok(flags)
 }
 
-// TODO: Change the hardcoded flags to the ones defined in the argument info module
-fn match_flag(arg: &str) -> Result<Flag, ArgumentError> {
-    match arg {
-        "-h" | "--help" => Ok(Flag::Help),
-        "-v" | "--version" => Ok(Flag::Version),
-        "-i" | "--input" => Ok(Flag::Input),
-        "-t" | "--type" => Ok(Flag::Type),
-        "-l" | "--length" => Ok(Flag::Length),
-        _ => Err(INVALID_ARGUMENT_ERROR),
-    }
-}
-
 fn parse_value(value: &str) -> Result<FlagType, ArgumentError> {
     let input = Regex::new(r"^[aA-zZ]+").unwrap();
     let option = Regex::new(r"^--?[aA-zZ]+").unwrap();
     let help = Regex::new(r"^--help|^-h").unwrap();
 
     if let Some(v) = help.find(value) {
-        return Ok(FlagType::Toggle);
+        return Ok(FlagType::Help);
     } else if let Some(v) = option.find(value) {
         return Ok(FlagType::Option(v.as_str().to_owned()));
     } else if let Some(v) = input.find(value) {
