@@ -9,7 +9,7 @@ pub enum Flag {
     Version(FlagInfo),
     Help(FlagInfo),
 }
-
+// TODO: Is enum the best way to go? Feels like its very repetitive...
 impl Flag {
     // TODO: Change the hardcoded flags to the ones defined in the argument info module
     pub fn from(value: &str) -> Option<Flag> {
@@ -42,6 +42,7 @@ impl Flag {
             Flag::Help(info) => info.toggle_help(),
         }
     }
+
 }
 
 pub enum FlagType {
