@@ -3,13 +3,20 @@ use std::{collections::VecDeque, env};
 use regex::Regex;
 
 use super::{
-    errors::argument::{
+    error::argument::{
         ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
     },
     flag::{Flag, FlagInfo, FlagType},
 };
 
-pub fn entry() -> Result<VecDeque<String>, ArgumentError> {
+pub fn produce_flags() -> Result<Vec<Flag>, ArgumentError> {
+    let values = collect_args()?;
+    let flags = parse_args(values)?;
+
+    Ok(flags)
+}
+
+fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
     let mut args = env::args()
         .into_iter()
         .skip(1)
@@ -18,7 +25,7 @@ pub fn entry() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-pub fn parse_args(mut args: VecDeque<String>) -> Result<Vec<Flag>, ArgumentError> {
+fn parse_args(mut args: VecDeque<String>) -> Result<Vec<Flag>, ArgumentError> {
     let mut flags: Vec<Flag> = vec![Flag::from("--help").unwrap()];
     let mut previous_flag = flags.last_mut();
     while !args.is_empty() {
