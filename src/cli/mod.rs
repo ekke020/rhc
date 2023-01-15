@@ -9,24 +9,24 @@ use argument::info;
 
 use self::errors::argument::ArgumentError;
 use self::errors::flag::FlagError;
-use self::flag::FlagInfo;
+use self::flag::{FlagInfo, Flag};
 use self::settings::gather;
 
 pub fn entrypoint() -> Result<(), ArgumentError>{
     let values = entry::entry()?;
-    let flags = entry::parse_args(values)?;
+    let mut flags = entry::parse_args(values)?;
+   
     flags.iter().for_each(|f| println!("{:?}", f));
 
-    for arg in info::ARGUMENTS {
-        println!("{}", argument::describe(arg))
+    if let Err(e) = handle_flags(&mut flags) {
+        println!("{}", e);
+        std::process::exit(e.get_exit_code())
     }
-
-    // settings()?;
 
     Ok(())
 }
 
-fn handle_flags(flags: Vec<FlagInfo>) -> Result<(), FlagError> {
+fn handle_flags(flags: &mut Vec<Flag>) -> Result<(), FlagError> {
 
     gather(flags)?;
     Ok(())
