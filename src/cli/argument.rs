@@ -45,13 +45,6 @@ impl Display for Char {
     }
 }
 
-// pub fn is_match<'a, T: argument>(argument: T, flag: impl AsRef<[u8]>) -> bool {
-//     let shorthand_match = argument
-//         .get_shorthand()
-//         .map_or(false, |s| match_shorthand(s, flag.as_ref()));
-//     let name_match = match_name(argument.get_name(), flag.as_ref());
-//     shorthand_match || name_match
-// }
 
 fn match_shorthand(shorthand: &Char, flag: &[u8]) -> bool {
     shorthand.1 == flag
