@@ -1,33 +1,19 @@
-mod errors;
-use std::collections::VecDeque;
-use std::env;
 mod argument;
 mod entry;
+mod error;
 mod flag;
 mod settings;
-use argument::info;
 
-use self::errors::argument::ArgumentError;
-use self::errors::flag::FlagError;
-use self::flag::{FlagInfo, Flag};
-use self::settings::gather;
+use self::settings::GlobalSettings;
 
-pub fn entrypoint() -> Result<(), ArgumentError>{
-    let values = entry::entry()?;
-    let mut flags = entry::parse_args(values)?;
-   
-    flags.iter().for_each(|f| println!("{:?}", f));
-
-    if let Err(e) = handle_flags(&mut flags) {
+pub fn run() -> GlobalSettings {
+    let flags = entry::produce_flags().unwrap_or_else(|e| {
+        println!("{}", e);
+        std::process::exit(e.get_exit_code());
+    });
+    let settings = settings::produce_settings(flags).unwrap_or_else(|e| {
         println!("{}", e);
         std::process::exit(e.get_exit_code())
-    }
-
-    Ok(())
-}
-
-fn handle_flags(flags: &mut Vec<Flag>) -> Result<(), FlagError> {
-
-    gather(flags)?;
-    Ok(())
+    });
+    settings
 }
