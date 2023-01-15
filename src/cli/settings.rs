@@ -1,11 +1,11 @@
 use super::{
     argument::describe,
-    errors::flag::FlagError,
+    error::flag::FlagError,
     flag::{Flag, FlagInfo},
 };
 use std::collections::HashMap;
 
-enum Setting {
+pub enum Setting {
     HashInput(String),
     HashType(String),
     HashLenght(u32),
@@ -33,18 +33,31 @@ impl GlobalSettings {
             Setting::HashLenght(_) => self.hash_length = Some(setting),
         }
     }
-}
 
-pub fn gather(flags: &mut Vec<Flag>) -> Result<GlobalSettings, FlagError> {
-    let mut settings = GlobalSettings::new();
-    for flag in flags {
-        handle_flag(flag, &mut settings)?;
+    pub fn get_hash_input(&mut self) -> Option<Setting> {
+        self.hash_input.take()
     }
 
+    pub fn get_hash_type(&mut self) -> Option<Setting> {
+        self.hash_type.take()
+    }
+
+    pub fn get_hash_length(&mut self) -> Option<Setting> {
+        self.hash_length.take()
+    }
+}
+
+pub fn produce_settings(flags: Vec<Flag>) -> Result<GlobalSettings, FlagError> {
+    let mut settings = GlobalSettings::new();
+    for mut flag in flags {
+        handle_flag(&mut flag, &mut settings)?;
+    }
     Ok(settings)
 }
 
 fn handle_flag(flag: &mut Flag, settings: &mut GlobalSettings) -> Result<(), FlagError> {
+
+    // TODO: Simplify this function, its to repetitive atm.
     match flag {
         Flag::Input(info) => {
             // TODO: Change the hardcoded value of "input" to the const value of argumentinfo
