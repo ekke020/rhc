@@ -61,7 +61,7 @@ fn match_name(name: &str, flag: &[u8]) -> bool {
     name.as_bytes().eq(flag)
 }
 
-pub fn describe(arg: ArgumentInfo) -> String {
+pub fn describe(arg: &ArgumentInfo) -> String {
     let mut short_name = String::from("    ");
     if let Some(shorthand) = arg.get_shorthand() {
         short_name = format!(" -{},", shorthand);
