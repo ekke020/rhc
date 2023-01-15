@@ -1,26 +1,45 @@
-const INPUT_HELP_MSG: &str = "INPUT TEST";
-const TYPE_HELP_MSG: &str = "TYPE TEST";
-const LENGTH_HELP_MSG: &str = "LENGTH TEST";
 const VERSION: &str = "0.0.1";
 
 // TODO: Maybe change these so they are connected to the argument info?
-#[derive(Eq, Hash, PartialEq, Debug)]
+#[derive(Debug)]
 pub enum Flag {
-    Input,
-    Type,
-    Length,
-    Version,
-    Help,
+    Input(FlagInfo),
+    Type(FlagInfo),
+    Length(FlagInfo),
+    Version(FlagInfo),
+    Help(FlagInfo),
 }
 
 impl Flag {
-    fn help(&self) -> &str {
+    // TODO: Change the hardcoded flags to the ones defined in the argument info module
+    pub fn from(value: &str) -> Option<Flag> {
+        match value {
+            "-h" | "--help" => Some(Flag::Help(FlagInfo::new())),
+            "-v" | "--version" => Some(Flag::Version(FlagInfo::new())),
+            "-i" | "--input" => Some(Flag::Input(FlagInfo::new())),
+            "-t" | "--type" => Some(Flag::Type(FlagInfo::new())),
+            "-l" | "--length" => Some(Flag::Length(FlagInfo::new())),
+            _ => None,
+        }
+    }
+
+    pub fn set_input(&mut self, input: &str) {
         match self {
-            Flag::Input => INPUT_HELP_MSG,
-            Flag::Type => TYPE_HELP_MSG,
-            Flag::Length => LENGTH_HELP_MSG,
-            Flag::Version => "",
-            Flag::Help => "",
+            Flag::Input(info) => info.input = Some(input.to_owned()),
+            Flag::Type(info) => info.input = Some(input.to_owned()),
+            Flag::Length(info) => info.input = Some(input.to_owned()),
+            Flag::Version(info) => info.input = Some(input.to_owned()),
+            Flag::Help(info) => info.input = Some(input.to_owned()),
+        }
+    }
+
+    pub fn toggle_help(&mut self) {
+        match self {
+            Flag::Input(info) => info.toggle_help(),
+            Flag::Type(info) => info.toggle_help(),
+            Flag::Length(info) => info.toggle_help(),
+            Flag::Version(info) => info.toggle_help(),
+            Flag::Help(info) => info.toggle_help(),
         }
     }
 }
@@ -28,34 +47,43 @@ impl Flag {
 pub enum FlagType {
     Option(String),
     Input(String),
-    Toggle,
+    Help,
 }
 
 #[derive(Debug)]
 pub struct FlagInfo {
-    flag: Flag,
     input: Option<String>,
     help: bool,
 }
 
 impl FlagInfo {
-    pub fn from(flag: Flag) -> Self {
-        Self {
-            flag,
-            input: None,
-            help: false,
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn set_input(&mut self, input: Option<String>) {
+    fn set_input(&mut self, input: Option<String>) {
         self.input = input;
     }
 
-    pub fn toggle_help(&mut self) {
+    fn toggle_help(&mut self) {
         self.help = !self.help;
     }
 
-    pub fn get_flag(&self) -> &Flag {
-        &self.flag
+
+    pub fn get_input(&mut self) -> Option<String> {
+       self.input.take()
+    }
+
+    pub fn get_help(&self) -> bool {
+        self.help
+    }
+}
+
+impl Default for FlagInfo {
+    fn default() -> Self {
+        Self {
+            input: Default::default(),
+            help: Default::default(),
+        }
     }
 }
