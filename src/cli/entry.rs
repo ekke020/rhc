@@ -3,17 +3,19 @@ use std::{collections::VecDeque, env};
 use regex::Regex;
 
 use super::{
+    argument::{help::print_help, version::print_version},
     error::argument::{
-        ArgumentError, INVALID_ARGUMENT_ERROR, MALFORMED_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
+        ArgumentError, INVALID_ARGUMENT_ERROR, MISSING_INPUT_ERROR, NO_ARGUMENT_ERROR,
     },
-    flag::{Flag, FlagInfo, FlagType},
+    flags,
+    settings::GlobalSettings,
 };
 
-pub fn produce_flags() -> Result<Vec<Flag>, ArgumentError> {
+pub fn produce_settings() -> Result<GlobalSettings, ArgumentError> {
     let values = collect_args()?;
-    let flags = parse_args(values)?;
+    let settings = parse_args(values)?;
 
-    Ok(flags)
+    Ok(settings)
 }
 
 fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
@@ -25,45 +27,52 @@ fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-fn parse_args(mut args: VecDeque<String>) -> Result<Vec<Flag>, ArgumentError> {
-    let mut flags: Vec<Flag> = vec![Flag::from("--help").unwrap()];
-    let mut previous_flag = flags.last_mut();
+fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentError> {
+    let mut settings = GlobalSettings::new();
+
     while !args.is_empty() {
         let arg = args.pop_front().unwrap();
-        let parsed = parse_value(&arg)?;
 
-        match parsed {
-            FlagType::Option(v) => {
-                let flag = Flag::from(&v).ok_or(INVALID_ARGUMENT_ERROR)?;
-                flags.push(flag);
-                previous_flag = flags.last_mut();
-            }
-            FlagType::Input(v) => {
-                let flag = previous_flag.as_mut().ok_or(MALFORMED_ARGUMENT_ERROR)?;
-                flag.set_input(&v);
-                previous_flag = None;
-            }
-            FlagType::Help => {
-                let flaginfo = previous_flag.as_mut().ok_or(INVALID_ARGUMENT_ERROR)?;
-                flaginfo.toggle_help();
+        // Call version and exit early if arg is version
+        arg.eq("version").then(|| print_version());
+        // Call help and exit early if arg is help
+        arg.eq("help").then(|| print_help());
+
+        is_arg_valid(&arg)?;
+
+        // TODO: Come up with a better way to handle the help argument
+        if arg.eq("-h") || arg.eq("--help") {
+            let f = flags::get_help(&arg)?;
+            println!("{}", f.help());
+            std::process::exit(0x00);
+        }
+
+        if let Some(arg2) = args.front() {
+            if arg2.eq("-h") || arg2.eq("--help") {
+                let f = flags::get_help(&arg)?;
+                println!("{}", f.help());
+                std::process::exit(0x00);
             }
         };
+
+        if let Some(f) = flags::get_input(&arg) {
+            let input = args.pop_front().ok_or(MISSING_INPUT_ERROR)?;
+            let setting = f.produce_input_setting(&input)?;
+            settings.add_setting(setting);
+        } else if let Some(f) = flags::get_toggle(&arg) {
+            let setting = f.produce_toggle_setting();
+            settings.add_setting(setting);
+        } else {
+            return Err(INVALID_ARGUMENT_ERROR);
+        }
     }
-    Ok(flags)
+    Ok(settings)
 }
 
-fn parse_value(value: &str) -> Result<FlagType, ArgumentError> {
-    let input = Regex::new(r"^[aA-zZ]+").unwrap();
-    let option = Regex::new(r"^--?[aA-zZ]+").unwrap();
-    let help = Regex::new(r"^--help|^-h").unwrap();
-
-    if let Some(v) = help.find(value) {
-        return Ok(FlagType::Help);
-    } else if let Some(v) = option.find(value) {
-        return Ok(FlagType::Option(v.as_str().to_owned()));
-    } else if let Some(v) = input.find(value) {
-        return Ok(FlagType::Input(v.as_str().to_owned()));
+fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
+    let option = Regex::new(r"^--?[aA-zZ]+$").unwrap();
+    if let Some(v) = option.find(value) {
+        return Ok(());
     }
-
     Err(INVALID_ARGUMENT_ERROR)
 }
