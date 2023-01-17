@@ -2,8 +2,9 @@ use std::{collections::VecDeque, env};
 
 use regex::Regex;
 
+use crate::cli::argument;
+
 use super::{
-    argument::{help::print_help, version::print_version},
     error::argument::{
         ArgumentError, INVALID_ARGUMENT_ERROR, MISSING_INPUT_ERROR, NO_ARGUMENT_ERROR,
     },
@@ -35,35 +36,22 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
         let arg = args.pop_front().unwrap();
 
         // Call version and exit early if arg is version
-        arg.eq("version").then(|| print_version());
+        arg.eq("version").then(|| argument::version_and_exit());
         // Call help and exit early if arg is help
-        arg.eq("help").then(|| print_help());
+        arg.eq("help").then(|| argument::help_and_exit(None));
 
         is_arg_valid(&arg)?;
 
-        // TODO: Come up with a better way to handle the help argument
-        if arg.eq("-h") || arg.eq("--help") {
-            let f = flags::get_help(&last_arg)?;
-            println!("{}", f.help());
-            std::process::exit(0x00);
-        }
-
-        if let Some(arg2) = args.front() {
-            if arg2.eq("-h") || arg2.eq("--help") {
-                let f = flags::get_help(&arg)?;
-                println!("{}", f.help());
-                std::process::exit(0x00);
-            }
-        };
-
         if let Some(f) = flags::get_input(&arg) {
             let input = args.pop_front().ok_or(MISSING_INPUT_ERROR)?;
+            check_help(&input, &arg);
             let setting = f.produce_input_setting(&input)?;
             settings.add_setting(setting);
         } else if let Some(f) = flags::get_toggle(&arg) {
             let setting = f.produce_toggle_setting();
             settings.add_setting(setting);
         } else {
+            check_help(&arg, &last_arg);
             return Err(INVALID_ARGUMENT_ERROR);
         }
         last_arg = arg;
@@ -71,10 +59,17 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
     Ok(settings)
 }
 
+
 fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
     let option = Regex::new(r"^--?[aA-zZ]+$").unwrap();
     if let Some(v) = option.find(value) {
         return Ok(());
     }
     Err(INVALID_ARGUMENT_ERROR)
+}
+
+fn check_help(arg: &str, last_arg: &str) {
+    if arg.eq("-h") || arg.eq("--help") {
+        argument::help_and_exit(Some(last_arg));
+    }
 }
