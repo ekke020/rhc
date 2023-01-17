@@ -5,11 +5,21 @@ use super::{FlagHelp, FlagInfo, FlagInput};
 // const SHORTHAND: char = 'a'; ?
 const NAME: &str = "algorithm";
 const SHORT_HELP: &str = "The algorithm to target";
-const LONG_HELP: &str = "The input should be a valid hash algorithm.
-Available algorithms are:
-The Sha2 family:
-    sha224, sha256, sha384, sha512, sha512_224, sha512_256
-Example: rhc [OPTIONS]... --algorithm sha224
+const LONG_HELP: &str = "Flag: --algorithm
+Details:
+    input type: string (specific algorithm to target)
+Supported algorithms: 
+    he Sha2 family:
+        sha224, sha256, sha384,
+        sha512, sha512_224, sha512_256
+Description:
+    The --algorithm flag specifies the algorithm to target when cracking a hash.
+    The tool will attempt to automatically detect the algorithm used to create the hash, 
+    but this may not always be possible. If the algorithm is known, 
+    it is recommended to provide it as a flag to avoid the increased runtime and potential 
+    false positives that come with trying multiple algorithms.
+Example: 
+    rhc [OPTIONS]... --algorithm sha224
 ";
 
 pub(super) struct Algorithm;

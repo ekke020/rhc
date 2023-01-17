@@ -8,9 +8,17 @@ use super::{FlagHelp, FlagInfo, FlagInput};
 const SHORTHAND: char = 'l';
 const NAME: &str = "length";
 const SHORT_HELP: &str = "The length to start generating words from";
-const LONG_HELP: &str = "The input should be an unsigned 32 bit integer.
-The length flag is used to start the tool from a specified word length.
-Example: rhc [OPTIONS]... -l 10
+const LONG_HELP: &str = "Flag: -l | --length
+Details:
+    input type: unsigned 32 bit integer
+Description:
+    The --length flag is used to specify the starting length of words 
+    to generate when cracking a hash. 
+    It is important to note that this flag only sets the starting length
+    and does not determine the target length. To set the maximum target length, 
+    use the --max-length flag [not yet specified].
+Example: 
+    rhc [OPTIONS]... -l 10
 ";
 
 pub(super) struct Length;

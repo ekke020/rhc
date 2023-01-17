@@ -1,14 +1,18 @@
 use crate::cli::settings::Setting;
 
-use super::{FlagHelp, FlagInfo, FLAG_DESCRIPTIONS, FlagToggle};
+use super::{FlagHelp, FlagInfo, FlagToggle, FLAG_DESCRIPTIONS};
 
 const SHORTHAND: char = 'v';
 const NAME: &str = "verbose";
 const SHORT_HELP: &str = "Enables verbose output";
-const LONG_HELP: &str = "Verbose output [not yet specified]
-Example: rhc [OPTIONS]... -v 
+const LONG_HELP: &str = "Flag: -v | --verbose
+Details:
+    Toggles the verbose output
+Description:
+    Verbose output [not yet specified]...
+Example: 
+    rhc [OPTIONS]... -v 
 ";
-
 pub(super) struct Verbose;
 
 impl FlagInfo for Verbose {
