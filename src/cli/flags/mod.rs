@@ -17,11 +17,7 @@ use super::{
     settings::{GlobalSettings, Setting},
 };
 
-pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 5] =
-    [&Help, &Password, &Length, &Algorithm, &Verbose];
-// const FLAG_HELP: [&dyn FlagHelp; 5] = [&Help, &Password, &Length, &Algorithm, &Verbose];
-// const FLAG_INPUT: [&dyn FlagInput; 3] = [&Password, &Length, &Algorithm];
-// const FLAG_TOGGLE: [&dyn FlagToggle; 1] = [&Verbose];
+pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 5] = [&Help, &Password, &Length, &Algorithm, &Verbose];
 
 const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
     "--help" => &Help,
