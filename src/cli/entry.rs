@@ -30,6 +30,7 @@ fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
 fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentError> {
     let mut settings = GlobalSettings::new();
 
+    let mut last_arg = String::from("--help");
     while !args.is_empty() {
         let arg = args.pop_front().unwrap();
 
@@ -42,7 +43,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
 
         // TODO: Come up with a better way to handle the help argument
         if arg.eq("-h") || arg.eq("--help") {
-            let f = flags::get_help(&arg)?;
+            let f = flags::get_help(&last_arg)?;
             println!("{}", f.help());
             std::process::exit(0x00);
         }
@@ -65,6 +66,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
         } else {
             return Err(INVALID_ARGUMENT_ERROR);
         }
+        last_arg = arg;
     }
     Ok(settings)
 }
