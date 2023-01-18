@@ -6,7 +6,7 @@ const COMMAND_USAGE_ERROR: i32 = 0x40;
 const DATA_FORMAT_ERROR: i32 = 0x41;
 const INPUT_OUTPUT_ERROR: i32 = 0x4A;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum ArgumentErrorKind {
     NoArgumentSpecified,
     InvalidArgumentPassed,
@@ -46,7 +46,7 @@ pub const MALFORMED_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorK
 pub const INVALID_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidInput);
 
 // TODO: Consider changing the name of this error to FlagError
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ArgumentError(ArgumentErrorKind);
 
 impl ArgumentError {
