@@ -5,9 +5,7 @@ use regex::Regex;
 use crate::cli::argument;
 
 use super::{
-    error::argument::{
-        ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
-    },
+    error::argument::{ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR},
     flags,
     settings::GlobalSettings,
 };
@@ -59,7 +57,6 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
     Ok(settings)
 }
 
-
 fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
     let option = Regex::new(r"^--?[aA-zZ]+$").unwrap();
     if let Some(v) = option.find(value) {
@@ -71,5 +68,45 @@ fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
 fn check_help(arg: &str, last_arg: &str) {
     if arg.eq("-h") || arg.eq("--help") {
         argument::help_and_exit(Some(last_arg));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cli::flags::get_input;
+
+    use super::*;
+
+    #[test]
+    fn test_collect_args() {
+        let result = collect_args();
+        assert_eq!(result, Err(NO_ARGUMENT_ERROR));
+    }
+
+    #[test]
+    fn test_parse_args() -> Result<(), ArgumentError>{
+        let args = VecDeque::from(["-p", "test", "--algorithm", "sha224"])
+            .iter_mut()
+            .map(|v| v.to_string())
+            .collect();
+        let mut result = parse_args(args)?;
+        let sha224 = result.get_hash_type().unwrap();
+        let hash = result.get_hash_input().unwrap();
+
+        assert_eq!(sha224, "sha224");
+        assert_eq!(hash, "test");
+        Ok(())
+    }
+
+    #[test]
+    fn test_is_arg_valid() -> Result<(), ArgumentError> {
+        is_arg_valid("--help")?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_is_arg_valid_error() {
+        let result = is_arg_valid("--");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR))
     }
 }
