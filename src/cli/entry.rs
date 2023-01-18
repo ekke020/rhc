@@ -6,7 +6,7 @@ use crate::cli::argument;
 
 use super::{
     error::argument::{
-        ArgumentError, INVALID_ARGUMENT_ERROR, MISSING_INPUT_ERROR, NO_ARGUMENT_ERROR,
+        ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR,
     },
     flags,
     settings::GlobalSettings,
@@ -43,7 +43,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
         is_arg_valid(&arg)?;
 
         if let Some(f) = flags::get_input(&arg) {
-            let input = args.pop_front().ok_or(MISSING_INPUT_ERROR)?;
+            let input = args.pop_front().ok_or(ArgumentError::missing_input(&arg))?;
             check_help(&input, &arg);
             let setting = f.produce_input_setting(&input)?;
             settings.add_setting(setting);
@@ -52,7 +52,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
             settings.add_setting(setting);
         } else {
             check_help(&arg, &last_arg);
-            return Err(INVALID_ARGUMENT_ERROR);
+            return Err(ArgumentError::no_such_argument(&arg));
         }
         last_arg = arg;
     }

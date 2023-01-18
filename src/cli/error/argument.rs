@@ -12,7 +12,7 @@ enum ArgumentErrorKind {
     InvalidArgumentPassed,
     MalformedArgument,
     InvalidInput,
-    MissingInput,
+    MissingInput(String),
     NoSuchArgument(String),
 }
 
@@ -23,19 +23,19 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::InvalidArgumentPassed => COMMAND_USAGE_ERROR,
             ArgumentErrorKind::MalformedArgument => COMMAND_USAGE_ERROR,
             ArgumentErrorKind::InvalidInput => INPUT_OUTPUT_ERROR,
-            ArgumentErrorKind::MissingInput => INPUT_OUTPUT_ERROR,
+            ArgumentErrorKind::MissingInput(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::NoSuchArgument(_) => COMMAND_USAGE_ERROR,
         }
     }
-    // TODO: Return a String instead for dynamic error messages
-    fn get_error_message(&self) -> &str {
+
+    fn get_error_message(&self) -> String {
         match self {
-            ArgumentErrorKind::NoArgumentSpecified => "No argument specified\nUse -h, --help for available options",
-            ArgumentErrorKind::InvalidArgumentPassed => "Invalid argument passed\nUse -h, --help for available options",
-            ArgumentErrorKind::MalformedArgument => "Argument is malformed\nAll arguments must start with either one or two hyphen('-')\nExample: -h, --help",
-            ArgumentErrorKind::InvalidInput => "Invalid input passed after argument\nUse -h, --help for available options",
-            ArgumentErrorKind::MissingInput => "Argument requires input\nUse -h, --help for available options",
-            ArgumentErrorKind::NoSuchArgument(_) => "No such argument: {}, arg) + \nUse -h, --help for available options",
+            ArgumentErrorKind::NoArgumentSpecified => String::from("No argument specified\nUse -h, --help for available options"),
+            ArgumentErrorKind::InvalidArgumentPassed => String::from("Invalid argument passed\nUse -h, --help for available options"),
+            ArgumentErrorKind::MalformedArgument => String::from("Argument is malformed\nAll arguments must start with either one or two hyphen('-')\nExample: -h, --help"),
+            ArgumentErrorKind::InvalidInput => String::from("Invalid input passed after argument\nUse -h, --help for available options"),
+            ArgumentErrorKind::MissingInput(arg) => format!("Missing input for argument: {arg}\nUse {arg} -h, --help for an example"),
+            ArgumentErrorKind::NoSuchArgument(arg) => format!("No such argument: {arg}\nUse -h, --help for available options"),
         }
     }
 }
@@ -44,14 +44,18 @@ pub const NO_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::No
 pub const INVALID_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidArgumentPassed);
 pub const MALFORMED_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MalformedArgument);
 pub const INVALID_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidInput);
-pub const MISSING_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MissingInput);
 
+// TODO: Consider changing the name of this error to FlagError
 #[derive(Debug)]
 pub struct ArgumentError(ArgumentErrorKind);
 
 impl ArgumentError {
     pub fn no_such_argument(arg: &str) -> Self {
         ArgumentError(ArgumentErrorKind::NoSuchArgument(arg.to_owned()))
+    }
+
+    pub fn missing_input(arg: &str) -> Self {
+        ArgumentError(ArgumentErrorKind::MissingInput(arg.to_owned()))
     }
 
     pub fn get_exit_code(&self) -> i32 {
