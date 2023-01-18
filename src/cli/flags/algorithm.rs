@@ -9,7 +9,7 @@ const LONG_HELP: &str = "Flag: --algorithm
 Details:
     input type: string (specific algorithm to target)
 Supported algorithms: 
-    he Sha2 family:
+    the Sha2 family:
         sha224, sha256, sha384,
         sha512, sha512_224, sha512_256
 Description:

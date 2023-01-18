@@ -84,7 +84,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_args() -> Result<(), ArgumentError>{
+    fn test_parse_args() -> Result<(), ArgumentError> {
         let args = VecDeque::from(["-p", "test", "--algorithm", "sha224"])
             .iter_mut()
             .map(|v| v.to_string())
