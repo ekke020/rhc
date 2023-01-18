@@ -35,7 +35,7 @@ impl FlagHelp for Algorithm {
         LONG_HELP.to_owned()
     }
 }
-
+// TODO: Check that the value is a valid algorithm
 impl FlagInput for Algorithm {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
         Ok(Setting::HashType(value.to_owned()))
