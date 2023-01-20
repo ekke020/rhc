@@ -1,4 +1,4 @@
-pub const VERSION: &str = "0.0.1";
+use crate::cli::argument::VERSION;
 
 pub fn print_version() {
     println!("rhc version: {}", VERSION);
