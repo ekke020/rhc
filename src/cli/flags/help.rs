@@ -4,6 +4,7 @@ const SHORTHAND: char = 'h';
 const NAME: &str = "help";
 const SHORT_HELP: &str = "Shows extended help information";
 const LONG_HELP: &str = "RHC
+Version: 0.0.1
 About:
     RHC is an implementation of John the ripper written in Rust
 usage: rhc [OPTION]...";
