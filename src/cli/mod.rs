@@ -37,7 +37,10 @@ mod tests {
     fn test_run_version() {
         let mut cmd = Command::cargo_bin("rhc").unwrap();
         let assert = cmd.arg("version").assert();
-        assert.success().code(0).stdout(predicate::eq(b"rhc version: 0.0.1\n" as &[u8]));
+        assert
+            .success()
+            .code(0)
+            .stdout(predicate::eq(b"rhc version: 0.0.1\n" as &[u8]));
     }
 
     #[test]
