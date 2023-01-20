@@ -1,6 +1,9 @@
 name: Test and build for main
 
 on:
+  push:
+    branches:
+      - "main"
   pull_request:
     branches: [ "main" ]
 
