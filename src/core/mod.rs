@@ -1,10 +1,13 @@
-pub mod cracker;
-mod hasher;
-pub mod password_info;
+mod constants;
+mod error;
+use crate::cli::settings::GlobalSettings;
+use self::error::core::CoreError;
 
-pub mod prelude {
-    pub use crate::core::cracker;
-    // pub use crate::core::hasher;
-    pub use crate::core::password_info::PasswordInfo;
-    pub use crate::core::password_info::PasswordInfoBuilder;
+pub fn run(settings: GlobalSettings) {
+
+}
+
+fn core(settings: GlobalSettings) -> Result<(), CoreError> {
+
+    Ok(())
 }

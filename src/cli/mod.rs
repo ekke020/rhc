@@ -2,11 +2,10 @@ mod argument;
 mod entry;
 mod error;
 mod flags;
-mod settings;
+pub mod settings;
 
-use self::settings::GlobalSettings;
 
-pub fn run() -> GlobalSettings {
+pub fn run() -> settings::GlobalSettings {
     let settings = entry::produce_settings().unwrap_or_else(|e| {
         println!("{}", e);
         std::process::exit(e.get_exit_code());
