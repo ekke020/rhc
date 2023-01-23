@@ -11,9 +11,9 @@ pub struct GlobalSettings {
     hash_length: Option<u32>,
     verbose: bool,
 }
-
+// TODO: Change visibility to super 
 impl GlobalSettings {
-    pub(super) fn new() -> Self {
+    pub(crate) fn new() -> Self {
         GlobalSettings {
             hash_input: None,
             hash_type: None,
