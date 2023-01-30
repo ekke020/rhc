@@ -14,6 +14,7 @@ enum ArgumentErrorKind {
     InvalidInput,
     MissingInput(String),
     NoSuchArgument(String),
+    UnsupportedAlgorithm(String),
 }
 
 impl ArgumentErrorKind {
@@ -25,6 +26,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::InvalidInput => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::MissingInput(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::NoSuchArgument(_) => COMMAND_USAGE_ERROR,
+            ArgumentErrorKind::UnsupportedAlgorithm(_) => INPUT_OUTPUT_ERROR,
         }
     }
 
@@ -36,6 +38,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::InvalidInput => String::from("Invalid input passed after argument\nUse -h, --help for available options"),
             ArgumentErrorKind::MissingInput(arg) => format!("Missing input for argument: {arg}\nUse {arg} -h, --help for an example"),
             ArgumentErrorKind::NoSuchArgument(arg) => format!("No such argument: {arg}\nUse -h, --help for available options"),
+            ArgumentErrorKind::UnsupportedAlgorithm(arg) => format!("\"{arg}\" is not a suppported algorithm\nUse --algorithm --help for available algorithms"),
         }
     }
 }
@@ -56,6 +59,10 @@ impl ArgumentError {
 
     pub fn missing_input(arg: &str) -> Self {
         ArgumentError(ArgumentErrorKind::MissingInput(arg.to_owned()))
+    }
+
+    pub fn unsupported_algorithm(arg: &str) -> Self {
+        ArgumentError(ArgumentErrorKind::UnsupportedAlgorithm(arg.to_owned()))
     }
 
     pub fn get_exit_code(&self) -> i32 {
