@@ -38,6 +38,6 @@ impl FlagHelp for Length {
 impl FlagInput for Length {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
         let length = value.parse::<u32>().ok().ok_or(INVALID_INPUT_ERROR)?;
-        Ok(Setting::HashLenght(length))
+        Ok(Setting::HashLength(length))
     }
 }
