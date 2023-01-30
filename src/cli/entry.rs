@@ -73,7 +73,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::cli::flags::get_input;
+    use crate::cli::{flags::get_input, settings::AlgorithmType};
 
     use super::*;
 
@@ -85,7 +85,7 @@ mod tests {
 
     #[test]
     fn test_parse_args() -> Result<(), ArgumentError> {
-        let args = VecDeque::from(["-p", "test", "--algorithm", "sha224"])
+        let args = VecDeque::from(["-p", "test", "--algorithm", "sha2_224"])
             .iter_mut()
             .map(|v| v.to_string())
             .collect();
@@ -93,7 +93,7 @@ mod tests {
         let sha224 = result.get_hash_type().unwrap();
         let hash = result.get_hash_input().unwrap();
 
-        assert_eq!(sha224, "sha224");
+        assert_eq!(sha224, AlgorithmType::Sha2_224);
         assert_eq!(hash, "test");
         Ok(())
     }
