@@ -1,4 +1,4 @@
-use crate::cli::{error::argument::ArgumentError, settings::Setting};
+use crate::cli::{error::argument::ArgumentError, settings::{Setting, AlgorithmType}};
 
 use super::{FlagHelp, FlagInfo, FlagInput};
 
@@ -10,8 +10,8 @@ Details:
     input type: string (specific algorithm to target)
 Supported algorithms: 
     the Sha2 family:
-        sha224, sha256, sha384,
-        sha512, sha512_224, sha512_256
+        sha2_224, sha2_256, sha2_384,
+        sha2_512, sha2_512_224, sha2_512_256
 Description:
     The --algorithm flag specifies the algorithm to target when cracking a hash.
     The tool will attempt to automatically detect the algorithm used to create the hash, 
@@ -35,9 +35,10 @@ impl FlagHelp for Algorithm {
         LONG_HELP.to_owned()
     }
 }
-// TODO: Check that the value is a valid algorithm
+
 impl FlagInput for Algorithm {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
-        Ok(Setting::HashType(value.to_owned()))
+        let algorithm = AlgorithmType::from(value)?;
+        Ok(Setting::HashType(algorithm))
     }
 }
