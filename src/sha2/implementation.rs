@@ -67,7 +67,7 @@ impl Extract<28> for U28 {
 pub trait Hash<T>
 where T: CompressionSize
 {
-    fn reload(&mut self, value: &[u8]);
+    fn load(&mut self, value: &[u8]);
 
     fn run(&mut self);
 
@@ -75,5 +75,6 @@ where T: CompressionSize
 
 }
 pub trait Sha {
-    fn new(value: &[u8]) -> Self;
+    fn from(value: &[u8]) -> Self;
+    fn new() -> Self;
 }

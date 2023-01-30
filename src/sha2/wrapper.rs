@@ -19,8 +19,8 @@ where
         self.sha2.run();
     }
 
-    pub fn reload(&mut self, data: impl AsRef<[u8]>) {
-        self.sha2.reload(data.as_ref());
+    pub fn load(&mut self, data: impl AsRef<[u8]>) {
+        self.sha2.load(data.as_ref());
     }
 }
 
@@ -52,10 +52,16 @@ where
 impl<T, U, const N: usize> Wrapper<T, U, N>
 where
     T: Sha,
-{
-    pub fn new(data: impl AsRef<[u8]>) -> Self {
+{   
+    pub fn new() -> Self {
         Self {
-            sha2: T::new(data.as_ref()),
+            sha2: T::new(),
+            size: PhantomData,
+        }
+    }
+    pub fn from(data: impl AsRef<[u8]>) -> Self {
+        Self {
+            sha2: T::from(data.as_ref()),
             size: PhantomData,
         }
     }

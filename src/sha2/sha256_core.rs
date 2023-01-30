@@ -2,66 +2,91 @@ use super::bit_utils::{pad, right_shift, u32_addition, u32_rotate};
 use super::consts::{State256, H256_224, H256_256, K32};
 use super::implementation::{CompressionSize, Hash, Sha, U28, U32};
 
+const RUN_ERROR: &str = "Load with value before running the algorithm";
+const EXTRACT_ERROR: &str = "Can't extract before running hash";
+
 pub struct Sha256 {
-    value: Vec<u8>, // The value that was provided.
+    value: Option<Vec<u8>>, // The value that was provided.
     state: State256,
     compressed: Option<U32>, // The final hash from the value.
 }
 
 impl Sha for Sha256 {
-    fn new(value: &[u8]) -> Self {
+    fn from(value: &[u8]) -> Self {
         Self {
-            value: pad::<64>(value),
-            state: H256_256,
-            compressed: None,
+            value: Some(pad::<64>(value)),
+            ..Default::default()
         }
     }
+
+    fn new() -> Self {
+        Self::default()
+    }
 }
+
+impl Default for Sha256 {
+    fn default() -> Self {
+        Self { value: None, state: H256_256, compressed: None }
+    }
+}
+
 impl Hash<U32> for Sha256 {
-    fn reload(&mut self, value: &[u8]) {
-        self.value = pad::<64>(value);
+    fn load(&mut self, value: &[u8]) {
+        self.value = Some(pad::<64>(value));
     }
 
     fn run(&mut self) {
         let mut buffer = self.state;
-        for chunk in self.value.chunks_mut(64) {
+        let mut value = self.value.take().expect(RUN_ERROR);
+        for chunk in value.chunks_mut(64) {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
         let bytes = to_bytes::<32>(&buffer);
         self.compressed = Some(U32::new(&bytes));
     }
+
     fn extract(&mut self) -> U32 {
         self.compressed
             .take()
-            .expect("Can't extract before running hash")
+            .expect(EXTRACT_ERROR)
     }
 }
 
 pub struct Sha224 {
-    value: Vec<u8>, // The value that was provided.
+    value: Option<Vec<u8>>, // The value that was provided.
     state: State256,
     compressed: Option<U28>,
 }
 
 impl Sha for Sha224 {
-    fn new(value: &[u8]) -> Self {
+    fn from(value: &[u8]) -> Self {
         Self {
-            value: pad::<64>(value),
-            state: H256_224,
-            compressed: None,
+            value: Some(pad::<64>(value)),
+            ..Default::default()
         }
+    }
+
+    fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for Sha224 {
+    fn default() -> Self {
+        Self { value: None, state: H256_224, compressed: None }
     }
 }
 
 impl Hash<U28> for Sha224 {
-    fn reload(&mut self, value: &[u8]) {
-        self.value = pad::<64>(value);
+    fn load(&mut self, value: &[u8]) {
+        self.value = Some(pad::<64>(value));
     }
 
     fn run(&mut self) {
         let mut buffer = self.state;
-        for chunk in self.value.chunks_mut(64) {
+        let mut value = self.value.take().expect(RUN_ERROR);
+        for chunk in value.chunks_mut(64) {
             let message = mutate_chunk(chunk);
             buffer = compression(message, buffer);
         }
@@ -72,7 +97,7 @@ impl Hash<U28> for Sha224 {
     fn extract(&mut self) -> U28 {
         self.compressed
             .take()
-            .expect("Can't extract before running hash")
+            .expect(EXTRACT_ERROR)
     }
 }
 
