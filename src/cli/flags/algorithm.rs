@@ -26,7 +26,7 @@ pub(super) struct Algorithm;
 
 impl FlagInfo for Algorithm {
     fn describe(&self) -> String {
-        format!("    --{NAME} \t{SHORT_HELP}")
+        format!("    --{NAME} \t\t{SHORT_HELP}")
     }
 }
 

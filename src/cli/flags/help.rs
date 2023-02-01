@@ -13,7 +13,7 @@ pub(super) struct Help;
 
 impl FlagInfo for Help {
     fn describe(&self) -> String {
-        format!("-{SHORTHAND}, --{NAME} \t\t{SHORT_HELP}")
+        format!("-{SHORTHAND}, --{NAME} \t\t\t{SHORT_HELP}")
     }
 }
 
@@ -21,6 +21,6 @@ impl FlagHelp for Help {
     fn help(&self) -> String {
         FLAG_DESCRIPTIONS
             .iter()
-            .fold(String::from(LONG_HELP), |a, b| a + "\n\t" + &b.describe())
+            .fold(String::from(LONG_HELP), |a, b| a + "\n    " + &b.describe())
     }
 }
