@@ -1,26 +1,24 @@
-prog :=xnixperms
+# binary name
+BINARY=rhc
 
-debug ?=
+# default target
+all: build
 
-$(info debug is $(debug))
-
-ifdef debug
-  release :=
-  target :=debug
-  extension :=debug
-else
-  release :=--release
-  target :=release
-  extension :=
-endif
-
+# build target
 build:
-	cargo build $(release)
+	cargo build --release
 
-install:
-	cp target/$(target)/$(prog) ~/bin/$(prog)-$(extension)
+# install target
+install: build
+	uname_S = $(shell uname -s)
+	ifeq ($(uname_S), Linux)
+		sudo cp target/release/$(BINARY) /usr/local/bin/$(BINARY)
+	endif
+	ifeq ($(uname_S), Darwin)
+		sudo cp target/release/$(BINARY) /usr/local/bin/$(BINARY)
+	endif
 
-all: build install
- 
-help:
-	@echo "usage: make $(prog) [debug=1]"
+# clean target
+clean:
+	cargo clean
+
