@@ -3,13 +3,12 @@ mod entry;
 mod error;
 mod flags;
 pub mod settings;
+use self::{settings::GlobalSettings, error::argument::ArgumentError};
 
+pub type Error = error::argument::ArgumentError;
 
-pub fn run() -> settings::GlobalSettings {
-    let settings = entry::produce_settings().unwrap_or_else(|e| {
-        println!("{}", e);
-        std::process::exit(e.get_exit_code());
-    });
+pub fn run() -> Result<GlobalSettings, ArgumentError> {
+    let settings = entry::produce_settings();
     settings
 }
 
