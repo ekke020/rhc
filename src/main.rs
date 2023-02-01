@@ -1,11 +1,9 @@
 #![allow(warnings)]
 mod cli;
 mod core;
-mod sha2;
 mod depricated;
-
+mod rhc;
+mod sha2;
 fn main() {
-    let settings = cli::run();
-    // let settings = cli::settings::GlobalSettings::new();
-    core::run(settings);
+    rhc::run().unwrap_or_else(|e| e.exit());
 }
