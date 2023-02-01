@@ -1,5 +1,3 @@
-use crate::core::setup::Package;
-
 use super::error::argument::ArgumentError;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -31,12 +29,14 @@ pub enum Setting {
     HashType(AlgorithmType),
     HashLength(u32),
     Verbose(bool),
+    Wordlist(Vec<String>),
 }
 #[derive(Debug, Clone)]
 pub struct GlobalSettings {
     hash_input: Option<String>,
     hash_type: Option<AlgorithmType>,
     hash_length: Option<u32>,
+    wordlist: Option<Vec<String>>,
     verbose: bool,
 }
 // TODO: Change visibility to super 
@@ -46,6 +46,7 @@ impl GlobalSettings {
             hash_input: None,
             hash_type: None,
             hash_length: None,
+            wordlist: None,
             verbose: false,
         }
     }
@@ -56,6 +57,7 @@ impl GlobalSettings {
             Setting::HashType(value) => self.hash_type = Some(value),
             Setting::HashLength(value) => self.hash_length = Some(value),
             Setting::Verbose(value) => self.verbose = value,
+            Setting::Wordlist(value) => self.wordlist = Some(value),
         }
     }
 
@@ -69,6 +71,10 @@ impl GlobalSettings {
 
     pub fn get_hash_length(&mut self) -> Option<u32> {
         self.hash_length.take()
+    }
+
+    pub fn get_wordlist(&mut self) -> Option<Vec<String>> {
+        self.wordlist.take()
     }
 
     pub fn is_verbose(&self) -> bool {
