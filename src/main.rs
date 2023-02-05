@@ -1,4 +1,5 @@
 #![allow(warnings)]
+mod algorithm;
 mod cli;
 mod core;
 mod depricated;
