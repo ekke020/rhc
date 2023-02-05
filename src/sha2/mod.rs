@@ -5,6 +5,8 @@ mod sha512_core;
 mod implementation;
 mod wrapper;
 
+use std::fmt;
+
 use self::implementation::{U28, U32, U48, U64};
 use self::sha256_core::{Sha224 as ShaCore224, Sha256 as ShaCore256};
 use self::sha512_core::{Sha384 as ShaCore384, Sha512 as ShaCore512, Sha512_256 as ShaCore512_256, Sha512_224 as ShaCore512_224};
@@ -16,6 +18,43 @@ pub type Sha384 = Wrapper<ShaCore384, U48, 48>;
 pub type Sha512 = Wrapper<ShaCore512, U64, 64>;
 pub type Sha512_224 = Wrapper<ShaCore512_224, U28, 28>;
 pub type Sha512_256 = Wrapper<ShaCore512_256, U32, 32>;
+
+
+impl fmt::Display for Sha224 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha224")
+    }
+}
+
+impl fmt::Display for Sha256 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha256")
+    }
+}
+
+impl fmt::Display for Sha384 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha384")
+    }
+}
+
+impl fmt::Display for Sha512 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha512")
+    }
+}
+
+impl fmt::Display for Sha512_224 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha512/224")
+    }
+}
+
+impl fmt::Display for Sha512_256 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Sha512/256")
+    }
+}
 
 #[cfg(test)]
 mod test {
