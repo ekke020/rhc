@@ -73,7 +73,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::cli::{flags::get_input, settings::AlgorithmType};
+    use crate::{cli::flags::get_input, algorithm::AlgorithmType};
 
     use super::*;
 
