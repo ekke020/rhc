@@ -1,28 +1,6 @@
+use crate::algorithm::AlgorithmType;
+
 use super::error::argument::ArgumentError;
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum AlgorithmType {
-    Sha2_224,
-    Sha2_256,
-    Sha2_384,
-    Sha2_512,
-    Sha2_512_224,
-    Sha2_512_256,
-}
-
-impl AlgorithmType {
-    pub fn from(value: &str) -> Result<Self, ArgumentError> {
-        match value {
-            "sha2_224" => Ok(AlgorithmType::Sha2_224),
-            "sha2_256" => Ok(AlgorithmType::Sha2_256), 
-            "sha2_384" => Ok(AlgorithmType::Sha2_384),
-            "sha2_512" => Ok(AlgorithmType::Sha2_512), 
-            "sha2_512_224" => Ok(AlgorithmType::Sha2_512_224), 
-            "sha2_512_256" => Ok(AlgorithmType::Sha2_512_256),
-            _ => Err(ArgumentError::unsupported_algorithm(value))
-        }
-    }
-}
 
 pub enum Setting {
     HashInput(String),
