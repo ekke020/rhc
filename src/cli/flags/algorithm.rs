@@ -1,4 +1,7 @@
-use crate::cli::{error::argument::ArgumentError, settings::{Setting, AlgorithmType}};
+use crate::{
+    algorithm::AlgorithmType,
+    cli::{error::argument::ArgumentError, settings::Setting},
+};
 
 use super::{FlagHelp, FlagInfo, FlagInput};
 
@@ -38,7 +41,8 @@ impl FlagHelp for Algorithm {
 
 impl FlagInput for Algorithm {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
-        let algorithm = AlgorithmType::from(value)?;
+        let algorithm = AlgorithmType::from(value)
+            .ok_or_else(|| ArgumentError::unsupported_algorithm(value))?;
         Ok(Setting::HashType(algorithm))
     }
 }
