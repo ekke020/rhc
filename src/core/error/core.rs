@@ -1,5 +1,6 @@
 use std::error;
 use std::fmt;
+use std::num::ParseIntError;
 use std::process;
 
 const NOT_YET_SPECIFIED: i32 = 0x40;
@@ -10,6 +11,7 @@ enum CoreErrorKind {
     InvalidAlgorithm,
     DetermineAlgorithm(String),
     MissingHashInput,
+    MalformedHash
 }
 
 impl CoreErrorKind {
@@ -19,6 +21,7 @@ impl CoreErrorKind {
             CoreErrorKind::InvalidAlgorithm => NOT_YET_SPECIFIED,
             CoreErrorKind::MissingHashInput => NOT_YET_SPECIFIED,
             CoreErrorKind::DetermineAlgorithm(_) => NOT_YET_SPECIFIED,
+            CoreErrorKind::MalformedHash => NOT_YET_SPECIFIED,
         }
     }
 
@@ -28,13 +31,14 @@ impl CoreErrorKind {
             CoreErrorKind::InvalidAlgorithm => String::from("Invalid algorithm supplied\nsee --algorithm --help for available options."),
             CoreErrorKind::MissingHashInput => String::from("No hash supplied, unable to run\nsee --password --help for information"),
             CoreErrorKind::DetermineAlgorithm(v) => format!("Unable to determine a possible algorithm from: {v}\nsee --algorithm --help for available options"),
+            CoreErrorKind::MalformedHash => String::from("The input hash is malformed, unable to continue. Validate the hash and try again."),
         }
     }
 }
 
 pub const MISSING_HASH_INPUT_ERROR: CoreError = CoreError(CoreErrorKind::MissingHashInput);
 pub const INVALID_ALGORITHM_ERROR: CoreError = CoreError(CoreErrorKind::InvalidAlgorithm);
-// pub const DETERMINE_ALGORITHM_ERROR: CoreError = CoreError(CoreErrorKind::DetermineAlgorithm);
+pub const MALFORMED_HASH_ERROR: CoreError = CoreError(CoreErrorKind::MalformedHash);
 
 #[derive(Debug, PartialEq)]
 pub struct CoreError(CoreErrorKind);
@@ -58,3 +62,9 @@ impl fmt::Display for CoreError {
 }
 
 impl error::Error for CoreError {}
+
+impl From<ParseIntError> for CoreError {
+    fn from(error: ParseIntError) -> Self {
+        MALFORMED_HASH_ERROR
+    }
+}
