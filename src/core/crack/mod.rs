@@ -1,3 +1,3 @@
 mod bruteforce;
-mod resource;
-mod result;
+pub mod resource;
+pub mod result;
