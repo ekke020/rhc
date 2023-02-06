@@ -1,5 +1,30 @@
 # RHC
 
+## Installation
+You can either build directly from source with make or download the latest version from [releases](https://github.com/ekke020/RHC).
+
+### Building from source
+- Clone the repository
+  ```bash
+  $ git clone https://github.com/<username>/rhc.git
+  ```
+- Navigate to the repository
+  ```bash
+  $ cd rhc
+  ```
+- Run make to build and install the project
+  ```bash
+  $ make # builds in release mode
+  $ make install # installs the binary in ~/.cargo/bin/
+  ```
+- Make clean to remove the build artifacts
+  ```bash
+  $ make clean # Removes artifacts
+  ```
+
+### Uninstalling with make
+The binary can be uninstalled by calling `make uninstall`, this will delete all artifacts related to the binary. **NOTE** that this does not delete the source files, this has to be done with `make clean`.
+
 ## Planned algorithm support
 rhc currently only supports the SHA-2 algorithm family. The plan is to expand the algorithm support in the future to support the listed algorithm families.
 
