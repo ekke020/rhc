@@ -3,6 +3,8 @@
 ## Installation
 You can either build directly from source with make or download the latest version from [releases](https://github.com/ekke020/RHC).
 
+To build the rhc project from source, you will need to have the [Cargo](https://doc.rust-lang.org/cargo/) package manager installed on your system. If you do not have Cargo installed, you can find installation instructions [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+
 ### Building from source
 - Clone the repository
   ```bash
