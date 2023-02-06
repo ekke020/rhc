@@ -47,7 +47,7 @@ Specifies the number of threads to utilize while cracking.
 ```bash
 rhc [OPTIONS]... --threads [unsigned integer]
 ``` 
-Specify a wordlist file to use while cracking.
+<s>Specify a wordlist file to use while cracking.</s>
 ```bash
 rhc [OPTIONS]... --wordlist [./path/to/wordlist]
 ``` 
