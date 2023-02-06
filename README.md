@@ -1,5 +1,8 @@
 # RHC
 
+## About
+RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language. The current build is able to crack roughly 
+
 ## Installation
 You can either build directly from source with make or download the latest version from [releases](https://github.com/ekke020/RHC).
 
