@@ -1,24 +1,37 @@
-# binary name
-BINARY=rhc
+TARGET = rhc
+BUILD_TYPE = release
 
-# default target
-all: build
+release: BUILD_TYPE = release
+release: build
 
-# build target
+debug: BUILD_TYPE = debug
+debug: build
+
+# Define the build command
+BUILD_CMD = cargo build --$(BUILD_TYPE) --future-incompat-report 
+
+# Define the install command
+INSTALL_CMD = cargo install --force --path .
+
+# Define the clean command
+CLEAN_CMD = cargo clean -v
+
+# Define the uninstall command
+UNINSTALL_CMD = cargo uninstall $(TARGET)
+
 build:
-	cargo build --release
+	$(BUILD_CMD)
 
-# install target
-install: build
-	uname_S = $(shell uname -s)
-	ifeq ($(uname_S), Linux)
-		sudo cp target/release/$(BINARY) /usr/local/bin/$(BINARY)
-	endif
-	ifeq ($(uname_S), Darwin)
-		sudo cp target/release/$(BINARY) /usr/local/bin/$(BINARY)
-	endif
+install:
+	$(INSTALL_CMD)
 
-# clean target
+uninstall:
+	$(UNINSTALL_CMD)
+
 clean:
-	cargo clean
+	$(CLEAN_CMD)
 
+.PHONY: build install uninstall clean debug release
+
+default: BUILD_TYPE = release
+default: build
