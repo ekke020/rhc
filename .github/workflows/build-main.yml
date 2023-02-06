@@ -43,7 +43,7 @@ jobs:
 
   release:
     needs: build
-    uses: ./github/workflows/release.yml@main
+    uses: .github/workflows/release.yml@main
     with:
       binary: rhc
     secrets: inherit
