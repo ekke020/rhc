@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - src/**/*.rs
   pull_request:
     branches: [ "main" ]
 
@@ -38,3 +40,10 @@ jobs:
       run: cargo build 
     - name: 🙏 Run tests 🙏
       run: cargo test 
+
+  release:
+    needs: build
+    uses: ./github/workflows/release.yml
+    with:
+      binary: rhc
+    secrets: inherit
