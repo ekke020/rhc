@@ -3,6 +3,19 @@
 ## About
 RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language. The current build is able to crack roughly *100.000* passwords a second on a i5-10600K.
 
+## Usage
+To use RHC, simply run the rhc command in your terminal after installing the binary. Here are a few examples to help you get started:
+
+- Bruteforce operation with a specified value defined by the `-p` flag:
+  ```bash
+  $ rhc -p 78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f
+  ``` 
+- The same operation as above, but using a list of possible values from a file:
+  ```bash
+  $ rhc ... -w ./path/to/file.txt
+  ``` 
+- Note that there are multiple flags available for customization, such as the target range of the password and the algorithm to use.
+
 ## Installation
 You can either build directly from source with make or download the latest version from [releases](https://github.com/ekke020/RHC).
 
