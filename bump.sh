@@ -18,5 +18,8 @@ fi
 
 new_version="${array[0]}.${array[1]}.${array[2]}"
 
-# Update the version in the file
+# Update the version in Cargo.toml
 sed -i "s/^version = \"$version\"/version = \"$new_version\"/" Cargo.toml
+# Update the version in Cargo.lock
+sed -i "/^\[\[package\]\]$/,/^$/{/^name = \"rhc\"$/{n;s/^version = \".*\"/version = \"$new_version\"/;}}" Cargo.lock
+
