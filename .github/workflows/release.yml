@@ -7,7 +7,7 @@ on:
     paths-ignore: 
       - 'Cargo.lock'
       - 'Cargo.toml'
-      
+
 jobs:
   bump-version:
     name: Bump Version
@@ -93,7 +93,6 @@ jobs:
           7z a "$staging.zip" "$staging"
           echo "ASSET=$staging.zip" >> $GITHUB_ENV
         else
-          cp "$outdir"/rg.1 "$staging/doc/"
           cp "target/${{ matrix.target }}/release/rhc" "$staging/"
           tar czf "$staging.tar.gz" "$staging"
           echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
