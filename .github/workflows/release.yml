@@ -1,32 +1,34 @@
-# name: Create Release
+name: Create Release
 
-# on:
-#   push:
-#     branches:
-#       - "main"
+on:
+  push:
+    branches:
+      - "main"
 
-# jobs:
-#   build:
-#     name: Create Release
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-#       - name: Get version
-#         id: release
-#         run: |
-#           version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml)
-#           echo "version=$version" >> $GITHUB_OUTPUT
-#       - name: Create Release
-#         id: create_release
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-#         with:
-#           tag_name: latest
-#           release_name: rhc ${{ steps.release.outputs.version }}
-#           body: |
-#             Changes in this Release
-#             - First stable release of rhc
-#           draft: false
-#           prerelease: false
+jobs:
+  update-version:
+    uses: ./.github/workflows/bump-version.yml
+    with:
+      version-type: "patch"
+    secrets: inherit
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: update-version
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          tag_name: latest
+          release_name: rhc ${{ needs.update-version.outputs.version }}
+          body: |
+            Changes in this Release
+            - First stable release of rhc
+          draft: false
+          prerelease: false
