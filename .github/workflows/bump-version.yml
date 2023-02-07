@@ -31,6 +31,7 @@ jobs:
       run: |
         git config --global user.name "Versioning"
         git config --global user.email "github@action.noreply.github.com"
+        git status
         git add Cargo.toml Cargo.lock
         git commit -m "Bumped to version: ${{ steps.release.outputs.version }}"
         git push     
