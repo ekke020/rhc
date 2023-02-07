@@ -1,13 +1,10 @@
 name: Test and build for main
 
 on:
-  push:
-    branches:
-      - "main"
-    # paths:
-    #   - src/**/*.rs
   pull_request:
     branches: [ "main" ]
+    paths:
+      - src/**/*.rs
 
 env:
   CARGO_TERM_COLOR: always
@@ -40,10 +37,3 @@ jobs:
       run: cargo build 
     - name: 🙏 Run tests 🙏
       run: cargo test 
-
-  release:
-    needs: build
-    uses: ./.github/workflows/release.yml
-    with:
-      binary: rhc
-    secrets: inherit
