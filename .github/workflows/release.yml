@@ -1,38 +1,27 @@
-name: Release artifact
+name: Create Release
 
 on:
-  workflow_call:
-    inputs:
-      binary:
-        required: true
-        type: string
+  push:
+    branches:
+      - "main"
 
-jobs: 
-  upload-assets:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
     steps:
-      # - uses: actions/checkout@v3
-      - run: ls
-        shell: bash
-      - run: ls target
-        shell: bash
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          # (required)
-          bin: $ {{ inputs.binary }}
-          # (optional) On which platform to distribute the `.tar.gz` file.
-          # [default value: unix]
-          # [possible values: all, unix, windows, none]
-          tar: unix
-          # (optional) On which platform to distribute the `.zip` file.
-          # [default value: windows]
-          # [possible values: all, unix, windows, none]
-          zip: windows
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First stable release of rhc
+          draft: false
+          prerelease: false
