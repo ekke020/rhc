@@ -17,7 +17,7 @@ To use RHC, simply run the rhc command in your terminal after installing the bin
 - Note that there are multiple flags available for customization, such as the target range of the password and the algorithm to use.
 
 ## Installation
-You can download and install the latest version of rhc either by building it from source with make, or by downloading a pre-compiled binary from the [releases](https://github.com/ekke020/rhc/releases) page.
+You can download and install the latest version of rhc by building it from source with make. Either clone the repository or download a release from the [releases](https://github.com/ekke020/rhc/releases) page. 
 
 To build the rhc project from source, you will need to have the [Cargo](https://doc.rust-lang.org/cargo/) package manager installed on your system. If you do not have Cargo installed, you can find installation instructions [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
