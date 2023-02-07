@@ -31,6 +31,8 @@ jobs:
         with:
           tag_name: ${{ needs.bump-version.outputs.version }}
           release_name: rhc ${{ needs.bump-version.outputs.version }}
+          body: |
+            rhc latest
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
       version: ${{ needs.bump-version.outputs.version }}
@@ -41,7 +43,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [linux, win-gnu] 
+        build: [linux, macos] 
         include:
         - build: linux
           os: ubuntu-22.04
