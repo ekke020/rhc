@@ -40,6 +40,12 @@ impl AlgorithmType {
     }
 }
 
+pub fn execute_comparison(algorithm: &mut dyn Algorithm, word: &str, target: &Vec<u8>) -> bool {
+    algorithm.populate(word);
+    algorithm.execute();
+    algorithm.compare(target)
+}
+
 pub trait Algorithm: Display {
     fn populate(&mut self, data: &str);
 
