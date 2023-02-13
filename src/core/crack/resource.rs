@@ -11,8 +11,12 @@ pub struct Resource<'a> {
     algorithm: Box<dyn Algorithm>,
 }
 
-impl <'a>Resource<'a> {
-    pub fn from(target: &'a Vec<u8>, wordlist: &'a Vec<String>, algorithm: Box<dyn Algorithm>) -> Self {
+impl<'a> Resource<'a> {
+    pub fn from(
+        target: &'a Vec<u8>,
+        wordlist: &'a Vec<String>,
+        algorithm: Box<dyn Algorithm>,
+    ) -> Self {
         Self {
             target,
             wordlist,
@@ -21,23 +25,17 @@ impl <'a>Resource<'a> {
     }
 
     pub fn run(&mut self) -> Option<PasswordMatch> {
-        let word = self.wordlist
+        let word = self
+            .wordlist
             .iter()
-            .find(|word| execute_comparison(self.algorithm.as_mut(), word, self.target) == true);
+            .find(|word| algorithm::execute_comparison(self.algorithm.as_mut(), word, self.target));
         match word {
             Some(password) => Some(PasswordMatch::from(
                 password.to_string(),
                 self.algorithm.to_string(),
-                self.target.to_vec()
+                self.target.to_vec(),
             )),
             None => None,
         }
     }
-}
-
-fn execute_comparison(algorithm: &mut dyn Algorithm, word: &str, target: &Vec<u8>) -> bool {
-    algorithm.populate(word);
-    algorithm.execute();
-    algorithm.compare(target)
-
 }
