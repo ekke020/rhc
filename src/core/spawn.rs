@@ -8,6 +8,7 @@ use crate::algorithm::{self, Algorithm};
 
 use super::constants::ASCII_95_TABLE;
 use super::crack;
+use super::crack::bruteforce::BruteForce;
 use super::crack::resource::Resource;
 use super::crack::result::PasswordMatch;
 use super::error::core::CoreError;
@@ -19,17 +20,23 @@ pub(super) fn brute_force_job(
     let atomic_value = Arc::new(AtomicU32::new(0));
     let num_cores = num_cpus::get();
     let mut threads = vec![];
-
     for i in 0..=num_cores {
         let counter = Arc::clone(&atomic_value);
         let p = package.clone();
+        let (start, end) = get_ascii_span(i);
         threads.push(thread::spawn(move || {
             // Create an instance of bruteforce and run it on the thread.
-            // Crack::from(get_ascii_span(i), counter, p).run();
+            let algorithm = p.get_algorithms().get(0).unwrap().get_algorithm();
+            let target = p.get_target();
+            let mut bruteforce =
+                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, algorithm);
+            if let Some(result) = bruteforce.run() {
+                return Some(result);
+            }
+            None
         }));
     }
-    todo!()
-    // Ok(threads)
+    Ok(threads)
 }
 
 fn get_ascii_span(index: usize) -> (usize, usize) {
@@ -77,7 +84,7 @@ pub(super) fn resource_job(
                 if let Some(result) = resource.run() {
                     return Some(result);
                 }
-            };
+            }
             None
         }));
     }
