@@ -17,6 +17,7 @@ pub struct BruteForce<'a> {
     target: &'a Vec<u8>,
     range: &'static [u32],
     counter: Arc<AtomicU32>,
+    instant: Arc<std::time::Instant>,
     algorithm: Box<dyn Algorithm>,
 }
 
@@ -25,12 +26,14 @@ impl<'a> BruteForce<'a> {
         target: &'a Vec<u8>,
         range: &'static [u32],
         counter: Arc<AtomicU32>,
+        instant: Arc<std::time::Instant>,
         algorithm: Box<dyn Algorithm>,
     ) -> Self {
         Self {
             target,
             range,
             counter,
+            instant,
             algorithm,
         }
     }
@@ -39,7 +42,6 @@ impl<'a> BruteForce<'a> {
             let char = from_u32(*c).unwrap();
             crack(self, None, 4,char.to_string());
         }
-        println!("Done");
         None
     }
 }
@@ -57,6 +59,7 @@ fn crack(
         let test = algorithm::execute_comparison(bf.algorithm.as_mut(), &word, bf.target);
         if test {
             println!("got em: {}", word);
+            elapsed_time(bf.instant.elapsed().as_secs());
             std::process::exit(0);
         }
         if total % 10000000 == 0 {
@@ -75,3 +78,10 @@ fn crack(
     None
 }
 
+
+fn elapsed_time(elapsed: u64) {
+    let seconds = (elapsed % 3600) % 60;
+    let minutes = (elapsed % 3600 - seconds) / 60;
+    let hours = (elapsed - minutes * 60 + seconds) / 3600;
+    println!("H: {}, M: {}, S: {}", hours, minutes, seconds);
+}
