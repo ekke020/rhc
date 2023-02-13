@@ -18,10 +18,12 @@ pub(super) fn brute_force_job(
     package: Package,
 ) -> Result<Vec<JoinHandle<Option<PasswordMatch>>>, CoreError> {
     let atomic_value = Arc::new(AtomicU32::new(0));
+    let atomic_instant = Arc::new(std::time::Instant::now());
     let num_cores = num_cpus::get();
     let mut threads = vec![];
     for i in 0..=num_cores {
         let counter = Arc::clone(&atomic_value);
+        let instant = Arc::clone(&atomic_instant);
         let p = package.clone();
         let (start, end) = get_ascii_span(i);
         threads.push(thread::spawn(move || {
@@ -29,7 +31,7 @@ pub(super) fn brute_force_job(
             let algorithm = p.get_algorithms().get(0).unwrap().get_algorithm();
             let target = p.get_target();
             let mut bruteforce =
-                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, algorithm);
+                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, instant, algorithm);
             if let Some(result) = bruteforce.run() {
                 return Some(result);
             }
