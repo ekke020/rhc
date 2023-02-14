@@ -23,7 +23,7 @@ jobs:
       with:
         token: ${{ secrets.WORKFLOW_GIT_ACCESS_TOKEN }}
     - name: bump version
-      run: ./bump.sh ${{ inputs.version-type }}
+      run: ./scripts/bump.sh ${{ inputs.version-type }}
     - name: Get version
       id: release
       run: |
