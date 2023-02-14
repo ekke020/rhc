@@ -28,7 +28,7 @@ impl<'a> Resource<'a> {
         let word = self
             .wordlist
             .iter()
-            .find(|word| algorithm::execute_comparison(self.algorithm.as_mut(), word, self.target));
+            .find(|word| algorithm::execute_comparison(self.algorithm.as_mut(), word.as_bytes(), self.target));
         match word {
             Some(password) => Some(PasswordMatch::from(
                 password.to_string(),
