@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::{char::from_u32, str::from_utf8, thread};
+use std::sync::mpsc::{self, Receiver};
 
 use crate::algorithm::{self, Algorithm};
 
@@ -16,29 +17,30 @@ use super::package::Package;
 
 pub(super) fn brute_force_job(
     package: Package,
-) -> Result<Vec<JoinHandle<Option<PasswordMatch>>>, CoreError> {
+) -> Receiver<Option<PasswordMatch>> {
     let atomic_value = Arc::new(AtomicU32::new(0));
     let atomic_instant = Arc::new(std::time::Instant::now());
+    let (tx, rx) = mpsc::channel();
     let num_cores = num_cpus::get();
     let mut threads = vec![];
-    for i in 0..=num_cores {
+    for i in 0..num_cores {
         let counter = Arc::clone(&atomic_value);
         let instant = Arc::clone(&atomic_instant);
         let p = package.clone();
+        let tx = tx.clone();
         let (start, end) = get_ascii_span(i);
         threads.push(thread::spawn(move || {
             // Create an instance of bruteforce and run it on the thread.
             let algorithm = p.get_algorithms().get(0).unwrap().get_algorithm();
             let target = p.get_target();
+            println!("Thread {}: {:?}",i ,&ASCII_95_TABLE[start..end]);
             let mut bruteforce =
-                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, instant, algorithm);
-            if let Some(result) = bruteforce.run() {
-                return Some(result);
-            }
-            None
+                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, algorithm);
+            let result = bruteforce.run();
+            tx.send(result);
         }));
-    }
-    Ok(threads)
+    };
+    rx
 }
 
 fn get_ascii_span(index: usize) -> (usize, usize) {
@@ -47,7 +49,7 @@ fn get_ascii_span(index: usize) -> (usize, usize) {
 
     let start = chunk_size * index;
     let end = if index == num_cores {
-        ASCII_95_TABLE.len() - 1
+        ASCII_95_TABLE.len()
     } else {
         chunk_size * (index + 1)
     };
