@@ -40,14 +40,14 @@ impl AlgorithmType {
     }
 }
 
-pub fn execute_comparison(algorithm: &mut dyn Algorithm, word: &str, target: &Vec<u8>) -> bool {
+pub fn execute_comparison(algorithm: &mut dyn Algorithm, word: &[u8], target: &Vec<u8>) -> bool {
     algorithm.populate(word);
     algorithm.execute();
     algorithm.compare(target)
 }
 
 pub trait Algorithm: Display {
-    fn populate(&mut self, data: &str);
+    fn populate(&mut self, data: &[u8]);
 
     fn execute(&mut self);
 
@@ -55,7 +55,7 @@ pub trait Algorithm: Display {
 }
 
 impl Algorithm for Sha224 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -70,7 +70,7 @@ impl Algorithm for Sha224 {
 }
 
 impl Algorithm for Sha256 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -85,7 +85,7 @@ impl Algorithm for Sha256 {
 }
 
 impl Algorithm for Sha384 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -100,7 +100,7 @@ impl Algorithm for Sha384 {
 }
 
 impl Algorithm for Sha512 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -115,7 +115,7 @@ impl Algorithm for Sha512 {
 }
 
 impl Algorithm for Sha512_224 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -130,7 +130,7 @@ impl Algorithm for Sha512_224 {
 }
 
 impl Algorithm for Sha512_256 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -141,5 +141,19 @@ impl Algorithm for Sha512_256 {
     fn compare(&mut self, target: &Vec<u8>) -> bool {
         let value = self.extract();
         target[..] == value
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{execute_comparison, AlgorithmType};
+    #[test]
+    fn test_execute_comparison() {
+        let target = vec![
+            219, 60, 218, 134, 212, 66, 154, 29, 57, 193, 72, 152, 149, 102, 179, 143, 123, 218, 1,
+            86, 41, 107, 211, 100, 186, 47, 135, 139,
+        ];
+        let mut algorithm = AlgorithmType::from("sha2_224").unwrap().get_algorithm();
+        assert!(execute_comparison(algorithm.as_mut(), "ab".as_bytes(), &target));
     }
 }
