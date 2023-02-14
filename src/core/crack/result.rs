@@ -1,5 +1,5 @@
 use std::fmt::Display;
-
+// TODO: Iclude an optional Instant if timers were enabled.
 pub struct PasswordMatch {
     password: String,
     algorithm: String,
