@@ -11,20 +11,36 @@ use crate::cli::settings::GlobalSettings;
 pub type Error = error::core::CoreError;
 
 // TODO: Return a result of the successful crack.
-pub fn run(mut settings: GlobalSettings) -> Result<(), CoreError> {
-    let package = Package::assemble(&mut settings)?;
-    let wordlist = settings.get_wordlist();
+// pub fn run(mut settings: GlobalSettings) -> Result<(), CoreError> {
+//     let package = Package::assemble(&mut settings)?;
+//     let wordlist = settings.get_wordlist();
 
-    let threads = match wordlist {
-        Some(wordlist) => spawn::resource_job(package, wordlist)?,
-        None => spawn::brute_force_job(package)?,
-    };
-    for thread in threads {
-        let result = thread.join().unwrap();
-        if result.is_some() {
-            println!("{}", result.unwrap());
-            break;
-        }
-    }
+//     let threads = match wordlist {
+//         Some(wordlist) => spawn::resource_job(package, wordlist)?,
+//         None => spawn::brute_force_job(package)?,
+//     };
+//     for thread in threads {
+//         let result = thread.join().unwrap();
+//         if result.is_some() {
+//             println!("{}", result.unwrap());
+//             break;
+//         }
+//     }
+//     Ok(())
+// }
+
+pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
+    let package = Package::assemble(&mut settings)?;
+    // let rx = spawn::brute_force_job(package);
+    let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+    // let value = rx.recv().unwrap();
+    let mut bf = crack::bruteforce::BruteForce::from(
+        package.get_target(),
+        &constants::NO_SPECIAL_RANGE[0..6],
+        counter,
+        package.get_algorithms().get(0).unwrap().get_algorithm(),
+    );
+    bf.run();
+    // println!("{}", value.unwrap());
     Ok(())
 }
