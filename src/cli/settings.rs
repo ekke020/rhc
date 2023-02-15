@@ -10,6 +10,7 @@ pub enum Setting {
     Wordlist(Vec<String>),
     Mode(Mode),
 }
+// TODO: Rethink the Mode here, maybe a list of modes to go for? Where Mode::Incremental is added by default.
 #[derive(Debug, Clone)]
 pub struct GlobalSettings {
     hash_input: Option<String>,
@@ -61,5 +62,9 @@ impl GlobalSettings {
 
     pub fn is_verbose(&self) -> bool {
         self.verbose
+    }
+
+    pub fn get_mode(&self) -> &Mode {
+        &self.mode
     }
 }
