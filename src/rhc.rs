@@ -40,6 +40,6 @@ impl From<core::Error> for Error {
 
 pub(super) fn run() -> Result<(), Error> {
     let settings = cli::run()?;
-    let result = core::test_brute_force(settings)?;
+    let result = core::run(settings)?;
     Ok(())
 }
