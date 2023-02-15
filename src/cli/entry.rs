@@ -6,7 +6,7 @@ use crate::cli::argument;
 
 use super::{
     error::argument::{ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR},
-    flags,
+    flag,
     settings::GlobalSettings,
 };
 
@@ -40,12 +40,12 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
 
         is_arg_valid(&arg)?;
 
-        if let Some(f) = flags::get_input(&arg) {
+        if let Some(f) = flag::get_input(&arg) {
             let input = args.pop_front().ok_or(ArgumentError::missing_input(&arg))?;
             check_help(&input, &arg);
             let setting = f.produce_input_setting(&input)?;
             settings.add_setting(setting);
-        } else if let Some(f) = flags::get_toggle(&arg) {
+        } else if let Some(f) = flag::get_toggle(&arg) {
             let setting = f.produce_toggle_setting();
             settings.add_setting(setting);
         } else {
@@ -73,7 +73,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cli::flags::get_input, algorithm::AlgorithmType};
+    use crate::{cli::flag::get_input, algorithm::AlgorithmType};
 
     use super::*;
 

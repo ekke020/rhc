@@ -16,6 +16,7 @@ enum ArgumentErrorKind {
     MissingInput(String),
     NoSuchArgument(String),
     UnsupportedAlgorithm(String),
+    UnsupportedMode(String),
     FileEvent(String),
 }
 
@@ -30,6 +31,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::NoSuchArgument(_) => COMMAND_USAGE_ERROR,
             ArgumentErrorKind::UnsupportedAlgorithm(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::FileEvent(_) => INPUT_OUTPUT_ERROR,
+            ArgumentErrorKind::UnsupportedMode(_) => COMMAND_USAGE_ERROR,
         }
     }
 
@@ -43,6 +45,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::NoSuchArgument(arg) => format!("No such argument: {arg}\nUse -h, --help for available options"),
             ArgumentErrorKind::UnsupportedAlgorithm(arg) => format!("\"{arg}\" is not a suppported algorithm\nUse --algorithm --help for available algorithms"),
             ArgumentErrorKind::FileEvent(info) => format!("{info}\nUse --wordlist --help for a detailed example"),
+            ArgumentErrorKind::UnsupportedMode(arg) => format!("\"{arg}\" is not a suppported mode\nUse --mode --help for available modes and how to use them"),
         }
     }
 }
@@ -67,6 +70,10 @@ impl ArgumentError {
 
     pub fn unsupported_algorithm(arg: &str) -> Self {
         ArgumentError(ArgumentErrorKind::UnsupportedAlgorithm(arg.to_owned()))
+    }
+
+    pub fn unsupported_mode(arg: &str) -> Self {
+        ArgumentError(ArgumentErrorKind::UnsupportedMode(arg.to_owned()))
     }
 
     fn file_event(event: &str) -> Self {
