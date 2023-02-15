@@ -1,4 +1,3 @@
-mod constants;
 pub mod crack;
 mod error;
 mod package;
@@ -29,18 +28,34 @@ pub type Error = error::core::CoreError;
 //     Ok(())
 // }
 
-pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
+pub fn run(mut settings: GlobalSettings) -> Result<(), CoreError> {
     let package = Package::assemble(&mut settings)?;
-    // let rx = spawn::brute_force_job(package);
-    let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
-    // let value = rx.recv().unwrap();
-    let mut bf = crack::incremental::Incremental::from(
-        package.get_target(),
-        &constants::NO_SPECIAL_RANGE[0..6],
-        counter,
-        package.get_algorithms().get(0).unwrap().get_algorithm(),
-    );
-    bf.run();
-    // println!("{}", value.unwrap());
+    let rx = spawn::test_incremental(package);
+    let value = rx.recv().unwrap();
+    if let Some(value) = value {
+        println!("{}",value);
+    } else {
+        println!("sadness");
+    }
     Ok(())
 }
+ // let mut chunks = wordlist
+    //     .chunks(chunk_size)
+    //     .map(|chunk| chunk.to_vec())
+    //     .collect::<Vec<Vec<String>>>();
+
+// pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
+//     let package = Package::assemble(&mut settings)?;
+//     // let rx = spawn::brute_force_job(package);
+//     let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+//     // let value = rx.recv().unwrap();
+//     let mut bf = crack::incremental::Incremental::from(
+//         package.get_target(),
+//         &constants::NO_SPECIAL_RANGE[0..6],
+//         counter,
+//         package.get_algorithms().get(0).unwrap().get_algorithm(),
+//     );
+//     bf.run();
+//     // println!("{}", value.unwrap());
+//     Ok(())
+// }
