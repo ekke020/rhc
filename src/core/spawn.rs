@@ -9,8 +9,8 @@ use crate::algorithm::{self, Algorithm};
 
 use super::constants::ASCII_95_TABLE;
 use super::crack;
-use super::crack::bruteforce::BruteForce;
-use super::crack::resource::Resource;
+use super::crack::incremental::Incremental;
+use super::crack::dictionary::Dictionary;
 use super::crack::result::PasswordMatch;
 use super::error::core::CoreError;
 use super::package::Package;
@@ -35,7 +35,7 @@ pub(super) fn brute_force_job(
             let target = p.get_target();
             println!("Thread {}: {:?}",i ,&ASCII_95_TABLE[start..end]);
             let mut bruteforce =
-                BruteForce::from(target, &ASCII_95_TABLE[start..end], counter, algorithm);
+                Incremental::from(target, &ASCII_95_TABLE[start..end], counter, algorithm);
             let result = bruteforce.run();
             tx.send(result);
         }));
@@ -78,11 +78,11 @@ pub(super) fn resource_job(
             // Create an instance of resource and run it on the thread.
             let target = p.get_target();
             let chunk = wordlist.lock().unwrap().pop().unwrap();
-            let mut resources: Vec<Resource> = p
+            let mut resources: Vec<Dictionary> = p
                 .get_algorithms()
                 .iter()
                 .map(|algorithm| algorithm.get_algorithm())
-                .map(|algorithm| Resource::from(target, &chunk, algorithm))
+                .map(|algorithm| Dictionary::from(target, &chunk, algorithm))
                 .collect();
             for mut resource in resources {
                 if let Some(result) = resource.run() {
