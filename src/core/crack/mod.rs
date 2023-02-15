@@ -1,23 +1,18 @@
-pub(super) mod bruteforce;
-pub(super) mod resource;
+pub(super) mod dictionary;
+pub(super) mod incremental;
+pub mod mode;
 pub mod result;
+mod wrapper;
 
-struct Placeholder<'a> {
-    target: &'a Vec<u8>,
-    instant: std::time::Instant,
-    algorithm: Box<dyn crate::algorithm::Algorithm>,
-}
-// TODO: Come up with a good entry point for this API
-pub enum Mode {
-    Resource,
-    BruteForce,
-}
+use self::wrapper::Wrapper;
+use dictionary::Dictionary as DictionaryCore;
+use incremental::Incremental as IncrementalCore;
 
-pub type BruteForce = Mode;
-pub type Dictionary = Mode;
+pub type Incremental<'a> = Wrapper<IncrementalCore<'a>>;
+pub type Dictionary<'a> = Wrapper<DictionaryCore<'a>>;
 
 fn calculate(
-    bf: &mut BruteForce,
+    bf: &mut IncrementalCore,
     pm: Option<result::PasswordMatch>,
     length: usize,
     word: &mut Vec<u8>,
@@ -33,4 +28,14 @@ fn calculate(
         word.pop();
     });
     None
+}
+
+pub fn execute_comparison(
+    algorithm: &mut dyn crate::algorithm::Algorithm,
+    word: &[u8],
+    target: &Vec<u8>,
+) -> bool {
+    algorithm.populate(word);
+    algorithm.execute();
+    algorithm.compare(target)
 }
