@@ -8,7 +8,7 @@ use crate::{
 use super::error::core::{CoreError, INVALID_ALGORITHM_ERROR, MISSING_HASH_INPUT_ERROR, MALFORMED_HASH_ERROR};
 
 #[derive(Debug, Clone)]
-pub(super) struct Package {
+pub struct Package {
     target_length: usize,
     target: Vec<u8>,
     algorithms: Vec<AlgorithmType>,
