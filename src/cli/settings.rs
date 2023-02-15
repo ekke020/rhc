@@ -1,4 +1,4 @@
-use crate::algorithm::AlgorithmType;
+use crate::{algorithm::AlgorithmType, core::crack::mode::Mode};
 
 use super::error::argument::ArgumentError;
 
@@ -8,6 +8,7 @@ pub enum Setting {
     HashLength(u32),
     Verbose(bool),
     Wordlist(Vec<String>),
+    Mode(Mode),
 }
 #[derive(Debug, Clone)]
 pub struct GlobalSettings {
@@ -16,6 +17,7 @@ pub struct GlobalSettings {
     hash_length: Option<u32>,
     wordlist: Option<Vec<String>>,
     verbose: bool,
+    mode: Mode,
 }
 // TODO: Change visibility to super 
 impl GlobalSettings {
@@ -26,6 +28,7 @@ impl GlobalSettings {
             hash_length: None,
             wordlist: None,
             verbose: false,
+            mode: Mode::Incremental
         }
     }
 
@@ -36,6 +39,7 @@ impl GlobalSettings {
             Setting::HashLength(value) => self.hash_length = Some(value),
             Setting::Verbose(value) => self.verbose = value,
             Setting::Wordlist(value) => self.wordlist = Some(value),
+            Setting::Mode(mode) => self.mode = mode,
         }
     }
 
