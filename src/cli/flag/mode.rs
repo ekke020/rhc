@@ -25,7 +25,7 @@ pub(super) struct Mode;
 
 impl FlagInfo for Mode {
     fn describe(&self) -> String {
-        format!("    --{NAME} \t\t{SHORT_HELP}")
+        format!("    --{NAME} \t\t\t{SHORT_HELP}")
     }
 }
 
