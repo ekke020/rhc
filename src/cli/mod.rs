@@ -1,7 +1,7 @@
 mod argument;
 mod entry;
 mod error;
-mod flags;
+mod flag;
 pub mod settings;
 use self::{settings::GlobalSettings, error::argument::ArgumentError};
 
