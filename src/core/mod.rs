@@ -1,5 +1,5 @@
 mod constants;
-mod crack;
+pub mod crack;
 mod error;
 mod package;
 mod setup;
@@ -34,7 +34,7 @@ pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
     // let rx = spawn::brute_force_job(package);
     let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
     // let value = rx.recv().unwrap();
-    let mut bf = crack::bruteforce::BruteForce::from(
+    let mut bf = crack::incremental::Incremental::from(
         package.get_target(),
         &constants::NO_SPECIAL_RANGE[0..6],
         counter,
