@@ -1,5 +1,5 @@
 use super::{FlagInfo, FlagHelp, FlagInput};
-use crate::cli::{settings::Setting, error::{flag::FlagError, argument::ArgumentError}};
+use crate::cli::{settings::Setting, error::{flag::FlagError, argument::{ArgumentError, MALFORMED_HASH_ERROR}}};
 
 const SHORTHAND: char = 'p';
 const NAME: &str = "--password";
@@ -29,9 +29,24 @@ impl FlagHelp for Password {
         LONG_HELP.to_owned()
     }
 }
-
+ // TODO: Should validate right here instead
 impl FlagInput for Password {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
-        Ok(Setting::HashInput(value.to_owned()))
+        let parsed = hex_string_to_bytes(value)?;
+        Ok(Setting::HashInput(parsed))
     }
+}
+
+fn hex_string_to_bytes(hex_string: &str) -> Result<Vec<u8>, ArgumentError> {
+    let hex_values = hex_string.as_bytes();
+    let mut result = Vec::new();
+    if hex_values.len() % 2 != 0 {
+        return Err(MALFORMED_HASH_ERROR)
+    }
+    for i in (0..hex_values.len()).step_by(2) {
+        let hex_value = &hex_values[i..i + 2];
+        let value = u8::from_str_radix(std::str::from_utf8(hex_value).unwrap(), 16)?;
+        result.push(value);
+    }
+    Ok(result)
 }
