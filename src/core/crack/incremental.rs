@@ -49,7 +49,6 @@ impl Crack for Incremental {
                     break 'runner result;
                 }
             }
-            println!("I just increased the wordsize to {}", n);
             n += 1;
         };
         Some(pm)
