@@ -18,7 +18,7 @@ use phf::phf_map;
 
 use super::{
     error::{argument::ArgumentError, flag::FlagError},
-    settings::{GlobalSettings, Setting},
+    settings::{InputOptions, Setting},
 };
 
 pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 7] =
