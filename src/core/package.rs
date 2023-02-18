@@ -1,7 +1,7 @@
 use std::vec;
 
 use crate::{
-    cli::settings::{self, GlobalSettings},
+    cli::settings::{self, InputOptions},
     sha2::Sha224, algorithm::{AlgorithmType, Algorithm},
 };
 
@@ -19,7 +19,7 @@ pub struct Package {
 }
 
 impl Package {
-    pub fn assemble(settings: &mut GlobalSettings) -> Result<Self, CoreError> {
+    pub fn assemble(settings: &mut InputOptions) -> Result<Self, CoreError> {
         println!("{}", num_cpus::get());
         let target = set_target(settings.get_hash_input())?;
         let algorithm = match settings.get_hash_type() {
