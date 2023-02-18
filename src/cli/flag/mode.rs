@@ -15,7 +15,7 @@ Supported modes:
     incremental - A powerful cracking mode that will try all possbile character combinations.
 Description:
     The --mode flag specifies the cracking mode to use.
-    This flag is optional as of now, the default behaviour is to start in the wordlist mode
+    NOTE: this flag is optional as of now, the default behaviour is to start in the wordlist mode
     if a wordlist was provided and then continue in incremental mode.
 Example: 
     rhc [OPTIONS]... --mode incremental 
