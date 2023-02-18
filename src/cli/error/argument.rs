@@ -1,5 +1,6 @@
 use std::error;
 use std::fmt;
+use std::fmt::format;
 use std::io;
 use std::num::ParseIntError;
 use std::process;
@@ -17,9 +18,13 @@ enum ArgumentErrorKind {
     MissingInput(String),
     NoSuchArgument(String),
     UnsupportedAlgorithm(String),
+    DetermineAlgorithm,
     UnsupportedMode(String),
     FileEvent(String),
     MalformedHash,
+    MissingTargetInput,
+    InvalidThreadCount(usize),
+    MissingWordList,
 }
 
 impl ArgumentErrorKind {
@@ -35,21 +40,29 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::FileEvent(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::UnsupportedMode(_) => COMMAND_USAGE_ERROR,
             ArgumentErrorKind::MalformedHash => INPUT_OUTPUT_ERROR,
+            ArgumentErrorKind::MissingTargetInput => INPUT_OUTPUT_ERROR,
+            ArgumentErrorKind::InvalidThreadCount(_) => COMMAND_USAGE_ERROR,
+            ArgumentErrorKind::DetermineAlgorithm => 0x01,
+            ArgumentErrorKind::MissingWordList => COMMAND_USAGE_ERROR,
         }
     }
 
     fn get_error_message(&self) -> String {
         match self {
-            ArgumentErrorKind::NoArgumentSpecified => String::from("No argument specified\nUse -h, --help for available options"),
-            ArgumentErrorKind::InvalidArgumentPassed => String::from("Invalid argument passed\nUse -h, --help for available options"),
-            ArgumentErrorKind::MalformedArgument => String::from("Argument is malformed\nAll arguments must start with either one or two hyphen('-')\nExample: -h, --help"),
-            ArgumentErrorKind::InvalidInput => String::from("Invalid input passed after argument\nUse -h, --help for available options"),
-            ArgumentErrorKind::MissingInput(arg) => format!("Missing input for argument: {arg}\nUse {arg} -h, --help for an example"),
-            ArgumentErrorKind::NoSuchArgument(arg) => format!("No such argument: {arg}\nUse -h, --help for available options"),
-            ArgumentErrorKind::UnsupportedAlgorithm(arg) => format!("\"{arg}\" is not a suppported algorithm\nUse --algorithm --help for available algorithms"),
-            ArgumentErrorKind::FileEvent(info) => format!("{info}\nUse --wordlist --help for a detailed example"),
-            ArgumentErrorKind::UnsupportedMode(arg) => format!("\"{arg}\" is not a suppported mode\nUse --mode --help for available modes and how to use them"),
+            ArgumentErrorKind::NoArgumentSpecified => String::from("No argument specified.\nUse -h, --help for available options."),
+            ArgumentErrorKind::InvalidArgumentPassed => String::from("Invalid argument passed.\nUse -h, --help for available options."),
+            ArgumentErrorKind::MalformedArgument => String::from("Argument is malformed\nAll arguments must start with either one or two hyphen('-').\nExample: -h, --help."),
+            ArgumentErrorKind::InvalidInput => String::from("Invalid input passed after argument.\nUse -h, --help for available options."),
+            ArgumentErrorKind::MissingInput(arg) => format!("Missing input for argument: {arg}.\nUse {arg} -h, --help for an example."),
+            ArgumentErrorKind::NoSuchArgument(arg) => format!("No such argument: {arg}.\nUse -h, --help for available options."),
+            ArgumentErrorKind::UnsupportedAlgorithm(arg) => format!("\"{arg}\" is not a suppported algorithm.\nUse --algorithm --help for available algorithms."),
+            ArgumentErrorKind::DetermineAlgorithm => String::from("Unable to determine algorithm.\nsee --algorithm --help for available options."),
+            ArgumentErrorKind::FileEvent(info) => format!("{info},\nUse --wordlist --help for a detailed example."),
+            ArgumentErrorKind::UnsupportedMode(arg) => format!("\"{arg}\" is not a suppported mode.\nUse --mode --help for available modes and how to use them."),
             ArgumentErrorKind::MalformedHash => String::from("The input hash is malformed, unable to continue. Validate the hash and try again."),
+            ArgumentErrorKind::MissingTargetInput => String::from("No target supplied, unable to run.\nsee --password --help for information."),
+            ArgumentErrorKind::InvalidThreadCount(count) => format!("Invalid thread count, not enough threads available.\nsee --threadcount --help for information."),
+            ArgumentErrorKind::MissingWordList => String::from("No wordlist supplied, unable to run.\nsee --wordlist --help for information."),
         }
     }
 }
@@ -59,7 +72,9 @@ pub const INVALID_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKin
 pub const MALFORMED_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MalformedArgument);
 pub const INVALID_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidInput);
 pub const MALFORMED_HASH_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MalformedHash);
-
+pub const MISSING_TARGET_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MissingTargetInput);
+pub const DETERMINE_ALGORITHM_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::DetermineAlgorithm);
+pub const MISSING_WORD_LIST_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MissingWordList);
 // TODO: Consider changing the name of this error to FlagError
 #[derive(Debug, PartialEq)]
 pub struct ArgumentError(ArgumentErrorKind);
@@ -83,6 +98,10 @@ impl ArgumentError {
 
     fn file_event(event: &str) -> Self {
         ArgumentError(ArgumentErrorKind::FileEvent(event.to_owned()))
+    }
+
+    pub fn invalid_thread_count(count: usize) -> Self {
+        ArgumentError(ArgumentErrorKind::InvalidThreadCount(count))
     }
 
     pub fn get_exit_code(&self) -> i32 {
