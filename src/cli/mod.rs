@@ -3,13 +3,13 @@ mod entry;
 mod error;
 mod flag;
 pub mod settings;
-use self::{settings::GlobalSettings, error::argument::ArgumentError};
+use self::{settings::InputOptions, error::argument::ArgumentError};
 
 pub type Error = error::argument::ArgumentError;
 
-pub fn run() -> Result<GlobalSettings, ArgumentError> {
-    let settings = entry::produce_settings();
-    settings
+pub fn run() -> Result<InputOptions, ArgumentError> {
+    let settings = entry::produce_settings()?;
+    Ok(settings)
 }
 
 #[cfg(test)]
