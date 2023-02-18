@@ -7,6 +7,7 @@ use crate::{
 
 use super::error::core::{CoreError, INVALID_ALGORITHM_ERROR, MISSING_HASH_INPUT_ERROR, MALFORMED_HASH_ERROR};
 
+// TODO: This Struct is considered depricated. Work on decompiling and restructure a thread-safe alternative
 #[derive(Debug, Clone)]
 pub struct Package {
     target_length: usize,
@@ -19,6 +20,7 @@ pub struct Package {
 
 impl Package {
     pub fn assemble(settings: &mut GlobalSettings) -> Result<Self, CoreError> {
+        println!("{}", num_cpus::get());
         let target = set_target(settings.get_hash_input())?;
         let algorithm = match settings.get_hash_type() {
             Some(algorithm) => algorithm,
@@ -50,26 +52,10 @@ impl Package {
         self.thread_count
     }
 }
-
-fn set_target(target: Option<String>) -> Result<Vec<u8>, CoreError> {
-    let value = target.ok_or_else(|| MISSING_HASH_INPUT_ERROR)?;
-    let bytes = hex_string_to_bytes(&value)?;
+// TODO: MISSING_HASH_INPUT_ERROR should remain when validating the settings
+fn set_target(target: Option<Vec<u8>>) -> Result<Vec<u8>, CoreError> {
+    let bytes = target.ok_or_else(|| MISSING_HASH_INPUT_ERROR)?;
     Ok(bytes)
-}
-
-fn hex_string_to_bytes(hex_string: &str) -> Result<Vec<u8>, CoreError> {
-    let hex_values = hex_string.as_bytes();
-    let mut result = Vec::new();
-    if hex_values.len() % 2 != 0 {
-        return Err(MALFORMED_HASH_ERROR)
-    }
-    for i in (0..hex_values.len()).step_by(2) {
-        let hex_value = &hex_values[i..i + 2];
-        let value = u8::from_str_radix(std::str::from_utf8(hex_value).unwrap(), 16)?;
-        result.push(value);
-    }
-    println!("result: {:?}", result);
-    Ok(result)
 }
 
 fn determine_algorithm(value: &Vec<u8>) -> Result<AlgorithmType, CoreError> {
