@@ -15,7 +15,7 @@ Description:
 Example: 
     rhc [OPTIONS]... -p 90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809
 ";
-
+// TODO: Rename this to target?
 pub(super) struct Password;
 
 impl FlagInfo for Password {
