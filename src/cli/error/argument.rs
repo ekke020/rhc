@@ -1,6 +1,7 @@
 use std::error;
 use std::fmt;
 use std::io;
+use std::num::ParseIntError;
 use std::process;
 
 const COMMAND_USAGE_ERROR: i32 = 0x40;
@@ -18,6 +19,7 @@ enum ArgumentErrorKind {
     UnsupportedAlgorithm(String),
     UnsupportedMode(String),
     FileEvent(String),
+    MalformedHash,
 }
 
 impl ArgumentErrorKind {
@@ -32,6 +34,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::UnsupportedAlgorithm(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::FileEvent(_) => INPUT_OUTPUT_ERROR,
             ArgumentErrorKind::UnsupportedMode(_) => COMMAND_USAGE_ERROR,
+            ArgumentErrorKind::MalformedHash => INPUT_OUTPUT_ERROR,
         }
     }
 
@@ -46,6 +49,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::UnsupportedAlgorithm(arg) => format!("\"{arg}\" is not a suppported algorithm\nUse --algorithm --help for available algorithms"),
             ArgumentErrorKind::FileEvent(info) => format!("{info}\nUse --wordlist --help for a detailed example"),
             ArgumentErrorKind::UnsupportedMode(arg) => format!("\"{arg}\" is not a suppported mode\nUse --mode --help for available modes and how to use them"),
+            ArgumentErrorKind::MalformedHash => String::from("The input hash is malformed, unable to continue. Validate the hash and try again."),
         }
     }
 }
@@ -54,6 +58,7 @@ pub const NO_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::No
 pub const INVALID_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidArgumentPassed);
 pub const MALFORMED_ARGUMENT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MalformedArgument);
 pub const INVALID_INPUT_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::InvalidInput);
+pub const MALFORMED_HASH_ERROR: ArgumentError = ArgumentError(ArgumentErrorKind::MalformedHash);
 
 // TODO: Consider changing the name of this error to FlagError
 #[derive(Debug, PartialEq)]
@@ -100,5 +105,11 @@ impl From<io::Error> for ArgumentError {
             io::ErrorKind::PermissionDenied => ArgumentError::file_event(&error.to_string()),
             _ => ArgumentError::file_event("Unable to load file, make sure the path is correct..."),
         }
+    }
+}
+
+impl From<ParseIntError> for ArgumentError {
+    fn from(error: ParseIntError) -> Self {
+        MALFORMED_HASH_ERROR
     }
 }
