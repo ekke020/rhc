@@ -3,13 +3,15 @@ mod entry;
 mod error;
 mod flag;
 pub mod settings;
-use self::{settings::InputOptions, error::argument::ArgumentError};
+use self::{settings::{UnvalidatedSettings, validator::{self, ProcessedSettings}}, error::argument::ArgumentError};
 
 pub type Error = error::argument::ArgumentError;
+pub type Settings = ProcessedSettings;
 
-pub fn run() -> Result<InputOptions, ArgumentError> {
-    let settings = entry::produce_settings()?;
-    Ok(settings)
+pub fn run() -> Result<ProcessedSettings, ArgumentError> {
+    let raw_settings = entry::produce_settings()?;
+    let validated = validator::validate(raw_settings)?;
+    Ok(validated)
 }
 
 #[cfg(test)]

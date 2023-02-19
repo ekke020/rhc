@@ -7,10 +7,10 @@ use crate::cli::argument;
 use super::{
     error::argument::{ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR},
     flag,
-    settings::InputOptions,
+    settings::UnvalidatedSettings,
 };
 
-pub fn produce_settings() -> Result<InputOptions, ArgumentError> {
+pub fn produce_settings() -> Result<UnvalidatedSettings, ArgumentError> {
     let values = collect_args()?;
     let settings = parse_args(values)?;
 
@@ -26,8 +26,8 @@ fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-fn parse_args(mut args: VecDeque<String>) -> Result<InputOptions, ArgumentError> {
-    let mut settings = InputOptions::new();
+fn parse_args(mut args: VecDeque<String>) -> Result<UnvalidatedSettings, ArgumentError> {
+    let mut settings = UnvalidatedSettings::new();
 
     let mut last_arg = String::from("--help");
     while !args.is_empty() {
@@ -90,8 +90,8 @@ mod tests {
             .map(|v| v.to_string())
             .collect();
         let mut result = parse_args(args)?;
-        let sha224 = result.get_hash_type().unwrap();
-        let hash = result.get_hash_input().unwrap();
+        let sha224 = result.get_target_type().unwrap();
+        let hash = result.get_target().unwrap();
 
         assert_eq!(sha224, AlgorithmType::Sha2_224);
         assert_eq!(hash, "test".as_bytes());
