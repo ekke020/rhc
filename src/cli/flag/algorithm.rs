@@ -43,6 +43,6 @@ impl FlagInput for Algorithm {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
         let algorithm = AlgorithmType::from(value)
             .ok_or_else(|| ArgumentError::unsupported_algorithm(value))?;
-        Ok(Setting::HashType(algorithm))
+        Ok(Setting::TargetType(algorithm))
     }
 }
