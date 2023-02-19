@@ -25,6 +25,7 @@ enum ArgumentErrorKind {
     MissingTargetInput,
     InvalidThreadCount(usize),
     MissingWordList,
+    BadLength((u32, u32)),
 }
 
 impl ArgumentErrorKind {
@@ -44,6 +45,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::InvalidThreadCount(_) => COMMAND_USAGE_ERROR,
             ArgumentErrorKind::DetermineAlgorithm => 0x01,
             ArgumentErrorKind::MissingWordList => COMMAND_USAGE_ERROR,
+            ArgumentErrorKind::BadLength(_) => COMMAND_USAGE_ERROR,
         }
     }
 
@@ -63,6 +65,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::MissingTargetInput => String::from("No target supplied, unable to run.\nsee --password --help for information."),
             ArgumentErrorKind::InvalidThreadCount(count) => format!("Invalid thread count, not enough threads available.\nsee --threadcount --help for information."),
             ArgumentErrorKind::MissingWordList => String::from("No wordlist supplied, unable to run.\nsee --wordlist --help for information."),
+            ArgumentErrorKind::BadLength((min, max)) => format!("Minimum length: \"{min}\" exceeds Maximum length: \"{max}\"."),
         }
     }
 }
@@ -104,6 +107,10 @@ impl ArgumentError {
         ArgumentError(ArgumentErrorKind::InvalidThreadCount(count))
     }
 
+    pub fn bad_length(min: u32, max: u32) -> Self {
+        ArgumentError(ArgumentErrorKind::BadLength((min, max)))
+    }
+    
     pub fn get_exit_code(&self) -> i32 {
         self.0.get_exit_code()
     }
