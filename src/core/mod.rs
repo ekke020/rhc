@@ -5,7 +5,8 @@ mod setup;
 mod spawn;
 use self::error::core::CoreError;
 use self::package::Package;
-use crate::cli::settings::InputOptions;
+use crate::cli::Settings;
+use crate::cli::settings::UnvalidatedSettings;
 
 pub type Error = error::core::CoreError;
 
@@ -28,8 +29,7 @@ pub type Error = error::core::CoreError;
 //     Ok(())
 // }
 
-pub fn run(mut settings: InputOptions) -> Result<(), CoreError> {
-    let package = Package::assemble(&mut settings)?;
+pub fn run(mut settings: Settings) -> Result<(), CoreError> {
     let rx = spawn::test_incremental(package);
     let value = rx.recv().unwrap();
     if let Some(value) = value {
