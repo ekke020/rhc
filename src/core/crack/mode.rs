@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Mode {
+pub (super) enum Mode {
     Dictionary,
     Incremental,
 }
-
+    // TODO: Redesign this. each mode should hold mode specific values (struct)
 impl Mode {
     pub fn from(value: &str) -> Option<Self> {
         match value {
