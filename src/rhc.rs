@@ -37,6 +37,7 @@ impl From<core::Error> for Error {
         Error::CoreError(error)
     }
 }
+// let modes = std::collections::HashSet::from([core::crack::Mode::Incremental, core::crack::Mode::Dictionary]);
 
 pub(super) fn run() -> Result<(), Error> {
     let settings = cli::run()?;
