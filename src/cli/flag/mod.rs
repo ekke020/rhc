@@ -1,7 +1,8 @@
 mod algorithm;
 mod help;
-mod length;
-mod password;
+mod min_length;
+mod max_length;
+mod target;
 mod verbose;
 mod wordlist;
 mod mode;
@@ -9,30 +10,32 @@ mod mode;
 use algorithm::Algorithm;
 use mode::Mode;
 use help::Help;
-use length::Length;
-use password::Password;
+use min_length::MinLength;
+use target::Target;
 use verbose::Verbose;
 use wordlist::Wordlist;
 use phf::phf_map;
 
 
+use self::max_length::MaxLength;
+
 use super::{
     error::{argument::ArgumentError, flag::FlagError},
-    settings::{InputOptions, Setting},
+    settings::{UnvalidatedSettings, Setting},
 };
 
-pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 7] =
-    [&Help, &Password, &Length, &Verbose, &Wordlist, &Algorithm, &Mode];
+pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 8] =
+    [&Help, &Target, &MinLength, &MaxLength, &Verbose, &Wordlist, &Algorithm, &Mode];
 
 const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
     "--help" => &Help,
     "-h" => &Help,
     "--verbose" => &Verbose,
     "-v" => &Verbose,
-    "--password" => &Password,
-    "-p" => &Password,
-    "--length" => &Length,
-    "-l" => &Length,
+    "--target" => &Target,
+    "-t" => &Target,
+    "--min-length" => &MinLength,
+    "--max-length" => &MaxLength,
     "--wordlist" => &Wordlist,
     "-w" => &Wordlist,
     "--algorithm" => &Algorithm,
@@ -40,10 +43,10 @@ const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
 };
 
 const FLAG_INPUT: phf::Map<&str, &dyn FlagInput> = phf_map! {
-    "--password" => &Password,
-    "-p" => &Password,
-    "--length" => &Length,
-    "-l" => &Length,
+    "--target" => &Target,
+    "-t" => &Target,
+    "--min-length" => &MinLength,
+    "--max-length" => &MaxLength,
     "--wordlist" => &Wordlist,
     "-w" => &Wordlist,
     "--algorithm" => &Algorithm,
