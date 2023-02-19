@@ -3,33 +3,34 @@ use crate::{algorithm::AlgorithmType, core::crack::mode::Mode};
 use super::error::argument::ArgumentError;
 use std::collections::HashSet;
 pub enum Setting {
-    HashInput(Vec<u8>), // Should be renamed to target?
-    HashType(AlgorithmType),
-    HashLength(u32), // Should be renamed to start length? 
+    Target(Vec<u8>),
+    TargetType(AlgorithmType),
+    MinLength(u32),
+    MaxLength(u32),
     Verbose(bool),
     Wordlist(Vec<String>),
     Mode(Mode),
 }
-// TODO: Might want to rename the variables in the Struct.
-// TODO: Look over missing memebers of the Struct.
-// TODO: Consider changing hash_input to be a list, this would require a lot of work...
+
 #[derive(Debug, Clone)]
-pub struct InputOptions {
-    hash_input: Option<Vec<u8>>, // Should be renamed to target
-    hash_type: Option<AlgorithmType>, // Should be renamed to target_type
-    hash_length: Option<u32>,  // Should be renamed to start_length?
+pub struct UnvalidatedSettings {
+    target: Option<Vec<u8>>,
+    target_type: Option<AlgorithmType>,
+    min_length: u32,
+    max_length: u32,
     wordlist: Option<Vec<String>>,
     verbose: bool,
     modes: HashSet<Mode>,
     thread_count: usize,
 }
 
-impl InputOptions {
+impl UnvalidatedSettings {
     pub(super) fn new() -> Self {
-        InputOptions {
-            hash_input: None,
-            hash_type: None,
-            hash_length: None,
+        UnvalidatedSettings {
+            target: None,
+            target_type: None,
+            min_length: 1,
+            max_length: 999,
             wordlist: None,
             verbose: false,
             modes: HashSet::from([Mode::Incremental]),
@@ -38,9 +39,10 @@ impl InputOptions {
     }
     pub fn add_setting(&mut self, setting: Setting) {
         match setting {
-            Setting::HashInput(value) => self.hash_input = Some(value),
-            Setting::HashType(value) => self.hash_type = Some(value),
-            Setting::HashLength(value) => self.hash_length = Some(value),
+            Setting::Target(value) => self.target = Some(value),
+            Setting::TargetType(value) => self.target_type = Some(value),
+            Setting::MinLength(value) => self.min_length = value,
+            Setting::MaxLength(value) => self.max_length = value,
             Setting::Verbose(value) => self.verbose = value,
             Setting::Wordlist(value) => self.wordlist = Some(value),
             Setting::Mode(mode) => {
@@ -49,16 +51,16 @@ impl InputOptions {
         }
     }
 
-    pub fn get_hash_input(&mut self) -> Option<Vec<u8>> {
-        self.hash_input.take()
+    pub fn get_target(&mut self) -> Option<Vec<u8>> {
+        self.target.take()
     }
 
-    pub fn get_hash_type(&mut self) -> Option<AlgorithmType> {
-        self.hash_type.take()
+    pub fn get_target_type(&mut self) -> Option<AlgorithmType> {
+        self.target_type.take()
     }
 
-    pub fn get_hash_length(&mut self) -> Option<u32> {
-        self.hash_length.take()
+    pub fn get_min_length(&mut self) -> u32 {
+        self.min_length
     }
 
     pub fn get_wordlist(&mut self) -> Option<Vec<String>> {
@@ -74,23 +76,57 @@ impl InputOptions {
     }
 }
 
-mod validator {
+pub (super) mod validator {
     use std::collections::HashSet;
 
-    use super::InputOptions;
-    use crate::{cli::error::argument::{ArgumentError, MISSING_TARGET_INPUT_ERROR, DETERMINE_ALGORITHM_ERROR, MISSING_WORD_LIST_ERROR}, algorithm::AlgorithmType, core::crack::mode::Mode};
-
-    pub struct Settings {
+    use super::UnvalidatedSettings;
+    use crate::{
+        algorithm::AlgorithmType,
+        cli::error::argument::{
+            ArgumentError, DETERMINE_ALGORITHM_ERROR, MISSING_TARGET_INPUT_ERROR,
+            MISSING_WORD_LIST_ERROR,
+        },
+        core::crack::Mode,
+    };
+    // TODO: This should hold only shared values between modes.
+    // TODO: Look at chatGPT for clarification.
+    pub struct ProcessedSettings {
         target: Vec<u8>,
         thread_count: usize,
         algorithm: AlgorithmType,
-        is_verbose: bool,
+        verbose: bool,
         modes: HashSet<Mode>,
         wordlist: Vec<String>,
+        min_length: u32,
+        max_length: u32,
     }
 
-    pub fn validate(settings: &mut InputOptions) -> Result<(), ArgumentError> {
-        Ok(())
+    impl ProcessedSettings {
+        pub fn test(&self) {
+
+        }
+    }
+
+    pub fn validate(raw_settings: UnvalidatedSettings) -> Result<ProcessedSettings, ArgumentError> {
+        let target = validate_target(raw_settings.target)?;
+        let algorithm = match raw_settings.target_type {
+            Some(algorithm) => algorithm,
+            None => determine_algorithm(&target)?,
+        };
+        validate_length(raw_settings.min_length, raw_settings.max_length)?;
+        let mut modes = raw_settings.modes;
+        let wordlist = validate_wordlist(raw_settings.wordlist, &mut modes)?;
+        let settings = ProcessedSettings {
+            target,
+            thread_count: validate_thread_count(raw_settings.thread_count)?,
+            algorithm,
+            verbose: raw_settings.verbose,
+            modes,
+            wordlist,
+            min_length: raw_settings.min_length,
+            max_length: raw_settings.max_length,
+        };
+        Ok(settings)
     }
 
     fn validate_target(target: Option<Vec<u8>>) -> Result<Vec<u8>, ArgumentError> {
@@ -116,18 +152,30 @@ mod validator {
         }
     }
 
-    fn validate_wordlist(wordlist: Option<Vec<String>>, modes: &mut HashSet<Mode>) -> Result<Vec<String>, ArgumentError> {
+    fn validate_wordlist(
+        wordlist: Option<Vec<String>>,
+        modes: &mut HashSet<Mode>,
+    ) -> Result<Vec<String>, ArgumentError> {
         match wordlist {
             Some(list) => {
-                modes.insert(Mode::Dictionary).then(|| println!("Wordlist detected, enabling Dictionary mode."));
+                modes
+                    .insert(Mode::Dictionary)
+                    .then(|| println!("Wordlist detected, enabling Dictionary mode."));
                 Ok(list)
-            },
+            }
             None => {
                 if modes.contains(&Mode::Dictionary) {
-                    return Err(MISSING_WORD_LIST_ERROR)
+                    return Err(MISSING_WORD_LIST_ERROR);
                 }
                 Ok(vec![])
-            },
+            }
         }
+    }
+
+    fn validate_length(min_length: u32, max_length: u32) -> Result<(), ArgumentError> {
+        if min_length > max_length {
+            return Err(ArgumentError::bad_length(min_length, max_length));
+        }
+        Ok(())
     }
 }
