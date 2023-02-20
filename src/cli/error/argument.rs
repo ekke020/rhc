@@ -25,7 +25,7 @@ enum ArgumentErrorKind {
     MissingTargetInput,
     InvalidThreadCount(usize),
     MissingWordList,
-    BadLength((u32, u32)),
+    BadLength((usize, usize)),
 }
 
 impl ArgumentErrorKind {
@@ -107,7 +107,7 @@ impl ArgumentError {
         ArgumentError(ArgumentErrorKind::InvalidThreadCount(count))
     }
 
-    pub fn bad_length(min: u32, max: u32) -> Self {
+    pub fn bad_length(min: usize, max: usize) -> Self {
         ArgumentError(ArgumentErrorKind::BadLength((min, max)))
     }
     

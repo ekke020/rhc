@@ -35,7 +35,7 @@ impl FlagHelp for MaxLength {
 
 impl FlagInput for MaxLength {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
-        let length = value.parse::<u32>().ok().ok_or(INVALID_INPUT_ERROR)?;
+        let length = value.parse::<usize>().ok().ok_or(INVALID_INPUT_ERROR)?;
         Ok(Setting::MaxLength(length))
     }
 }
