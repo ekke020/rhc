@@ -5,8 +5,8 @@ mod setup;
 mod spawn;
 use self::error::core::CoreError;
 use self::package::Package;
-use crate::cli::Settings;
 use crate::cli::settings::UnvalidatedSettings;
+use crate::cli::Settings;
 
 pub type Error = error::core::CoreError;
 
@@ -29,20 +29,26 @@ pub type Error = error::core::CoreError;
 //     Ok(())
 // }
 
-pub fn run(mut settings: Settings) -> Result<(), CoreError> {
+pub fn run(mut package: Package) -> Result<(), CoreError> {
     let rx = spawn::test_incremental(package);
     let value = rx.recv().unwrap();
     if let Some(value) = value {
-        println!("{}",value);
+        println!("{}", value);
     } else {
         println!("sadness");
     }
     Ok(())
 }
- // let mut chunks = wordlist
-    //     .chunks(chunk_size)
-    //     .map(|chunk| chunk.to_vec())
-    //     .collect::<Vec<Vec<String>>>();
+
+
+pub fn new_run(mut settings: Settings) -> Result<(), CoreError> {
+    Ok(())
+}
+
+// let mut chunks = wordlist
+//     .chunks(chunk_size)
+//     .map(|chunk| chunk.to_vec())
+//     .collect::<Vec<Vec<String>>>();
 
 // pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
 //     let package = Package::assemble(&mut settings)?;
