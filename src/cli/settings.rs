@@ -1,12 +1,12 @@
-use crate::{algorithm::AlgorithmType, core::crack::mode::Mode};
+use crate::{algorithm::AlgorithmType, core::crack::Mode};
 
 use super::error::argument::ArgumentError;
 use std::collections::HashSet;
 pub enum Setting {
     Target(Vec<u8>),
     TargetType(AlgorithmType),
-    MinLength(u32),
-    MaxLength(u32),
+    MinLength(usize),
+    MaxLength(usize),
     Verbose(bool),
     Wordlist(Vec<String>),
     Mode(Mode),
@@ -16,8 +16,8 @@ pub enum Setting {
 pub struct UnvalidatedSettings {
     target: Option<Vec<u8>>,
     target_type: Option<AlgorithmType>,
-    min_length: u32,
-    max_length: u32,
+    min_length: usize,
+    max_length: usize,
     wordlist: Option<Vec<String>>,
     verbose: bool,
     modes: HashSet<Mode>,
@@ -59,8 +59,12 @@ impl UnvalidatedSettings {
         self.target_type.take()
     }
 
-    pub fn get_min_length(&mut self) -> u32 {
-        self.min_length
+    pub fn get_min_length(&mut self) -> &usize {
+        &self.min_length
+    }
+
+    pub fn get_max_length(&mut self) -> &usize {
+        &self.max_length
     }
 
     pub fn get_wordlist(&mut self) -> Option<Vec<String>> {
@@ -97,8 +101,8 @@ pub (super) mod validator {
         verbose: bool,
         modes: HashSet<Mode>,
         wordlist: Vec<String>,
-        min_length: u32,
-        max_length: u32,
+        min_length: usize,
+        max_length: usize,
     }
 
     impl ProcessedSettings {
@@ -115,7 +119,8 @@ pub (super) mod validator {
         };
         validate_length(raw_settings.min_length, raw_settings.max_length)?;
         let mut modes = raw_settings.modes;
-        let wordlist = validate_wordlist(raw_settings.wordlist, &mut modes)?;
+        let wordlist = validate_dictionary_mode(raw_settings.wordlist, &mut modes)?;
+
         let settings = ProcessedSettings {
             target,
             thread_count: validate_thread_count(raw_settings.thread_count)?,
@@ -152,27 +157,18 @@ pub (super) mod validator {
         }
     }
 
-    fn validate_wordlist(
-        wordlist: Option<Vec<String>>,
-        modes: &mut HashSet<Mode>,
-    ) -> Result<Vec<String>, ArgumentError> {
-        match wordlist {
-            Some(list) => {
-                modes
-                    .insert(Mode::Dictionary)
-                    .then(|| println!("Wordlist detected, enabling Dictionary mode."));
-                Ok(list)
-            }
-            None => {
-                if modes.contains(&Mode::Dictionary) {
-                    return Err(MISSING_WORD_LIST_ERROR);
-                }
-                Ok(vec![])
-            }
+    fn validate_dictionary_mode(wordlist: Option<Vec<String>>, modes: &mut HashSet<Mode>) -> Result<Vec<String>, ArgumentError> {
+        if modes.contains(&Mode::Dictionary) {
+            wordlist.ok_or(MISSING_WORD_LIST_ERROR)?;
+        } else if wordlist.is_some() {
+            modes
+                .insert(Mode::Dictionary)
+                .then(|| println!("Wordlist detected, enabling Dictionary mode."));
         }
+        Ok(vec![])
     }
 
-    fn validate_length(min_length: u32, max_length: u32) -> Result<(), ArgumentError> {
+    fn validate_length(min_length: usize, max_length: usize) -> Result<(), ArgumentError> {
         if min_length > max_length {
             return Err(ArgumentError::bad_length(min_length, max_length));
         }
