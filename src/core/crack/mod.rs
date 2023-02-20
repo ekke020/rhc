@@ -6,12 +6,10 @@ pub mod result;
 mod wrapper;
 
 use self::wrapper::Wrapper;
-use dictionary::Dictionary as DictionaryCore;
-use incremental::Incremental as IncrementalCore;
 
 pub type Mode = mode::Mode;
-pub type Incremental = Wrapper<IncrementalCore>;
-pub type Dictionary<'a> = Wrapper<DictionaryCore<'a>>;
+pub type Incremental = Wrapper<incremental::Incremental>;
+pub type Dictionary<'a> = Wrapper<dictionary::Dictionary<'a>>;
 
 
 // #[cfg(test)]
