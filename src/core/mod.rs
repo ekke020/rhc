@@ -41,7 +41,8 @@ pub fn run(mut package: Package) -> Result<(), CoreError> {
 }
 
 
-pub fn new_run(mut settings: Settings) -> Result<(), CoreError> {
+pub fn new_run(settings: Settings) -> Result<(), CoreError> {
+    let threadObj = setup::generate_thread_
     Ok(())
 }
 

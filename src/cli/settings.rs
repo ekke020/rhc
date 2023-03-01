@@ -106,8 +106,36 @@ pub (super) mod validator {
     }
 
     impl ProcessedSettings {
-        pub fn test(&self) {
+        pub fn target(&self) -> &Vec<u8> {
+            &self.target
+        }
+    
+        pub fn thread_count(&self) -> usize {
+            self.thread_count
+        }
 
+        pub fn algorithm(&self) -> &AlgorithmType {
+            &self.algorithm
+        }
+    
+        pub fn verbose(&self) -> bool {
+            self.verbose
+        }
+
+        pub fn modes(&self) -> &HashSet<Mode> {
+            &self.modes
+        }
+
+        pub fn wordlist(&self) -> &[String] {
+            self.wordlist.as_ref()
+        }
+
+        pub fn min_length(&self) -> usize {
+            self.min_length
+        }
+
+        pub fn max_length(&self) -> usize {
+            self.max_length
         }
     }
 

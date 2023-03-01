@@ -45,7 +45,7 @@ impl Package {
     }
 
     pub fn get_algorithm(&self) -> Box<dyn Algorithm> {
-        self.algorithm.get_algorithm()
+        self.algorithm.generate_algorithm()
     }
 
     pub fn get_thread_count(&self) -> usize {

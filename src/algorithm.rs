@@ -28,7 +28,7 @@ impl AlgorithmType {
         }
     }
 
-    pub fn get_algorithm(&self) -> Box<dyn Algorithm> {
+    pub fn generate_algorithm(&self) -> Box<dyn Algorithm> {
         match self {
             AlgorithmType::Sha2_224 => Box::new(Sha224::new()),
             AlgorithmType::Sha2_256 => Box::new(Sha256::new()),
