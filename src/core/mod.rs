@@ -1,68 +1,33 @@
-pub mod crack;
+mod charset;
 mod error;
-mod package;
 mod setup;
 mod spawn;
+mod dictionary;
+mod incremental;
+mod result;
+use std::sync::mpsc;
+
 use self::error::core::CoreError;
-use self::package::Package;
 use crate::cli::settings::UnvalidatedSettings;
 use crate::cli::Settings;
 
 pub type Error = error::core::CoreError;
 
-// TODO: Return a result of the successful crack.
-// pub fn run(mut settings: GlobalSettings) -> Result<(), CoreError> {
-//     let package = Package::assemble(&mut settings)?;
-//     let wordlist = settings.get_wordlist();
 
-//     let threads = match wordlist {
-//         Some(wordlist) => spawn::resource_job(package, wordlist)?,
-//         None => spawn::brute_force_job(package)?,
-//     };
-//     for thread in threads {
-//         let result = thread.join().unwrap();
-//         if result.is_some() {
-//             println!("{}", result.unwrap());
-//             break;
-//         }
-//     }
-//     Ok(())
-// }
+// TODO: Implement a channel central. Each thread will have a connection to the central and will be able to send different information there.
+// TODO: For example, whenever a thread is done with its wordlist part it could tell the channel central and if all threads are done the central
+// TODO: can communicate this to the user and inform them about the progress.
 
-pub fn run(mut package: Package) -> Result<(), CoreError> {
-    let rx = spawn::test_incremental(package);
+pub fn run(settings: Settings) -> Result<(), CoreError> {
+    // TODO: We need some sort of Instant here.
+    let thread_settings = setup::ThreadSettings::from(&settings);
+    let (tx, rx) = mpsc::channel();
+    thread_settings.into_iter().for_each(|settings| spawn::job(tx.clone(), settings));
+    // TODO: The passwordmatch should not be the final result that the user sees...
     let value = rx.recv().unwrap();
-    if let Some(value) = value {
-        println!("{}", value);
-    } else {
-        println!("sadness");
+    match value {
+        Some(pm) => println!("{pm}"),
+        None => todo!(),
     }
     Ok(())
 }
-
-
-pub fn new_run(settings: Settings) -> Result<(), CoreError> {
-    let threadObj = setup::generate_thread_
-    Ok(())
-}
-
-// let mut chunks = wordlist
-//     .chunks(chunk_size)
-//     .map(|chunk| chunk.to_vec())
-//     .collect::<Vec<Vec<String>>>();
-
-// pub fn test_brute_force(mut settings: GlobalSettings) -> Result<(), CoreError> {
-//     let package = Package::assemble(&mut settings)?;
-//     // let rx = spawn::brute_force_job(package);
-//     let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
-//     // let value = rx.recv().unwrap();
-//     let mut bf = crack::incremental::Incremental::from(
-//         package.get_target(),
-//         &constants::NO_SPECIAL_RANGE[0..6],
-//         counter,
-//         package.get_algorithms().get(0).unwrap().get_algorithm(),
-//     );
-//     bf.run();
-//     // println!("{}", value.unwrap());
-//     Ok(())
-// }
