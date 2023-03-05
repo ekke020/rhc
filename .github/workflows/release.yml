@@ -12,7 +12,7 @@ jobs:
     name: Bump Version
     uses: ./.github/workflows/bump-version.yml
     with:
-      version-type: "patch"
+      version-type: "minor"
     secrets: inherit
 
   release:

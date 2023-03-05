@@ -5,9 +5,9 @@ version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml)
 
 # Increment the version
 IFS='.' read -r -a array <<< "$version"
-if [[ "$1" == "minor" ]]; then
+if [[ "$1" == "patch" ]]; then
   array[2]=$((array[2]+1))
-elif [[ "$1" == "patch" ]]; then
+elif [[ "$1" == "minor" ]]; then
   array[1]=$((array[1]+1))
 elif [[ "$1" == "major" ]]; then
   array[0]=$((array[0]+1))
