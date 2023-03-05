@@ -1,7 +1,23 @@
-use crate::{algorithm::AlgorithmType, core::crack::Mode};
-
 use super::error::argument::ArgumentError;
+use crate::algorithm::AlgorithmType;
 use std::collections::HashSet;
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum Strategy {
+    Dictionary,
+    Incremental,
+}
+
+impl Strategy {
+    pub fn from(value: &str) -> Option<Self> {
+        match value {
+            "dictionary" => Some(Self::Dictionary),
+            "incremental" => Some(Self::Incremental),
+            _ => None,
+        }
+    }
+}
+
 pub enum Setting {
     Target(Vec<u8>),
     TargetType(AlgorithmType),
@@ -9,7 +25,8 @@ pub enum Setting {
     MaxLength(usize),
     Verbose(bool),
     Wordlist(Vec<String>),
-    Mode(Mode),
+    ThreadCount(usize),
+    Mode(Strategy),
 }
 
 #[derive(Debug, Clone)]
@@ -20,7 +37,7 @@ pub struct UnvalidatedSettings {
     max_length: usize,
     wordlist: Option<Vec<String>>,
     verbose: bool,
-    modes: HashSet<Mode>,
+    modes: HashSet<Strategy>,
     thread_count: usize,
 }
 
@@ -33,10 +50,11 @@ impl UnvalidatedSettings {
             max_length: 999,
             wordlist: None,
             verbose: false,
-            modes: HashSet::from([Mode::Incremental]),
+            modes: HashSet::from([Strategy::Incremental]),
             thread_count: num_cpus::get(),
         }
     }
+    
     pub fn add_setting(&mut self, setting: Setting) {
         match setting {
             Setting::Target(value) => self.target = Some(value),
@@ -45,61 +63,68 @@ impl UnvalidatedSettings {
             Setting::MaxLength(value) => self.max_length = value,
             Setting::Verbose(value) => self.verbose = value,
             Setting::Wordlist(value) => self.wordlist = Some(value),
+            Setting::ThreadCount(count) => self.thread_count = count,
             Setting::Mode(mode) => {
                 self.modes.insert(mode);
             }
         }
     }
-
-    pub fn get_target(&mut self) -> Option<Vec<u8>> {
-        self.target.take()
-    }
-
-    pub fn get_target_type(&mut self) -> Option<AlgorithmType> {
-        self.target_type.take()
-    }
-
-    pub fn get_min_length(&mut self) -> &usize {
-        &self.min_length
-    }
-
-    pub fn get_max_length(&mut self) -> &usize {
-        &self.max_length
-    }
-
-    pub fn get_wordlist(&mut self) -> Option<Vec<String>> {
-        self.wordlist.take()
-    }
-
-    pub fn is_verbose(&self) -> bool {
-        self.verbose
-    }
-
-    pub fn is_mode(&self, mode: Mode) -> bool {
-        self.modes.contains(&mode)
-    }
 }
 
-pub (super) mod validator {
+pub(super) mod validator {
     use std::collections::HashSet;
 
-    use super::UnvalidatedSettings;
+    use super::{Strategy, UnvalidatedSettings};
     use crate::{
         algorithm::AlgorithmType,
         cli::error::argument::{
             ArgumentError, DETERMINE_ALGORITHM_ERROR, MISSING_TARGET_INPUT_ERROR,
             MISSING_WORD_LIST_ERROR,
         },
-        core::crack::Mode,
     };
-    // TODO: This should hold only shared values between modes.
-    // TODO: Look at chatGPT for clarification.
+
+    pub struct IncrementalValues {
+        thread_count: usize,
+        min_length: usize,
+        max_length: usize,
+    }
+
+    impl IncrementalValues {
+        pub fn thread_count(&self) -> usize {
+            self.thread_count
+        }
+    
+        pub fn max_length(&self) -> usize {
+            self.max_length
+        }
+
+        pub fn min_length(&self) -> usize {
+            self.min_length
+        }
+    }
+
+    pub struct DictionaryValues<'a> {
+        thread_count: usize,
+        wordlist: &'a Vec<String>
+    }
+
+    impl <'a>DictionaryValues<'a> {
+        pub fn thread_count(&self) -> usize {
+            self.thread_count
+        }
+    
+        pub fn wordlist(&self) -> &'a Vec<String> {
+            self.wordlist
+        }
+    }
+    // TODO: Consider changing modes to be specific structs instead...
+    #[derive(Debug, PartialEq)]
     pub struct ProcessedSettings {
         target: Vec<u8>,
         thread_count: usize,
         algorithm: AlgorithmType,
         verbose: bool,
-        modes: HashSet<Mode>,
+        modes: HashSet<Strategy>,
         wordlist: Vec<String>,
         min_length: usize,
         max_length: usize,
@@ -122,7 +147,7 @@ pub (super) mod validator {
             self.verbose
         }
 
-        pub fn modes(&self) -> &HashSet<Mode> {
+        pub fn modes(&self) -> &HashSet<Strategy> {
             &self.modes
         }
 
@@ -137,6 +162,23 @@ pub (super) mod validator {
         pub fn max_length(&self) -> usize {
             self.max_length
         }
+
+        pub fn incremental_values(&self) -> IncrementalValues {
+            IncrementalValues {
+                thread_count: self.thread_count,
+                min_length: self.min_length,
+                max_length: self.max_length,
+            }
+        }
+
+        pub fn dictionary_values(&self) -> Option<DictionaryValues> {
+            self.modes
+                .get(&Strategy::Dictionary)
+                .and(Some(DictionaryValues {
+                    thread_count: self.thread_count,
+                    wordlist: &self.wordlist,
+                }))
+        }
     }
 
     pub fn validate(raw_settings: UnvalidatedSettings) -> Result<ProcessedSettings, ArgumentError> {
@@ -148,7 +190,6 @@ pub (super) mod validator {
         validate_length(raw_settings.min_length, raw_settings.max_length)?;
         let mut modes = raw_settings.modes;
         let wordlist = validate_dictionary_mode(raw_settings.wordlist, &mut modes)?;
-
         let settings = ProcessedSettings {
             target,
             thread_count: validate_thread_count(raw_settings.thread_count)?,
@@ -177,23 +218,43 @@ pub (super) mod validator {
 
     fn determine_algorithm(target: &Vec<u8>) -> Result<AlgorithmType, ArgumentError> {
         match target.len() {
-            28 => Ok(AlgorithmType::Sha2_224), // , AlgorithmType::Sha2_512_224
-            32 => Ok(AlgorithmType::Sha2_256), // ,AlgorithmType::Sha2_512_256
-            48 => Ok(AlgorithmType::Sha2_384),
-            64 => Ok(AlgorithmType::Sha2_512),
+            28 => {
+                println!("No algorithm specified, auto detected to: Sha224");
+                Ok(AlgorithmType::Sha2_224)
+            }, // , AlgorithmType::Sha2_512_224
+            32 => {
+                println!("No algorithm specified, auto detected to: Sha256");
+                Ok(AlgorithmType::Sha2_256)
+            }, // ,AlgorithmType::Sha2_512_256
+            48 => {
+                println!("No algorithm specified, auto detected to: Sha384");
+                Ok(AlgorithmType::Sha2_384)
+            },
+            64 => {
+                println!("No algorithm specified, auto detected to: Sha512");
+                Ok(AlgorithmType::Sha2_512)
+            },
             _ => Err(DETERMINE_ALGORITHM_ERROR),
         }
     }
 
-    fn validate_dictionary_mode(wordlist: Option<Vec<String>>, modes: &mut HashSet<Mode>) -> Result<Vec<String>, ArgumentError> {
-        if modes.contains(&Mode::Dictionary) {
-            wordlist.ok_or(MISSING_WORD_LIST_ERROR)?;
-        } else if wordlist.is_some() {
-            modes
-                .insert(Mode::Dictionary)
-                .then(|| println!("Wordlist detected, enabling Dictionary mode."));
+    fn validate_dictionary_mode(
+        wordlist: Option<Vec<String>>,
+        modes: &mut HashSet<Strategy>,
+    ) -> Result<Vec<String>, ArgumentError> {
+        if modes.contains(&Strategy::Dictionary) {
+            let list = wordlist.ok_or(MISSING_WORD_LIST_ERROR)?;
+            return Ok(list);
         }
-        Ok(vec![])
+        match wordlist {
+            Some(list) => {
+                modes
+                    .insert(Strategy::Dictionary)
+                    .then(|| println!("Wordlist detected, enabling Dictionary mode."));
+                Ok(list)
+            }
+            None => Ok(vec![]),
+        }
     }
 
     fn validate_length(min_length: usize, max_length: usize) -> Result<(), ArgumentError> {
@@ -202,4 +263,78 @@ pub (super) mod validator {
         }
         Ok(())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::error::argument::{MISSING_TARGET_INPUT_ERROR, DETERMINE_ALGORITHM_ERROR, MISSING_WORD_LIST_ERROR};
+
+
+    fn setup() -> UnvalidatedSettings {
+        let mut unvalidated = UnvalidatedSettings::new();
+        unvalidated.add_setting(Setting::Target(vec![
+            144, 163, 237, 158, 50, 178, 170, 244, 198, 
+            28, 65, 14, 185, 37, 66, 97, 25, 225, 169,
+            220, 83, 212, 40, 106, 222, 153, 168, 9,
+        ]));
+
+        unvalidated
+    }
+    #[test]
+    fn test_validate_missing_target() {
+        let unvalidated = UnvalidatedSettings::new();
+        let result = validator::validate(unvalidated);
+        assert_eq!(result, Err(MISSING_TARGET_INPUT_ERROR));
+    }
+
+    #[test]
+    fn test_validate_bad_algorithm() {
+        let mut unvalidated = UnvalidatedSettings::new();
+        unvalidated.add_setting(Setting::Target(vec![123]));
+        let result = validator::validate(unvalidated);
+        assert_eq!(result, Err(DETERMINE_ALGORITHM_ERROR));
+    }
+
+
+    #[test]
+    fn test_validate_bad_thread_count() {
+        let thread_target = 999999;
+        let mut unvalidated = setup();
+        unvalidated.add_setting(Setting::ThreadCount(thread_target));
+        let result = validator::validate(unvalidated);
+        assert_eq!(result, Err(ArgumentError::invalid_thread_count(thread_target)));
+    }
+    
+    #[test]
+    fn test_validate_bad_length() {
+        let min = 5;
+        let max = 4;
+        let mut unvalidated = setup();
+        unvalidated.add_setting(Setting::MaxLength(max));
+        unvalidated.add_setting(Setting::MinLength(min));
+        let result = validator::validate(unvalidated);
+        assert_eq!(result, Err(ArgumentError::bad_length(min, max)));
+    }
+
+    #[test]
+    fn test_validate_missing_wordlist() {
+        let mut unvalidated = setup();
+        unvalidated.add_setting(Setting::Mode(Strategy::Dictionary));
+        let result = validator::validate(unvalidated);
+        assert_eq!(result, Err(MISSING_WORD_LIST_ERROR));
+    }
+
+    #[test]
+    fn test_validate() -> Result<(), ArgumentError> {
+        let mut unvalidated = UnvalidatedSettings::new();
+        unvalidated.add_setting(Setting::Target(vec![
+            144, 163, 237, 158, 50, 178, 170, 244, 198, 
+            28, 65, 14, 185, 37, 66, 97, 25, 225, 169,
+            220, 83, 212, 40, 106, 222, 153, 168, 9,
+        ]));
+        let result = validator::validate(unvalidated)?;
+        Ok(())
+    }
+
 }
