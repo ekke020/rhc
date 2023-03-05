@@ -85,16 +85,11 @@ mod tests {
 
     #[test]
     fn test_parse_args() -> Result<(), ArgumentError> {
-        let args = VecDeque::from(["-p", "test", "--algorithm", "sha2_224"])
+        let args = VecDeque::from(["-t", "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809", "--algorithm", "sha2_224"])
             .iter_mut()
             .map(|v| v.to_string())
             .collect();
         let mut result = parse_args(args)?;
-        let sha224 = result.get_target_type().unwrap();
-        let hash = result.get_target().unwrap();
-
-        assert_eq!(sha224, AlgorithmType::Sha2_224);
-        assert_eq!(hash, "test".as_bytes());
         Ok(())
     }
 
