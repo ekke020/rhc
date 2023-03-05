@@ -62,7 +62,7 @@ impl ArgumentErrorKind {
             ArgumentErrorKind::FileEvent(info) => format!("{info},\nUse --wordlist --help for a detailed example."),
             ArgumentErrorKind::UnsupportedMode(arg) => format!("\"{arg}\" is not a suppported mode.\nUse --mode --help for available modes and how to use them."),
             ArgumentErrorKind::MalformedHash => String::from("The input hash is malformed, unable to continue. Validate the hash and try again."),
-            ArgumentErrorKind::MissingTargetInput => String::from("No target supplied, unable to run.\nsee --password --help for information."),
+            ArgumentErrorKind::MissingTargetInput => String::from("No target supplied, unable to run.\nsee --target --help for information."),
             ArgumentErrorKind::InvalidThreadCount(count) => format!("Invalid thread count, not enough threads available.\nsee --threadcount --help for information."),
             ArgumentErrorKind::MissingWordList => String::from("No wordlist supplied, unable to run.\nsee --wordlist --help for information."),
             ArgumentErrorKind::BadLength((min, max)) => format!("Minimum length: \"{min}\" exceeds Maximum length: \"{max}\"."),
