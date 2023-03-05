@@ -1,6 +1,9 @@
 use crate::{
     algorithm::AlgorithmType,
-    cli::{error::argument::ArgumentError, settings::Setting}, core::crack,
+    cli::{
+        error::argument::ArgumentError,
+        settings::{Setting, Strategy},
+    },
 };
 
 use super::{FlagHelp, FlagInfo, FlagInput};
@@ -37,8 +40,7 @@ impl FlagHelp for Mode {
 
 impl FlagInput for Mode {
     fn produce_input_setting(&self, value: &str) -> Result<Setting, ArgumentError> {
-        let mode = crack::Mode::from(value)
-            .ok_or_else(|| ArgumentError::unsupported_mode(value))?;
+        let mode = Strategy::from(value).ok_or_else(|| ArgumentError::unsupported_mode(value))?;
         Ok(Setting::Mode(mode))
     }
 }
