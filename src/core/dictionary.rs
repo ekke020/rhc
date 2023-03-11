@@ -10,8 +10,6 @@ pub struct Dictionary<'a> {
     algorithm: Box<dyn Algorithm>,
 }
 
-impl<'a> Dictionary<'a> {}
-
 impl<'a> Dictionary<'a> {
     pub fn from(target: &'a Vec<u8>, wordlist: &'a [String], algorithm: Box<dyn Algorithm>) -> Self {
         Self {
