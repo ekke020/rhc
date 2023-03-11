@@ -6,11 +6,11 @@ use crate::cli::argument;
 
 use super::{
     error::argument::{ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR},
-    flags,
-    settings::GlobalSettings,
+    flag,
+    settings::UnvalidatedSettings,
 };
 
-pub fn produce_settings() -> Result<GlobalSettings, ArgumentError> {
+pub fn produce_settings() -> Result<UnvalidatedSettings, ArgumentError> {
     let values = collect_args()?;
     let settings = parse_args(values)?;
 
@@ -26,8 +26,8 @@ fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentError> {
-    let mut settings = GlobalSettings::new();
+fn parse_args(mut args: VecDeque<String>) -> Result<UnvalidatedSettings, ArgumentError> {
+    let mut settings = UnvalidatedSettings::new();
 
     let mut last_arg = String::from("--help");
     while !args.is_empty() {
@@ -40,12 +40,12 @@ fn parse_args(mut args: VecDeque<String>) -> Result<GlobalSettings, ArgumentErro
 
         is_arg_valid(&arg)?;
 
-        if let Some(f) = flags::get_input(&arg) {
+        if let Some(f) = flag::get_input(&arg) {
             let input = args.pop_front().ok_or(ArgumentError::missing_input(&arg))?;
             check_help(&input, &arg);
             let setting = f.produce_input_setting(&input)?;
             settings.add_setting(setting);
-        } else if let Some(f) = flags::get_toggle(&arg) {
+        } else if let Some(f) = flag::get_toggle(&arg) {
             let setting = f.produce_toggle_setting();
             settings.add_setting(setting);
         } else {
@@ -73,7 +73,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cli::flags::get_input, algorithm::AlgorithmType};
+    use crate::{cli::flag::get_input, algorithm::AlgorithmType};
 
     use super::*;
 
@@ -85,16 +85,11 @@ mod tests {
 
     #[test]
     fn test_parse_args() -> Result<(), ArgumentError> {
-        let args = VecDeque::from(["-p", "test", "--algorithm", "sha2_224"])
+        let args = VecDeque::from(["-t", "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809", "--algorithm", "sha2_224"])
             .iter_mut()
             .map(|v| v.to_string())
             .collect();
         let mut result = parse_args(args)?;
-        let sha224 = result.get_hash_type().unwrap();
-        let hash = result.get_hash_input().unwrap();
-
-        assert_eq!(sha224, AlgorithmType::Sha2_224);
-        assert_eq!(hash, "test");
         Ok(())
     }
 

@@ -28,7 +28,7 @@ impl AlgorithmType {
         }
     }
 
-    pub fn get_algorithm(&self) -> Box<dyn Algorithm> {
+    pub fn generate_algorithm(&self) -> Box<dyn Algorithm> {
         match self {
             AlgorithmType::Sha2_224 => Box::new(Sha224::new()),
             AlgorithmType::Sha2_256 => Box::new(Sha256::new()),
@@ -41,7 +41,7 @@ impl AlgorithmType {
 }
 
 pub trait Algorithm: Display {
-    fn populate(&mut self, data: &str);
+    fn populate(&mut self, data: &[u8]);
 
     fn execute(&mut self);
 
@@ -49,7 +49,7 @@ pub trait Algorithm: Display {
 }
 
 impl Algorithm for Sha224 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -64,7 +64,7 @@ impl Algorithm for Sha224 {
 }
 
 impl Algorithm for Sha256 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -79,7 +79,7 @@ impl Algorithm for Sha256 {
 }
 
 impl Algorithm for Sha384 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -94,7 +94,7 @@ impl Algorithm for Sha384 {
 }
 
 impl Algorithm for Sha512 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -109,7 +109,7 @@ impl Algorithm for Sha512 {
 }
 
 impl Algorithm for Sha512_224 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -124,7 +124,7 @@ impl Algorithm for Sha512_224 {
 }
 
 impl Algorithm for Sha512_256 {
-    fn populate(&mut self, data: &str) {
+    fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
 
@@ -137,3 +137,4 @@ impl Algorithm for Sha512_256 {
         target[..] == value
     }
 }
+

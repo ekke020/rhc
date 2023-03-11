@@ -11,7 +11,8 @@ enum CoreErrorKind {
     InvalidAlgorithm,
     DetermineAlgorithm(String),
     MissingHashInput,
-    MalformedHash
+    MalformedHash,
+    ByteConversion(Vec<u8>, String),
 }
 
 impl CoreErrorKind {
@@ -22,6 +23,7 @@ impl CoreErrorKind {
             CoreErrorKind::MissingHashInput => NOT_YET_SPECIFIED,
             CoreErrorKind::DetermineAlgorithm(_) => NOT_YET_SPECIFIED,
             CoreErrorKind::MalformedHash => NOT_YET_SPECIFIED,
+            CoreErrorKind::ByteConversion(_, _) => NOT_YET_SPECIFIED,
         }
     }
 
@@ -32,6 +34,7 @@ impl CoreErrorKind {
             CoreErrorKind::MissingHashInput => String::from("No hash supplied, unable to run\nsee --password --help for information"),
             CoreErrorKind::DetermineAlgorithm(v) => format!("Unable to determine a possible algorithm from: {v}\nsee --algorithm --help for available options"),
             CoreErrorKind::MalformedHash => String::from("The input hash is malformed, unable to continue. Validate the hash and try again."),
+            CoreErrorKind::ByteConversion(bytes, hash) => format!("There was a problem converting the bytes: {:?} to a string\nThe bytes equal the hashed value: {}", bytes, hash),
         }
     }
 }
@@ -52,6 +55,10 @@ impl CoreError {
     pub fn determine_algorithm(value: &Vec<u8>) -> Self {
         let input = std::str::from_utf8(value).unwrap();
         CoreError(CoreErrorKind::DetermineAlgorithm(input.to_owned()))
+    }
+
+    pub fn byte_conversion(bytes: &Vec<u8>, hash: &str) -> Self{
+        CoreError(CoreErrorKind::ByteConversion(bytes.to_vec(), hash.to_owned()))
     }
 }
 

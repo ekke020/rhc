@@ -1,7 +1,7 @@
 # RHC
 
 ## About
-RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language. The current build is able to crack roughly *100.000* passwords a second on an i5-10600K.
+RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language. The current build is able to crack roughly *10.000.000* passwords a second on an i5-10600K.
 
 ## Usage
 To use RHC, simply run the rhc command in your terminal after installing the binary. Here are a few examples to help you get started:

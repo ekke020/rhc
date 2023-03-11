@@ -1,15 +1,19 @@
 mod argument;
 mod entry;
 mod error;
-mod flags;
+mod flag;
 pub mod settings;
-use self::{settings::GlobalSettings, error::argument::ArgumentError};
+use self::{settings::{UnvalidatedSettings, validator::{self, ProcessedSettings, IncrementalValues, DictionaryValues}}, error::argument::ArgumentError};
 
 pub type Error = error::argument::ArgumentError;
+pub type Settings = ProcessedSettings;
+pub type Incremental = IncrementalValues;
+pub type Dictionary<'a> = DictionaryValues<'a>;
 
-pub fn run() -> Result<GlobalSettings, ArgumentError> {
-    let settings = entry::produce_settings();
-    settings
+pub fn run() -> Result<ProcessedSettings, ArgumentError> {
+    let raw_settings = entry::produce_settings()?;
+    let validated = validator::validate(raw_settings)?;
+    Ok(validated)
 }
 
 #[cfg(test)]
@@ -33,18 +37,19 @@ mod tests {
 
     #[test]
     fn test_run_version() {
+        let version = format!("rhc version: {}\n", env!("CARGO_PKG_VERSION"));
         let mut cmd = Command::cargo_bin("rhc").unwrap();
         let assert = cmd.arg("version").assert();
         assert
             .success()
             .code(0)
-            .stdout(predicate::eq(b"rhc version: 0.0.1\n" as &[u8]));
+            .stdout(predicate::eq(version.as_bytes()));
     }
 
     #[test]
     fn test_run_missing_input() {
         let mut cmd = Command::cargo_bin("rhc").unwrap();
-        let assert = cmd.arg("-p").assert();
+        let assert = cmd.arg("-t").assert();
         assert.failure().code(0x4A);
     }
     #[test]

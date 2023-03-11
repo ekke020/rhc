@@ -9,14 +9,14 @@ on:
 
 jobs:
   bump-version:
-    name: Bump Version
+    name: ⬆️ Bump Version ⬆️
     uses: ./.github/workflows/bump-version.yml
     with:
-      version-type: "patch"
+      version-type: "minor"
     secrets: inherit
 
   release:
-    name: Create Release
+    name: 🚀 Create Release 🚀
     runs-on: ubuntu-latest
     needs: bump-version
     steps:
@@ -30,14 +30,13 @@ jobs:
         with:
           tag_name: ${{ needs.bump-version.outputs.version }}
           release_name: rhc ${{ needs.bump-version.outputs.version }}
-          body: |
-            rhc latest
+          body_path: RELEASE.md
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
       version: ${{ needs.bump-version.outputs.version }}
 
   build-release:
-    name: Build Release
+    name: 🏗 Build Release 🏗
     needs: release
     runs-on: ${{ matrix.os }}
     strategy:
@@ -59,18 +58,18 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    - name: Install Rust
+    - name: ⚙️ Install Rust ⚙️
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
-    - name: Build release binary
+    - name: 🔨 Build release binary 🔨
       run: cargo build --verbose --release --target ${{ matrix.target }}
 
-    - name: Strip release binary
+    - name: ✨ Strip release binary ✨
       run: strip "target/${{ matrix.target }}/release/rhc"
 
-    - name: Build archive
+    - name: 🔧 Build archive 🔧
       shell: bash
       run: |
         staging="rhc-${{ needs.release.outputs.version }}-${{ matrix.target }}"
@@ -80,7 +79,7 @@ jobs:
         tar czf "$staging.tar.gz" "$staging"
         echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
 
-    - name: Upload release archive
+    - name: 📦 Upload release archive 📦
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
