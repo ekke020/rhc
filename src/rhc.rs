@@ -1,4 +1,4 @@
-use crate::{cli, core};
+use crate::{cli, core, central::{Manager, self}};
 
 #[derive(Debug)]
 pub(super) enum Error {
@@ -40,6 +40,6 @@ impl From<core::Error> for Error {
 
 pub(super) fn run() -> Result<(), Error> {
     let settings = cli::run()?;
-    let result = core::run(settings)?;
+    let result = central::run(settings)?;
     Ok(())
 }
