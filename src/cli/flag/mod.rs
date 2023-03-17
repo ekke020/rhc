@@ -6,6 +6,7 @@ mod target;
 mod verbose;
 mod wordlist;
 mod mode;
+mod charset;
 
 use algorithm::Algorithm;
 use mode::Mode;
@@ -15,17 +16,16 @@ use target::Target;
 use verbose::Verbose;
 use wordlist::Wordlist;
 use phf::phf_map;
-
-
-use self::max_length::MaxLength;
+use max_length::MaxLength;
+use charset::Charset;
 
 use super::{
     error::{argument::ArgumentError, flag::FlagError},
     settings::{UnvalidatedSettings, Setting},
 };
 
-pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 8] =
-    [&Help, &Target, &MinLength, &MaxLength, &Verbose, &Wordlist, &Algorithm, &Mode];
+pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 9] =
+    [&Help, &Target, &MinLength, &MaxLength, &Verbose, &Wordlist, &Algorithm, &Mode, &Charset];
 
 const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
     "--help" => &Help,
@@ -34,10 +34,12 @@ const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
     "-v" => &Verbose,
     "--target" => &Target,
     "-t" => &Target,
-    "--min-length" => &MinLength,
-    "--max-length" => &MaxLength,
+    "--charset" => &Charset,
+    "-c" => &Charset,
     "--wordlist" => &Wordlist,
     "-w" => &Wordlist,
+    "--min-length" => &MinLength,
+    "--max-length" => &MaxLength,
     "--algorithm" => &Algorithm,
     "--mode" => &Mode,
 };
@@ -51,6 +53,8 @@ const FLAG_INPUT: phf::Map<&str, &dyn FlagInput> = phf_map! {
     "-w" => &Wordlist,
     "--algorithm" => &Algorithm,
     "--mode" => &Mode,
+    "--charset" => &Charset,
+    "-c" => &Charset,
 };
 
 const FLAG_TOGGLE: phf::Map<&str, &dyn FlagToggle> = phf_map! {
