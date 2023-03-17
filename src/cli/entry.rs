@@ -58,7 +58,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<UnvalidatedSettings, Argumen
 }
 
 fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
-    let option = Regex::new(r"^--?[aA-zZ]+$").unwrap();
+    let option = Regex::new(r"^((-[a-zA-Z0-9])|(--[a-zA-Z0-9]{2,})(-[a-zA-Z0-9]{2,})*)$").unwrap();
     if let Some(v) = option.find(value) {
         return Ok(());
     }
