@@ -1,5 +1,5 @@
 use super::error::argument::ArgumentError;
-use crate::algorithm::AlgorithmType;
+use crate::{algorithm::AlgorithmType, core::charset::CharacterSet};
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -27,6 +27,7 @@ pub enum Setting {
     Wordlist(Vec<String>),
     ThreadCount(usize),
     Mode(Strategy),
+    Charset(CharacterSet),
 }
 
 #[derive(Debug, Clone)]
@@ -38,6 +39,7 @@ pub struct UnvalidatedSettings {
     wordlist: Option<Vec<String>>,
     verbose: bool,
     modes: HashSet<Strategy>,
+    charset: CharacterSet,
     thread_count: usize,
 }
 
@@ -51,6 +53,7 @@ impl UnvalidatedSettings {
             wordlist: None,
             verbose: false,
             modes: HashSet::from([Strategy::Incremental]),
+            charset: CharacterSet::Common,
             thread_count: num_cpus::get(),
         }
     }
@@ -64,9 +67,8 @@ impl UnvalidatedSettings {
             Setting::Verbose(value) => self.verbose = value,
             Setting::Wordlist(value) => self.wordlist = Some(value),
             Setting::ThreadCount(count) => self.thread_count = count,
-            Setting::Mode(mode) => {
-                self.modes.insert(mode);
-            }
+            Setting::Charset(set) => self.charset = set,
+            Setting::Mode(mode) => { self.modes.insert(mode); }
         }
     }
 }
@@ -80,13 +82,14 @@ pub(super) mod validator {
         cli::error::argument::{
             ArgumentError, DETERMINE_ALGORITHM_ERROR, MISSING_TARGET_INPUT_ERROR,
             MISSING_WORD_LIST_ERROR,
-        },
+        }, core::charset::CharacterSet,
     };
 
     pub struct IncrementalValues {
         thread_count: usize,
         min_length: usize,
         max_length: usize,
+        charset: &'static [u8],
     }
 
     impl IncrementalValues {
@@ -100,6 +103,10 @@ pub(super) mod validator {
 
         pub fn min_length(&self) -> usize {
             self.min_length
+        }
+
+        pub fn charset(&self) -> &'static [u8] {
+            self.charset
         }
     }
 
@@ -128,6 +135,7 @@ pub(super) mod validator {
         wordlist: Vec<String>,
         min_length: usize,
         max_length: usize,
+        charset: CharacterSet,
     }
 
     impl ProcessedSettings {
@@ -168,6 +176,7 @@ pub(super) mod validator {
                 thread_count: self.thread_count,
                 min_length: self.min_length,
                 max_length: self.max_length,
+                charset: self.charset.get_table(),
             }
         }
 
@@ -199,6 +208,7 @@ pub(super) mod validator {
             wordlist,
             min_length: raw_settings.min_length,
             max_length: raw_settings.max_length,
+            charset: raw_settings.charset,
         };
         Ok(settings)
     }
