@@ -1,8 +1,8 @@
 use std::str::from_utf8;
 
-use crate::algorithm::Algorithm;
+use crate::{algorithm::Algorithm, central::IncrementalSettings};
 
-use super::{charset::Table, result::PasswordMatch, setup::IncrementalSettings};
+use super::{charset::Table, result::PasswordMatch};
 
 pub struct Incremental<'a> {
     target: &'a Vec<u8>,
