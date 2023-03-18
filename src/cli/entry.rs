@@ -96,12 +96,22 @@ mod tests {
     #[test]
     fn test_is_arg_valid() -> Result<(), ArgumentError> {
         is_arg_valid("--help")?;
+        is_arg_valid("-h")?;
+        is_arg_valid("--help-help")?;
         Ok(())
     }
 
     #[test]
     fn test_is_arg_valid_error() {
+        let result = is_arg_valid("--awd-c");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("-wad");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("--a");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
         let result = is_arg_valid("--");
-        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR))
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("-");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
     }
 }
