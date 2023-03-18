@@ -42,7 +42,7 @@ print_success() {
 
 print_failure() {
   if [[ $1 == *$'\n'* ]] || (( ${#1} > 20 )); then
-    echo -e "\t${red}${bold}Assertion ($number) failed:${reset} "
+    echo -e "\t${red}${bold}Assertion ($number) failed with (arg1) == (arg2):${reset} "
     # TODO: This might be confusing if the issue is a newline character
     echo -e "$(echo "\t\t${red}(1)${reset}$1" | sed ':a;N;$!ba;s/\n/ /g')"
     echo -e "$(echo "\t\t${red}(2)${reset}$2" | sed ':a;N;$!ba;s/\n/ /g')"
@@ -59,7 +59,7 @@ assert_eq () {
   else
     ((failure++))
     print_failure "$1" "$2"
-    if [[ FAIL_EARLY ]]; then 
+    if $FAIL_EARLY; then 
       exit 1
     fi
   fi
@@ -160,7 +160,7 @@ assert_eq $match $target
 echo "${underline}${bold}Running invalid flags/arguments tests${reset}"
 
 result=$(./target/release/rhc)
-target=$'No argument  specified.\nUse -h, --help for available options.'
+target=$'No argument specified.\nUse -h, --help for available options.'
 assert_eq "$result" "$target"
 
 result=$(./target/release/rhc --invalid-flag)
