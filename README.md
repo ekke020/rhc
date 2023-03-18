@@ -59,7 +59,7 @@ There are only a handful flags available at the moment but I plan to add more in
 ```bash
 rhc [OPTIONS]... --max-length [unsigned integer]
 ``` 
-Specifies the number of threads to utilize while cracking.
+<s>Specifies the number of threads to utilize while cracking.</s>
 ```bash
 rhc [OPTIONS]... --threads [unsigned integer]
 ``` 
