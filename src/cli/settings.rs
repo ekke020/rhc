@@ -68,7 +68,7 @@ impl UnvalidatedSettings {
             Setting::Wordlist(value) => self.wordlist = Some(value),
             Setting::ThreadCount(count) => self.thread_count = count,
             Setting::Charset(set) => self.charset = set,
-            Setting::Mode(mode) => { self.modes.insert(mode); }
+            Setting::Mode(mode) => { self.modes.insert(mode); },
         }
     }
 }
