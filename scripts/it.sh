@@ -179,4 +179,12 @@ result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885edd
 target=$'"sha1" is not a suppported algorithm.\nUse --algorithm --help for available algorithms.'
 assert_eq "$result" "$target"
 
+result=$(./target/release/rhc --target malformed)
+target=$'The input hash is malformed, unable to continue. Validate the hash and try again.'
+assert_eq "$result" "$target"
+
+result=$(./target/release/rhc --target bdd03d560993e675516ba5a50638b6531ac2ac3d5847c61916cfced6 --algorithm sha2_224 --thread-count 100)
+target=$'Invalid thread count, not enough threads available.\nsee --threadcount --help for information.'
+assert_eq "$result" "$target"
+
 print_result
