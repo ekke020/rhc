@@ -35,5 +35,8 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-
     - name: 💎 Build 💎 
       run: cargo build 
-    - name: 🧪 Run tests 🧪
-      run: cargo test 
+    - name: 🧪 Run Unit Tests 🧪
+      run: cargo test
+    - name: 🔬 Run IT Tests 🔬
+      run: |
+        ./scripts/it.sh
