@@ -74,7 +74,7 @@ pub struct ThreadSettings {
     target: Vec<u8>,
     thread_count: usize,
     algorithm: AlgorithmType,
-    verbose: bool,
+    quiet: bool,
     dictionary: Option<DictionarySettings>,
     incremental: IncrementalSettings,
 }
@@ -95,7 +95,7 @@ impl ThreadSettings {
             target: settings.target().to_vec(),
             thread_count: settings.thread_count(),
             algorithm: settings.algorithm().clone(),
-            verbose: settings.verbose(),
+            quiet: settings.quiet(),
             dictionary: DictionarySettings::from(settings.dictionary_values(), count),
             incremental: IncrementalSettings::from(settings.incremental_values(), count),
         }
@@ -109,8 +109,8 @@ impl ThreadSettings {
         self.algorithm.generate_algorithm()
     }
 
-    pub fn verbose(&self) -> bool {
-        self.verbose
+    pub fn quiet(&self) -> bool {
+        self.quiet
     }
 
     pub fn dictionary(&self) -> Option<&DictionarySettings> {
