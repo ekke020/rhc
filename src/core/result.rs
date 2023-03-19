@@ -8,10 +8,11 @@ pub struct PasswordMatch {
 }
 
 impl PasswordMatch {
-    pub fn from(password: &str, algorithm: String, target: &Vec<u8>) -> Self {
+    pub fn from(password: &[u8], algorithm: String, target: &Vec<u8>) -> Self {
+        let result = from_utf8(password).expect(&format!("Failed to convert password to string: {:?}", password));
         Self {
-            length: password.len(),
-            password: password.to_owned(),
+            length: result.len(),
+            password: result.to_owned(),
             algorithm,
             target: target_to_lower_hex(target),
         }
