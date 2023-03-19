@@ -3,7 +3,7 @@ mod help;
 mod min_length;
 mod max_length;
 mod target;
-mod verbose;
+mod quiet;
 mod wordlist;
 mod mode;
 mod charset;
@@ -14,7 +14,7 @@ use mode::Mode;
 use help::Help;
 use min_length::MinLength;
 use target::Target;
-use verbose::Verbose;
+use quiet::Quiet;
 use wordlist::Wordlist;
 use phf::phf_map;
 use max_length::MaxLength;
@@ -27,13 +27,13 @@ use super::{
 };
 
 pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 10] =
-    [&Help, &Target, &MinLength, &MaxLength, &Verbose, &Wordlist, &Algorithm, &Mode, &Charset, &ThreadCount];
+    [&Help, &Target, &MinLength, &MaxLength, &Quiet, &Wordlist, &Algorithm, &Mode, &Charset, &ThreadCount];
 
 const FLAG_HELP: phf::Map<&str, &dyn FlagHelp> = phf_map! {
     "--help" => &Help,
     "-h" => &Help,
-    "--verbose" => &Verbose,
-    "-v" => &Verbose,
+    "--quiet" => &Quiet,
+    "-q" => &Quiet,
     "--target" => &Target,
     "-t" => &Target,
     "--charset" => &Charset,
@@ -62,8 +62,8 @@ const FLAG_INPUT: phf::Map<&str, &dyn FlagInput> = phf_map! {
 };
 
 const FLAG_TOGGLE: phf::Map<&str, &dyn FlagToggle> = phf_map! {
-    "--verbose" => &Verbose,
-    "-v" => &Verbose,
+    "--quiet" => &Quiet,
+    "-q" => &Quiet,
 };
 
 pub trait FlagInfo {
