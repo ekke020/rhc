@@ -23,7 +23,7 @@ pub enum Setting {
     TargetType(AlgorithmType),
     MinLength(usize),
     MaxLength(usize),
-    Verbose(bool),
+    Quiet(bool),
     Wordlist(Vec<String>),
     ThreadCount(usize),
     Mode(Strategy),
@@ -37,7 +37,7 @@ pub struct UnvalidatedSettings {
     min_length: usize,
     max_length: usize,
     wordlist: Option<Vec<String>>,
-    verbose: bool,
+    quiet: bool,
     modes: HashSet<Strategy>,
     charset: CharacterSet,
     thread_count: usize,
@@ -51,7 +51,7 @@ impl UnvalidatedSettings {
             min_length: 1,
             max_length: 999,
             wordlist: None,
-            verbose: false,
+            quiet: false,
             modes: HashSet::from([Strategy::Incremental]),
             charset: CharacterSet::Common,
             thread_count: num_cpus::get(),
@@ -64,7 +64,7 @@ impl UnvalidatedSettings {
             Setting::TargetType(value) => self.target_type = Some(value),
             Setting::MinLength(value) => self.min_length = value,
             Setting::MaxLength(value) => self.max_length = value,
-            Setting::Verbose(value) => self.verbose = value,
+            Setting::Quiet(value) => self.quiet = value,
             Setting::Wordlist(value) => self.wordlist = Some(value),
             Setting::ThreadCount(count) => self.thread_count = count,
             Setting::Charset(set) => self.charset = set,
@@ -130,7 +130,7 @@ pub(super) mod validator {
         target: Vec<u8>,
         thread_count: usize,
         algorithm: AlgorithmType,
-        verbose: bool,
+        quiet: bool,
         modes: HashSet<Strategy>,
         wordlist: Vec<String>,
         min_length: usize,
@@ -151,8 +151,8 @@ pub(super) mod validator {
             &self.algorithm
         }
     
-        pub fn verbose(&self) -> bool {
-            self.verbose
+        pub fn quiet(&self) -> bool {
+            self.quiet
         }
 
         pub fn modes(&self) -> &HashSet<Strategy> {
@@ -203,7 +203,7 @@ pub(super) mod validator {
             target,
             thread_count: validate_thread_count(raw_settings.thread_count)?,
             algorithm,
-            verbose: raw_settings.verbose,
+            quiet: raw_settings.quiet,
             modes,
             wordlist,
             min_length: raw_settings.min_length,
