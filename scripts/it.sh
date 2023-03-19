@@ -152,7 +152,7 @@ result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885edd
 match=$(echo "$result" | sed -n 's/^Match: //p')
 assert_eq $match $target
 
-result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885eddd3fde135806e601 --min-length 4 --max-length 5 --verbose)
+result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885eddd3fde135806e601 --min-length 4 --max-length 5 --quiet)
 match=$(echo "$result" | sed -n 's/^Match: //p')
 assert_eq $match $target
 
