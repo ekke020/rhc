@@ -1,25 +1,13 @@
-use super::setup::ThreadSettings;
+use super::{setup::ThreadSettings, Message};
 use crate::core::{dictionary::Dictionary, incremental::Incremental, result::PasswordMatch};
 use std::{sync::mpsc::Sender, thread};
 
-pub(super) fn job(tx: Sender<Option<PasswordMatch>>, settings: ThreadSettings) {
+pub(super) fn job(tx: Sender<Message>, settings: ThreadSettings) {
     thread::spawn(move || {
-        let result = match settings.dictionary() {
-            Some(dict) => {
-                Dictionary::from(settings.target(), dict.wordlist(), settings.algorithm()).run()
-            }
-            None => None,
-        };
-        let result = match result {
-            Some(pm) => Some(pm),
-            None => Incremental::from(
-                settings.target(),
-                settings.incremental(),
-                settings.algorithm(),
-            )
-            .run(),
-        };
+        if settings.dictionary().is_some() {
+            Dictionary::from(&settings, &tx).run();
+        }
+        Incremental::from(&settings, &tx).run();
         drop(settings);
-        tx.send(result);
     });
 }
