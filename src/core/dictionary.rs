@@ -1,6 +1,9 @@
 use std::{str::from_utf8, sync::mpsc::Sender};
 
-use crate::{algorithm::{self, Algorithm}, central::{setup::ThreadSettings, Message}};
+use crate::{
+    algorithm::{self, Algorithm},
+    central::{setup::ThreadSettings, Message},
+};
 
 use super::result::PasswordMatch;
 
@@ -8,6 +11,7 @@ pub struct Dictionary<'a> {
     target: &'a Vec<u8>,
     wordlist: &'a [String],
     algorithm: Box<dyn Algorithm>,
+    quiet: bool,
     tx: &'a Sender<Message>,
 }
 
@@ -17,6 +21,7 @@ impl<'a> Dictionary<'a> {
             target: settings.target(),
             wordlist: settings.dictionary().unwrap().wordlist(),
             algorithm: settings.algorithm(),
+            quiet: settings.quiet(),
             tx,
         }
     }
@@ -26,7 +31,9 @@ impl<'a> Dictionary<'a> {
             .iter()
             .any(|word| self.execute_comparison(&word.as_bytes()));
 
-        self.tx.send(Message::DictionaryProcessed);
+        if !self.quiet {
+            self.tx.send(Message::DictionaryProcessed);
+        }
     }
 
     fn execute_comparison(&mut self, word: &[u8]) -> bool {
@@ -37,7 +44,7 @@ impl<'a> Dictionary<'a> {
         if algorithm.compare(&self.target) {
             let password_match =
                 PasswordMatch::from(word, self.algorithm.to_string(), &self.target);
-                self.tx.send(Message::PasswordMatch(password_match));
+            self.tx.send(Message::PasswordMatch(password_match));
             return true;
         }
         false
