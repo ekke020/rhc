@@ -14,6 +14,7 @@ pub struct Incremental<'a> {
     algorithm: Box<dyn Algorithm>,
     min_length: usize,
     max_length: usize,
+    quiet: bool,
     tx: &'a Sender<Message>,
 }
 
@@ -26,6 +27,7 @@ impl<'a> Incremental<'a> {
             algorithm: settings.algorithm(),
             min_length: settings.incremental().min_length(),
             max_length: settings.incremental().max_length(),
+            quiet: settings.quiet(),
             tx,
         }
     }
@@ -41,7 +43,9 @@ impl<'a> Incremental<'a> {
                     break 'runner;
                 }
             }
-            self.tx.send(Message::WordSizeIncreased);
+            if !self.quiet {
+                self.tx.send(Message::WordSizeIncreased);
+            }
             n += 1;
             if (n > self.max_length) {
                 self.tx.send(Message::NoMatch);
