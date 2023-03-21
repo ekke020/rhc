@@ -5,8 +5,6 @@ use crate::{
     central::{setup::ThreadSettings, Message},
 };
 
-use super::result::PasswordMatch;
-
 pub struct Dictionary<'a> {
     target: &'a Vec<u8>,
     wordlist: &'a [String],
@@ -42,9 +40,7 @@ impl<'a> Dictionary<'a> {
         algorithm.execute();
 
         if algorithm.compare(&self.target) {
-            let password_match =
-                PasswordMatch::from(word, self.algorithm.to_string(), &self.target);
-            self.tx.send(Message::PasswordMatch(password_match));
+            self.tx.send(Message::PasswordMatch(word.to_vec()));
             return true;
         }
         false

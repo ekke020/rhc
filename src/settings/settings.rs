@@ -171,6 +171,10 @@ pub(super) mod validator {
             self.max_length
         }
 
+        pub fn charset(&self) -> &CharacterSet {
+            &self.charset
+        }
+
         pub fn incremental_values(&self) -> IncrementalValues {
             IncrementalValues {
                 thread_count: self.thread_count,

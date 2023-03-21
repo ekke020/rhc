@@ -5,6 +5,7 @@ mod cli;
 mod core;
 mod depricated;
 mod rhc;
+mod settings;
 mod sha2;
 
 fn main() {

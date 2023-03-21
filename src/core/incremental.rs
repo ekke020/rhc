@@ -5,7 +5,7 @@ use crate::{
 };
 use std::sync::mpsc::Sender;
 
-use super::{charset::Table, result::PasswordMatch};
+use super::charset::Table;
 
 pub struct Incremental<'a> {
     target: &'a Vec<u8>,
@@ -76,9 +76,7 @@ impl<'a> Incremental<'a> {
         algorithm.execute();
 
         if algorithm.compare(&self.target) {
-            let password_match =
-                PasswordMatch::from(word, self.algorithm.to_string(), &self.target);
-                self.tx.send(Message::PasswordMatch(password_match));
+            self.tx.send(Message::PasswordMatch(word.to_vec()));
             return true;
         }
         false

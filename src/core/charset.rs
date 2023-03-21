@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 pub type Table = &'static [u8];
 
 pub const ASCII_95_TABLE: Table = &ASCII_95;
@@ -26,6 +28,16 @@ impl CharacterSet {
             CharacterSet::Ascii95 => &ASCII_95,
             CharacterSet::Common => &COMMON,
             CharacterSet::NoSpecial => &NO_SPECIAL,
+        }
+    }
+}
+
+impl Display for CharacterSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CharacterSet::Ascii95 => f.write_str("ASCII_95"),
+            CharacterSet::Common => f.write_str("COMMON"),
+            CharacterSet::NoSpecial => f.write_str("NO_SPECIAL"),
         }
     }
 }
