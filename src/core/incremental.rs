@@ -1,9 +1,6 @@
-use crate::central::setup::ThreadSettings;
-use crate::{
-    algorithm::Algorithm,
-    central::{IncrementalSettings, Message},
-};
 use std::sync::mpsc::Sender;
+
+use crate::{algorithm::Algorithm, central::Message, settings::thread::ThreadSettings};
 
 use super::charset::Table;
 

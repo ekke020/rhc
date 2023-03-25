@@ -2,7 +2,8 @@ use std::{str::from_utf8, sync::mpsc::Sender};
 
 use crate::{
     algorithm::{self, Algorithm},
-    central::{setup::ThreadSettings, Message},
+    central::Message,
+    settings::thread::ThreadSettings
 };
 
 pub struct Dictionary<'a> {
