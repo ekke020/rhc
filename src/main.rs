@@ -4,6 +4,7 @@ mod central;
 mod cli;
 mod core;
 mod depricated;
+mod error;
 mod rhc;
 mod settings;
 mod sha2;
