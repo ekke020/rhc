@@ -1,6 +1,8 @@
-use super::{FlagHelp, FlagInfo, FlagInput};
-use crate::{core::charset::CharacterSet, cli::{settings::Setting, error::argument::ArgumentError}};
-const SHORTHAND: char = 'c'; 
+use crate::core::charset::CharacterSet;
+
+use super::*;
+
+const SHORTHAND: char = 'c';
 const NAME: &str = "charset";
 const SHORT_HELP: &str = "The charset to use";
 const LONG_HELP: &str = "Flag: -c | --charset

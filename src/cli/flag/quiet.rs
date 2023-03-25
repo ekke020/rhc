@@ -1,6 +1,4 @@
-use crate::cli::settings::Setting;
-
-use super::{FlagHelp, FlagInfo, FlagToggle, FLAG_DESCRIPTIONS};
+use super::*;
 
 const SHORTHAND: char = 'q';
 const NAME: &str = "quiet";

@@ -1,9 +1,4 @@
-use crate::cli::{
-    error::argument::{ArgumentError, INVALID_INPUT_ERROR},
-    settings::Setting,
-};
-
-use super::{FlagHelp, FlagInfo, FlagInput};
+use super::*;
 
 const NAME: &str = "max-length";
 const SHORT_HELP: &str = "Specifies the maximum length to target";

@@ -21,10 +21,7 @@ use max_length::MaxLength;
 use charset::Charset;
 use thread_count::ThreadCount;
 
-use super::{
-    error::{argument::ArgumentError, flag::FlagError},
-    settings::{UnvalidatedSettings, Setting},
-};
+use super::*;
 
 pub(self) const FLAG_DESCRIPTIONS: [&dyn FlagInfo; 10] =
     [&Help, &Target, &MinLength, &MaxLength, &Quiet, &Wordlist, &Algorithm, &Mode, &Charset, &ThreadCount];

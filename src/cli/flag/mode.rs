@@ -1,12 +1,4 @@
-use crate::{
-    algorithm::AlgorithmType,
-    cli::{
-        error::argument::ArgumentError,
-        settings::{Setting, Strategy},
-    },
-};
-
-use super::{FlagHelp, FlagInfo, FlagInput};
+use super::*;
 
 const NAME: &str = "mode";
 const SHORT_HELP: &str = "The cracking mode to use";
