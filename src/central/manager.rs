@@ -1,11 +1,10 @@
 use std::{sync::mpsc::{self, Receiver, Sender}, fmt::format, str::from_utf8};
+use crate::core::spawn;
 
-use crate::{cli::Settings, core::spawn};
-
-use super::{Message, setup::ThreadSettings};
+use super::*;
 
 pub struct Manager<'a> {
-    settings: &'a Settings,
+    settings: &'a ProcessedSettings,
     current_word_size: usize,
     word_size_count: usize,
     processed_words: usize,
@@ -16,7 +15,7 @@ pub struct Manager<'a> {
 }
 
 impl <'a>Manager<'a> {
-    pub fn new(settings: &'a Settings) -> Self {
+    pub fn new(settings: &'a ProcessedSettings) -> Self {
         let (tx, rx) = mpsc::channel();
         Self {
             settings,
@@ -93,7 +92,7 @@ impl <'a>Manager<'a> {
     }
 }
 
-fn print_match(settings: &Settings, password: Vec<u8>) {
+fn print_match(settings: &ProcessedSettings, password: Vec<u8>) {
     let target = target_to_lower_hex(settings.target());
     println!("Successfully matched target: {}", target);
     match from_utf8(&password) {
