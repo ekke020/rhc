@@ -2,15 +2,11 @@ mod argument;
 mod entry;
 mod error;
 mod flag;
-pub mod settings;
-use self::{settings::{UnvalidatedSettings, validator::{self, ProcessedSettings, IncrementalValues, DictionaryValues}}, error::argument::ArgumentError};
 
-pub type Error = error::argument::ArgumentError;
-pub type Settings = ProcessedSettings;
-pub type Incremental = IncrementalValues;
-pub type Dictionary<'a> = DictionaryValues<'a>;
+use crate::error::argument::*;
+use crate::settings::*;
 
-pub fn run() -> Result<ProcessedSettings, ArgumentError> {
+pub fn run() -> Result<validator::ProcessedSettings, ArgumentError> {
     let raw_settings = entry::produce_settings()?;
     let validated = validator::validate(raw_settings)?;
     Ok(validated)
