@@ -5,9 +5,9 @@ use std::io;
 use std::num::ParseIntError;
 use std::process;
 
-const COMMAND_USAGE_ERROR: i32 = 0x40;
-const DATA_FORMAT_ERROR: i32 = 0x41;
-const INPUT_OUTPUT_ERROR: i32 = 0x4A;
+use super::COMMAND_USAGE_ERROR;
+use super::INPUT_OUTPUT_ERROR;
+
 
 #[derive(Debug, PartialEq)]
 enum ArgumentErrorKind {

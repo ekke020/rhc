@@ -4,6 +4,11 @@ pub mod core;
 use self::argument::ArgumentError;
 use self::core::CoreError;
 
+const NOT_YET_SPECIFIED: i32 = 0x40;
+const COMMAND_USAGE_ERROR: i32 = 0x40;
+const DATA_FORMAT_ERROR: i32 = 0x41;
+const INPUT_OUTPUT_ERROR: i32 = 0x4A;
+
 #[derive(Debug)]
 pub(super) enum Error {
     CliError(ArgumentError),
