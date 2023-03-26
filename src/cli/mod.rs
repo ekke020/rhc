@@ -1,6 +1,5 @@
 mod argument;
 mod entry;
-mod error;
 mod flag;
 
 use crate::error::argument::*;
