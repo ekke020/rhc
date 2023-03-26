@@ -1,8 +1,8 @@
-use std::str::from_utf8;
+use std::sync::mpsc::Sender;
 
-use crate::algorithm::Algorithm;
+use crate::{algorithm::Algorithm, central::Message, settings::thread::ThreadSettings};
 
-use super::{charset::Table, result::PasswordMatch, setup::IncrementalSettings};
+use super::charset::Table;
 
 pub struct Incremental<'a> {
     target: &'a Vec<u8>,
@@ -11,74 +11,71 @@ pub struct Incremental<'a> {
     algorithm: Box<dyn Algorithm>,
     min_length: usize,
     max_length: usize,
+    quiet: bool,
+    tx: &'a Sender<Message>,
 }
 
-impl <'a>Incremental<'a> {
-    pub fn from(target: &'a Vec<u8>, settings: &IncrementalSettings, algorithm: Box<dyn Algorithm>) -> Self {
+impl<'a> Incremental<'a> {
+    pub fn from(settings: &'a ThreadSettings, tx: &'a Sender<Message>) -> Self {
         Self {
-            target,
-            range: settings.range(),
-            table: settings.table(),
-            algorithm,
-            min_length: settings.min_length(),
-            max_length: settings.max_length(),
+            target: settings.target(),
+            range: settings.incremental().range(),
+            table: settings.incremental().table(),
+            algorithm: settings.algorithm(),
+            min_length: settings.incremental().min_length(),
+            max_length: settings.incremental().max_length(),
+            quiet: settings.quiet(),
+            tx,
         }
     }
 
-    pub fn run(&mut self) -> Option<PasswordMatch> {
+    pub fn run(&mut self) {
         let mut n = self.min_length;
+        let mut counter = 0;
         'runner: loop {
             for c in self.range {
                 let mut word = Vec::with_capacity(n);
                 word.push(*c);
-                if let Some(result) = self.calculate(None, n - 1, &mut word) {
-                    break 'runner Some(result);
+                if self.calculate(false, n - 1, &mut word) {
+                    break 'runner;
                 }
+            }
+            if !self.quiet {
+                self.tx.send(Message::WordSizeIncreased);
             }
             n += 1;
             if (n > self.max_length) {
-                break 'runner None;
+                self.tx.send(Message::NoMatch);
+                break 'runner;
             }
         }
     }
 
-    fn calculate(
-        &mut self,
-        pm: Option<PasswordMatch>,
-        length: usize,
-        word: &mut Vec<u8>,
-    ) -> Option<PasswordMatch> {
-        if pm.is_some() {
-            return pm;
-        } else if length == 0 {
+    fn calculate(&mut self, is_match: bool, length: usize, word: &mut Vec<u8>) -> bool {
+        if is_match {
+            return true;
+        }
+        if length == 0 {
             return self.execute_comparison(word);
         }
 
-        self.table.iter().find_map(|b| {
-            word.push(*b);
-            let result = self.calculate(None, length - 1, word);
+        self.table.iter().any(|byte| {
+            word.push(*byte);
+            let result = self.calculate(false, length - 1, word);
             word.pop();
             result
         })
     }
 
-    fn execute_comparison(&mut self, word: &[u8]) -> Option<PasswordMatch> {
+    fn execute_comparison(&mut self, word: &[u8]) -> bool {
         let algorithm = self.algorithm.as_mut();
         algorithm.populate(word);
         algorithm.execute();
-        match algorithm.compare(&self.target) {
-            true => Some(self.create_password_match(word)),
-            false => None,
-        }
-    }
 
-    fn create_password_match(&self, word: &[u8]) -> PasswordMatch {
-        // TODO: This unwrap is a bit risky, consider moving the value as a vector instead.
-        let password = from_utf8(word).unwrap();
-        PasswordMatch::from(
-            password,
-            self.algorithm.to_string(),
-            &self.target,
-        )
+        if algorithm.compare(&self.target) {
+            self.tx.send(Message::PasswordMatch(word.to_vec()));
+            return true;
+        }
+        false
     }
 }

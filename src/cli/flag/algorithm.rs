@@ -1,11 +1,6 @@
-use crate::{
-    algorithm::AlgorithmType,
-    cli::{error::argument::ArgumentError, settings::Setting},
-};
+use super::*;
+use crate::algorithm::AlgorithmType;
 
-use super::{FlagHelp, FlagInfo, FlagInput};
-
-// const SHORTHAND: char = 'a'; ?
 const NAME: &str = "algorithm";
 const SHORT_HELP: &str = "The algorithm to target";
 const LONG_HELP: &str = "Flag: --algorithm

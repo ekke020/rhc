@@ -1,20 +1,16 @@
 # Improvements
-
-This release has two primary goals in mind. The first is to improve upon the different strategies available in rhc, including significant performance improvements for the Incremental strategy and the addition of two new charsets. The second goal is to clean up the code structure, with the aim of creating a cohesive and easy-to-follow codebase that will facilitate smoother development in the future.
+In this release, the major goal was to improve the user feedback when running the application. This was achieved by implementing a central manager that controls all outgoing messages that the user sees. Each thread now has a direct line to the manager, where it can send different updates and messages. The manager then decides when and how to present this information to the user, resulting in a smoother and more informative experience.
 
 ## Bug Fixes
-- Fixed a bug where the wrong help text would display when targeting certain flags.
+- Fixed a bug that caused certain flags to not trigger properly.
+- Fixed a bug that presented the wrong version when running the help command.
+- Fixed a bug that would cause a crash if an argument flag was misconfigured.
 ## New Features
-- The **--mode** flag has been added to allow users to specify the desired strategy.
-- Added two new charsets in addition to the ASCII-95 set. 
-  - The **COMMON** set contains the 77 most common characters.
-  - The **NO_SPECIAL** set contains no special characters.
-- Added the **--max-length** and **--min-length** flag.
-- Modes will now be detected automatically.
+- The **--charset** flag has been added to allow users to specify one of three charsets.
+- The **--thread-count** flag has been added to allow users to have full control over thread consumption.
+- The **--quiet** flag has been added. This flag will remove all non-essential output.
 ## Changes
-- The **Bruteforce** strategy was renamed to **Incremental**.
-- The password **flag** was renamed to **target**.
+- The verbose flag has been removed in this release. Instead, verbose output is now toggled by default, allowing users to opt-out with the --quiet flag.
+
 ## Miscellaneous
-- Significant performance improvements when calculating the words in **Incremental** mode.
-- Improved the message feedback during runtime.
-- Large overhaul of the codebase, improved code quality and introduced a cohesive structure.
+- Major improvements have been made to the user feedback. This includes better output and more available information abut an ongoing crack.

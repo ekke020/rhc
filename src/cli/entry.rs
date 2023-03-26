@@ -1,16 +1,8 @@
+use super::*;
+use regex::Regex;
 use std::{collections::VecDeque, env};
 
-use regex::Regex;
-
-use crate::cli::argument;
-
-use super::{
-    error::argument::{ArgumentError, INVALID_ARGUMENT_ERROR, NO_ARGUMENT_ERROR},
-    flag,
-    settings::UnvalidatedSettings,
-};
-
-pub fn produce_settings() -> Result<UnvalidatedSettings, ArgumentError> {
+pub fn produce_settings() -> Result<unvalidated::Settings, ArgumentError> {
     let values = collect_args()?;
     let settings = parse_args(values)?;
 
@@ -26,8 +18,8 @@ fn collect_args() -> Result<VecDeque<String>, ArgumentError> {
     Ok(args)
 }
 
-fn parse_args(mut args: VecDeque<String>) -> Result<UnvalidatedSettings, ArgumentError> {
-    let mut settings = UnvalidatedSettings::new();
+fn parse_args(mut args: VecDeque<String>) -> Result<unvalidated::Settings, ArgumentError> {
+    let mut settings = unvalidated::Settings::new();
 
     let mut last_arg = String::from("--help");
     while !args.is_empty() {
@@ -58,7 +50,7 @@ fn parse_args(mut args: VecDeque<String>) -> Result<UnvalidatedSettings, Argumen
 }
 
 fn is_arg_valid(value: &str) -> Result<(), ArgumentError> {
-    let option = Regex::new(r"^--?[aA-zZ]+$").unwrap();
+    let option = Regex::new(r"^((-[a-zA-Z0-9])|(--[a-zA-Z0-9]{2,})(-[a-zA-Z0-9]{2,})*)$").unwrap();
     if let Some(v) = option.find(value) {
         return Ok(());
     }
@@ -73,7 +65,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cli::flag::get_input, algorithm::AlgorithmType};
+    use crate::{algorithm::AlgorithmType, cli::flag::get_input};
 
     use super::*;
 
@@ -85,10 +77,15 @@ mod tests {
 
     #[test]
     fn test_parse_args() -> Result<(), ArgumentError> {
-        let args = VecDeque::from(["-t", "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809", "--algorithm", "sha2_224"])
-            .iter_mut()
-            .map(|v| v.to_string())
-            .collect();
+        let args = VecDeque::from([
+            "-t",
+            "90a3ed9e32b2aaf4c61c410eb925426119e1a9dc53d4286ade99a809",
+            "--algorithm",
+            "sha2_224",
+        ])
+        .iter_mut()
+        .map(|v| v.to_string())
+        .collect();
         let mut result = parse_args(args)?;
         Ok(())
     }
@@ -96,12 +93,22 @@ mod tests {
     #[test]
     fn test_is_arg_valid() -> Result<(), ArgumentError> {
         is_arg_valid("--help")?;
+        is_arg_valid("-h")?;
+        is_arg_valid("--help-help")?;
         Ok(())
     }
 
     #[test]
     fn test_is_arg_valid_error() {
+        let result = is_arg_valid("--awd-c");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("-wad");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("--a");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
         let result = is_arg_valid("--");
-        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR))
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
+        let result = is_arg_valid("-");
+        assert_eq!(result, Err(INVALID_ARGUMENT_ERROR));
     }
 }

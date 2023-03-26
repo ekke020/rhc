@@ -1,5 +1,4 @@
-use super::{FlagInfo, FlagHelp, FlagInput};
-use crate::cli::{settings::Setting, error::{flag::FlagError, argument::{ArgumentError, MALFORMED_HASH_ERROR}}};
+use super::*;
 
 const SHORTHAND: char = 't';
 const NAME: &str = "--target";

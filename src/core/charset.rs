@@ -1,9 +1,48 @@
+use std::fmt::Display;
+
 pub type Table = &'static [u8];
 
 pub const ASCII_95_TABLE: Table = &ASCII_95;
 pub const COMMON_TABLE: Table = &COMMON;
 pub const NO_SPECIAL_TABLE: Table = &NO_SPECIAL;
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum CharacterSet {
+    Ascii95,
+    Common,
+    NoSpecial,
+}
+
+impl CharacterSet {
+    pub fn from(value: &str) -> Option<Self> {
+        match value {
+            "ASCII_95" => Some(CharacterSet::Ascii95),
+            "COMMON" => Some(CharacterSet::Common),
+            "NO_SPECIAL" => Some(CharacterSet::NoSpecial),
+            _ => None,
+        }
+    }
+
+    pub fn get_table(&self) -> Table {
+        match self {
+            CharacterSet::Ascii95 => &ASCII_95,
+            CharacterSet::Common => &COMMON,
+            CharacterSet::NoSpecial => &NO_SPECIAL,
+        }
+    }
+}
+
+impl Display for CharacterSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CharacterSet::Ascii95 => f.write_str("ASCII_95"),
+            CharacterSet::Common => f.write_str("COMMON"),
+            CharacterSet::NoSpecial => f.write_str("NO_SPECIAL"),
+        }
+    }
+}
+
+// TODO: Combine these three into one single array to save binary size?
 const ASCII_95: [u8; 95] = [
     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F,

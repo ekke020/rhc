@@ -1,11 +1,8 @@
-use std::{fs::File, io::{BufReader, BufRead}};
-
-use crate::cli::{
-    error::argument::{ArgumentError, INVALID_INPUT_ERROR},
-    settings::Setting,
+use super::*;
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
 };
-
-use super::{FlagHelp, FlagInfo, FlagInput};
 
 const SHORTHAND: char = 'w';
 const NAME: &str = "wordlist";
@@ -46,12 +43,12 @@ impl FlagHelp for Wordlist {
 
 impl FlagInput for Wordlist {
     fn produce_input_setting(&self, path: &str) -> Result<Setting, ArgumentError> {
-        let words = gather_words(path)?;
+        let words = read_word_file(path)?;
         Ok(Setting::Wordlist(words))
     }
 }
 
-fn gather_words(path: &str) -> Result<Vec<String>, ArgumentError> {
+fn read_word_file(path: &str) -> Result<Vec<String>, ArgumentError> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let lines = reader

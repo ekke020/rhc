@@ -3,7 +3,7 @@ use std::fmt;
 use std::num::ParseIntError;
 use std::process;
 
-const NOT_YET_SPECIFIED: i32 = 0x40;
+use super::NOT_YET_SPECIFIED;
 
 #[derive(Debug, PartialEq)]
 enum CoreErrorKind {
@@ -47,7 +47,6 @@ pub const MALFORMED_HASH_ERROR: CoreError = CoreError(CoreErrorKind::MalformedHa
 pub struct CoreError(CoreErrorKind);
 
 impl CoreError {
-
     pub fn get_exit_code(&self) -> i32 {
         self.0.get_exit_code()
     }
@@ -57,8 +56,11 @@ impl CoreError {
         CoreError(CoreErrorKind::DetermineAlgorithm(input.to_owned()))
     }
 
-    pub fn byte_conversion(bytes: &Vec<u8>, hash: &str) -> Self{
-        CoreError(CoreErrorKind::ByteConversion(bytes.to_vec(), hash.to_owned()))
+    pub fn byte_conversion(bytes: &Vec<u8>, hash: &str) -> Self {
+        CoreError(CoreErrorKind::ByteConversion(
+            bytes.to_vec(),
+            hash.to_owned(),
+        ))
     }
 }
 

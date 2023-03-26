@@ -1,14 +1,14 @@
 # RHC
 
 ## About
-RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language. The current build is able to crack roughly *10.000.000* passwords a second on an i5-10600K.
+RHC is an implementation of "[John the ripper](https://github.com/openwall/john)" written in Rust. Currently it supports a lot less features than its corresponding C implementation. It's a hoby project that I have created to get a better understanding of the Rust programming language.
 
 ## Usage
 To use RHC, simply run the rhc command in your terminal after installing the binary. Here are a few examples to help you get started:
 
-- Bruteforce operation with a specified value defined by the `-p` flag:
+- Bruteforce operation with a specified value defined by the `-t` flag:
   ```bash
-  $ rhc -p 78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f
+  $ rhc -t 78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f
   ``` 
 - The same operation as above, but using a list of possible values from a file:
   ```bash
@@ -55,11 +55,11 @@ rhc currently only supports the SHA-2 algorithm family. The plan is to expand th
 There are only a handful flags available at the moment but I plan to add more in the near future. Below is a list of some of the flags that I intend to add.
 
 
-Specify the maximum length of the words to generate when cracking a hash, should work in conjunction with the `--length` flag to target a length-range of words.
+<s>Specify the maximum length of the words to generate when cracking a hash, should work in conjunction with the `--length` flag to target a length-range of words.</s>
 ```bash
 rhc [OPTIONS]... --max-length [unsigned integer]
 ``` 
-Specifies the number of threads to utilize while cracking.
+<s>Specifies the number of threads to utilize while cracking.</s>
 ```bash
 rhc [OPTIONS]... --threads [unsigned integer]
 ``` 

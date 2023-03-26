@@ -1,9 +1,4 @@
-use crate::cli::{
-    error::argument::{ArgumentError, INVALID_INPUT_ERROR},
-    settings::Setting,
-};
-
-use super::{FlagHelp, FlagInfo, FlagInput};
+use super::*;
 
 const NAME: &str = "min-length";
 const SHORT_HELP: &str = "The length to start generating words from";
