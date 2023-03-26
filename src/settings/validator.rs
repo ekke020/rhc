@@ -120,7 +120,7 @@ pub fn validate(
 ) -> Result<ProcessedSettings, ArgumentError> {
     let target = validate_target(unvalidated.target())?;
     if unvalidated.target_type().is_none() {
-        let algorithm = determine_algorithm(&target)?;
+        let algorithm = determine_algorithm(target)?;
         unvalidated.add_setting(Setting::TargetType(algorithm));
     };
     validate_length(unvalidated.min_length(), unvalidated.max_length())?;
@@ -131,7 +131,7 @@ pub fn validate(
     Ok(validated)
 }
 
-fn validate_target(target: Option<Vec<u8>>) -> Result<Vec<u8>, ArgumentError> {
+fn validate_target<'a>(target: Option<&'a Vec<u8>>) -> Result<&'a Vec<u8>, ArgumentError> {
     let target = target.ok_or_else(|| MISSING_TARGET_INPUT_ERROR)?;
     Ok(target)
 }

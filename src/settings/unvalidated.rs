@@ -45,12 +45,12 @@ impl Settings {
         }
     }
 
-    pub fn target(&mut self) -> Option<Vec<u8>> {
-        self.target.take()
+    pub fn target(&self) -> Option<&Vec<u8>> {
+        self.target.as_ref()
     }
 
-    pub fn target_type(&mut self) -> Option<AlgorithmType> {
-        self.target_type.take()
+    pub fn target_type(&self) -> Option<&AlgorithmType> {
+        self.target_type.as_ref()
     }
 
     pub fn min_length(&self) -> usize {
