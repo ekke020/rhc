@@ -1,4 +1,4 @@
-mod sha;
+mod sha1;
 mod sha2;
 use std::fmt::Display;
 
