@@ -1,9 +1,13 @@
 mod sha1;
 mod sha2;
+mod common;
+mod wrapper;
+mod compression;
 use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AlgorithmType {
+    Sha1,
     Sha2_224,
     Sha2_256,
     Sha2_384,
@@ -15,6 +19,7 @@ pub enum AlgorithmType {
 impl AlgorithmType {
     pub fn from(value: &str) -> Option<Self> {
         match value {
+            "sha1" => Some(AlgorithmType::Sha1),
             "sha2_224" => Some(AlgorithmType::Sha2_224),
             "sha2_256" => Some(AlgorithmType::Sha2_256),
             "sha2_384" => Some(AlgorithmType::Sha2_384),
@@ -33,6 +38,7 @@ impl AlgorithmType {
             AlgorithmType::Sha2_512 => Box::new(sha2::Sha512::new()),
             AlgorithmType::Sha2_512_224 => Box::new(sha2::Sha512_224::new()),
             AlgorithmType::Sha2_512_256 => Box::new(sha2::Sha512_256::new()),
+            AlgorithmType::Sha1 => Box::new(sha1::Sha160::new()),
         }
     }
 }
@@ -43,6 +49,21 @@ pub trait Algorithm: Display {
     fn execute(&mut self);
 
     fn compare(&mut self, target: &Vec<u8>) -> bool;
+}
+
+impl Algorithm for sha1::Sha160 {
+    fn populate(&mut self, data: &[u8]) {
+        self.load(data);
+    }
+
+    fn execute(&mut self) {
+        self.run();
+    }
+
+    fn compare(&mut self, target: &Vec<u8>) -> bool {
+        let value = self.extract();
+        target[..] == value
+    }
 }
 
 impl Algorithm for sha2::Sha224 {
