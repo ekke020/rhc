@@ -1,12 +1,13 @@
+mod sha1;
+mod sha2;
+mod common;
+mod wrapper;
+mod compression;
 use std::fmt::Display;
-
-use crate::{
-    cli, core,
-    sha2::{Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256},
-};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AlgorithmType {
+    Sha1,
     Sha2_224,
     Sha2_256,
     Sha2_384,
@@ -18,6 +19,7 @@ pub enum AlgorithmType {
 impl AlgorithmType {
     pub fn from(value: &str) -> Option<Self> {
         match value {
+            "sha1" => Some(AlgorithmType::Sha1),
             "sha2_224" => Some(AlgorithmType::Sha2_224),
             "sha2_256" => Some(AlgorithmType::Sha2_256),
             "sha2_384" => Some(AlgorithmType::Sha2_384),
@@ -30,12 +32,13 @@ impl AlgorithmType {
 
     pub fn generate_algorithm(&self) -> Box<dyn Algorithm> {
         match self {
-            AlgorithmType::Sha2_224 => Box::new(Sha224::new()),
-            AlgorithmType::Sha2_256 => Box::new(Sha256::new()),
-            AlgorithmType::Sha2_384 => Box::new(Sha384::new()),
-            AlgorithmType::Sha2_512 => Box::new(Sha512::new()),
-            AlgorithmType::Sha2_512_224 => Box::new(Sha512_224::new()),
-            AlgorithmType::Sha2_512_256 => Box::new(Sha512_256::new()),
+            AlgorithmType::Sha2_224 => Box::new(sha2::Sha224::new()),
+            AlgorithmType::Sha2_256 => Box::new(sha2::Sha256::new()),
+            AlgorithmType::Sha2_384 => Box::new(sha2::Sha384::new()),
+            AlgorithmType::Sha2_512 => Box::new(sha2::Sha512::new()),
+            AlgorithmType::Sha2_512_224 => Box::new(sha2::Sha512_224::new()),
+            AlgorithmType::Sha2_512_256 => Box::new(sha2::Sha512_256::new()),
+            AlgorithmType::Sha1 => Box::new(sha1::Sha160::new()),
         }
     }
 }
@@ -48,7 +51,7 @@ pub trait Algorithm: Display {
     fn compare(&mut self, target: &Vec<u8>) -> bool;
 }
 
-impl Algorithm for Sha224 {
+impl Algorithm for sha1::Sha160 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -63,7 +66,7 @@ impl Algorithm for Sha224 {
     }
 }
 
-impl Algorithm for Sha256 {
+impl Algorithm for sha2::Sha224 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -78,7 +81,7 @@ impl Algorithm for Sha256 {
     }
 }
 
-impl Algorithm for Sha384 {
+impl Algorithm for sha2::Sha256 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -93,7 +96,7 @@ impl Algorithm for Sha384 {
     }
 }
 
-impl Algorithm for Sha512 {
+impl Algorithm for sha2::Sha384 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -108,7 +111,7 @@ impl Algorithm for Sha512 {
     }
 }
 
-impl Algorithm for Sha512_224 {
+impl Algorithm for sha2::Sha512 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -123,7 +126,7 @@ impl Algorithm for Sha512_224 {
     }
 }
 
-impl Algorithm for Sha512_256 {
+impl Algorithm for sha2::Sha512_224 {
     fn populate(&mut self, data: &[u8]) {
         self.load(data);
     }
@@ -138,3 +141,17 @@ impl Algorithm for Sha512_256 {
     }
 }
 
+impl Algorithm for sha2::Sha512_256 {
+    fn populate(&mut self, data: &[u8]) {
+        self.load(data);
+    }
+
+    fn execute(&mut self) {
+        self.run();
+    }
+
+    fn compare(&mut self, target: &Vec<u8>) -> bool {
+        let value = self.extract();
+        target[..] == value
+    }
+}

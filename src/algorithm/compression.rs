@@ -64,6 +64,21 @@ impl Extract<28> for U28 {
         self.0
     }
 }
+pub struct U20([u8; 20]);
+impl CompressionSize for U20 {
+    fn new(compressed: &[u8]) -> Self {
+        let data = compressed
+            .try_into().expect("N has to be 20");
+        U20(data)
+    }
+}
+impl Extract<20> for U20 {
+    const S: usize = 28;
+    fn take(self) -> [u8; 20] {
+        self.0
+    }
+}
+
 pub trait Hash<T>
 where T: CompressionSize
 {

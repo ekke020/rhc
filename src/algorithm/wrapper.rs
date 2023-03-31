@@ -1,9 +1,6 @@
-use super::{
-    bit_utils::lazy_vector,
-    consts::ByteSize,
-    implementation::{CompressionSize, Extract, Hash, Sha},
-};
 use std::marker::PhantomData;
+
+use super::compression::{CompressionSize, Hash, Sha, Extract};
 
 pub struct Wrapper<T, U, const N: usize> {
     sha2: T,

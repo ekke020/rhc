@@ -146,6 +146,10 @@ fn validate_thread_count(thread_count: usize) -> Result<usize, ArgumentError> {
 
 fn determine_algorithm(target: &Vec<u8>) -> Result<AlgorithmType, ArgumentError> {
     match target.len() {
+        20 => {
+            println!("No algorithm specified, auto detected to: Sha1");
+            Ok(AlgorithmType::Sha1)
+        }
         28 => {
             println!("No algorithm specified, auto detected to: Sha224");
             Ok(AlgorithmType::Sha2_224)

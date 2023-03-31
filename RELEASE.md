@@ -1,16 +1,12 @@
 # Improvements
-In this release, the major goal was to improve the user feedback when running the application. This was achieved by implementing a central manager that controls all outgoing messages that the user sees. Each thread now has a direct line to the manager, where it can send different updates and messages. The manager then decides when and how to present this information to the user, resulting in a smoother and more informative experience.
+This release adds support for SHA-1 and makes some efforts to improve the performance of the already existing
+SHA-2 implementation. A lot of effort also went into restructuring the algorithm section of the code. This work should help increase the rate at which new algorithms are introduced in the future.
 
 ## Bug Fixes
-- Fixed a bug that caused certain flags to not trigger properly.
-- Fixed a bug that presented the wrong version when running the help command.
-- Fixed a bug that would cause a crash if an argument flag was misconfigured.
+- Fixed a bug that caused the wrong length to be displayed after a successful crack.
 ## New Features
-- The **--charset** flag has been added to allow users to specify one of three charsets.
-- The **--thread-count** flag has been added to allow users to have full control over thread consumption.
-- The **--quiet** flag has been added. This flag will remove all non-essential output.
+- The introduction of SHA-1.
 ## Changes
-- The verbose flag has been removed in this release. Instead, verbose output is now toggled by default, allowing users to opt-out with the --quiet flag.
-
+- The **--algorithm** flag has been updated with the addition of SHA-1. The new algorithm can be used by calling `--algorithm sha1` when running rhc.
 ## Miscellaneous
-- Major improvements have been made to the user feedback. This includes better output and more available information abut an ongoing crack.
+- Some performance improvements have been made to the existing implementation of SHA-2.

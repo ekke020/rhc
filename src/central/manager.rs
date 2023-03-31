@@ -98,7 +98,7 @@ fn print_match(settings: &ProcessedSettings, password: Vec<u8>) {
     match from_utf8(&password) {
         Ok(value) => {
             println!("Decrypted: {}", value);
-            println!("Length: {}", target.len());
+            println!("Length: {}", password.len());
         }
         Err(_) => println!("Decrypted bytes: {:?}", password),
     }
