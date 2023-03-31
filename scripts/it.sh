@@ -96,6 +96,10 @@ fi
 echo "${underline}${bold}Running Dictionary tests${reset}"
 target="zikazsanka666"
 
+result=$(./target/release/rhc -t ccb3e15be5c78b66f2937935a0a376e500651f25 --algorithm sha1 --wordlist resources/common.txt)
+match=$(echo "$result" | sed -n 's/^Decrypted: //p')
+assert_eq $match $target
+
 result=$(./target/release/rhc -t 5d6fb74aa3977bb2aaf565bd1b03d3ab3d654ee6bdbf88802e0cc902 --algorithm sha2_224 --wordlist resources/common.txt)
 match=$(echo "$result" | sed -n 's/^Decrypted: //p')
 assert_eq $match $target
@@ -115,6 +119,10 @@ assert_eq $match $target
 # Run Incremental tests
 echo "${underline}${bold}Running Incremental tests${reset}"
 target="abc"
+
+result=$(./target/release/rhc -t a9993e364706816aba3e25717850c26c9cd0d89d --algorithm sha1)
+match=$(echo "$result" | sed -n 's/^Decrypted: //p')
+assert_eq $match $target
 
 result=$(./target/release/rhc -t 23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7 --algorithm sha2_224)
 match=$(echo "$result" | sed -n 's/^Decrypted: //p')
@@ -175,8 +183,8 @@ result=$(./target/release/rhc -t bdd03d560993e675516ba5a50638b6531ac2ac3d5847c61
 target=$'Minimum length: "4" exceeds Maximum length: "2".'
 assert_eq "$result" "$target"
 
-result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885eddd3fde135806e601 --algorithm sha1)
-target=$'"sha1" is not a suppported algorithm.\nUse --algorithm --help for available algorithms.'
+result=$(./target/release/rhc --target a76654d8e3550e9a2d67a0eeb6c67b220e5885eddd3fde135806e601 --algorithm md5)
+target=$'"md5" is not a suppported algorithm.\nUse --algorithm --help for available algorithms.'
 assert_eq "$result" "$target"
 
 result=$(./target/release/rhc --target malformed)
