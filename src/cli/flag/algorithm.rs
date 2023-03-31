@@ -7,8 +7,8 @@ const LONG_HELP: &str = "Flag: --algorithm
 Details:
     input type: string (specific algorithm to target)
 Supported algorithms: 
-    the Sha2 family:
-        sha2_224, sha2_256, sha2_384,
+    the SHA family:
+        sha1, sha2_224, sha2_256, sha2_384,
         sha2_512, sha2_512_224, sha2_512_256
 Description:
     The --algorithm flag specifies the algorithm to target when cracking a hash.
