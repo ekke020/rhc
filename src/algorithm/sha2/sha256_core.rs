@@ -1,9 +1,8 @@
-use super::bit_utils::{pad, right_shift, u32_addition, u32_rotate};
-use super::consts::{State256, H256_224, H256_256, K32};
-use super::implementation::{CompressionSize, Hash, Sha, U28, U32};
+use std::ops::Shr;
 
-const RUN_ERROR: &str = "Load with value before running the algorithm";
-const EXTRACT_ERROR: &str = "Can't extract before running hash";
+use super::super::common::{pad, u32_addition, to_bytes_32, RUN_ERROR, EXTRACT_ERROR};
+use super::consts::{State256, H256_224, H256_256, K32};
+use super::super::compression::{CompressionSize, Hash, Sha, U28, U32};
 
 pub struct Sha256 {
     value: Option<Vec<u8>>, // The value that was provided.
@@ -38,11 +37,11 @@ impl Hash<U32> for Sha256 {
     fn run(&mut self) {
         let mut buffer = self.state;
         let mut value = self.value.take().expect(RUN_ERROR);
-        for chunk in value.chunks_mut(64) {
-            let message = mutate_chunk(chunk);
+        for block in value.chunks_mut(64) {
+            let message = prepare_block(block);
             buffer = compression(message, buffer);
         }
-        let bytes = to_bytes::<32>(&buffer);
+        let bytes = to_bytes_32::<32>(&buffer);
         self.compressed = Some(U32::new(&bytes));
     }
 
@@ -86,11 +85,11 @@ impl Hash<U28> for Sha224 {
     fn run(&mut self) {
         let mut buffer = self.state;
         let mut value = self.value.take().expect(RUN_ERROR);
-        for chunk in value.chunks_mut(64) {
-            let message = mutate_chunk(chunk);
+        for block in value.chunks_mut(64) {
+            let message = prepare_block(block);
             buffer = compression(message, buffer);
         }
-        let bytes = to_bytes::<28>(&buffer);
+        let bytes = to_bytes_32::<28>(&buffer);
         self.compressed = Some(U28::new(&bytes));
     }
 
@@ -101,14 +100,12 @@ impl Hash<U28> for Sha224 {
     }
 }
 
-fn mutate_chunk(message: &[u8]) -> [u32; 64] {
+fn prepare_block(message: &[u8]) -> [u32; 64] {
     let mut message_schedule: [u32; 64] = [0; 64];
-    let mut i = 0;
     
     // Concatenate 4 bytes into a 32bit word.
-    message.windows(4).step_by(4).for_each(|bytes| {
-        message_schedule[i] = concatenate_bytes(bytes);
-        i += 1;
+    message.windows(4).step_by(4).enumerate().for_each(|(i, bytes)| {
+        message_schedule[i] = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
     });
 
     // Manipulate the bits after index 15.
@@ -121,18 +118,10 @@ fn mutate_chunk(message: &[u8]) -> [u32; 64] {
     message_schedule
 }
 
-fn concatenate_bytes(bytes: &[u8]) -> u32 {
-    bytes
-        .iter()
-        .map(|byte| *byte as u32)
-        .reduce(|con, byte| (con << 8) | byte)
-        .expect("Concatenation can't be performed on an empty array.")
-}
-
-fn bit_manipulation(word_32_bit: &u32, r1: u8, r2: u8, r3: u8) -> u32 {
-    let n0 = u32_rotate(word_32_bit, r1);
-    let n1 = u32_rotate(word_32_bit, r2);
-    let n2 = right_shift!(word_32_bit, r3);
+fn bit_manipulation(word_32_bit: &u32, r1: u32, r2: u32, r3: u32) -> u32 {
+    let n0 = word_32_bit.rotate_right(r1);
+    let n1 = word_32_bit.rotate_right(r2);
+    let n2 = word_32_bit.shr(r3);
     n0 ^ n1 ^ n2
 }
 
@@ -140,10 +129,10 @@ fn compression(message: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = compressed;
 
     for i in 0..64 {
-        let s1 = u32_rotate(&e, 6) ^ u32_rotate(&e, 11) ^ u32_rotate(&e, 25);
+        let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
         let ch = (e & f) ^ ((!e) & g);
         let temp1 = u32_addition!(h, s1, ch, K32[i], message[i]);
-        let s0 = u32_rotate(&a, 2) ^ u32_rotate(&a, 13) ^ u32_rotate(&a, 22);
+        let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
         let maj = (a & b) ^ (a & c) ^ (b & c);
         let temp2 = u32_addition!(s0, maj);
         h = g;
@@ -168,45 +157,20 @@ fn compression(message: [u32; 64], compressed: [u32; 8]) -> [u32; 8] {
     compressed
 }
 
-fn to_bytes<const N: usize>(buffer: &[u32; 8]) -> [u8; N] {
-    buffer.iter()
-        .flat_map(|v| v.to_be_bytes())
-        .take(N)
-        .collect::<Vec<u8>>()
-        .try_into()
-        .unwrap_or_else(| err: Vec<u8>| panic!("N was {N} when it should not exceed {}", err.len()))
-}
+#[cfg(test)]
+mod test {
+    use super::*;
+
 
 #[test]
-#[should_panic]
-fn test_to_bytes() {
-    let result = to_bytes::<32>(&[
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
-    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171, 91, 224, 205, 25]);
-    let result = to_bytes::<28>(&[
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
-    assert_eq!(result, [106, 9, 230, 103, 187, 103, 174, 133, 60, 110, 243, 114, 165, 79, 245, 58, 81, 14, 82, 127, 155, 5, 104, 140, 31, 131, 217, 171]);
-    to_bytes::<48>(&[0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,]);
-}
-
-#[test]
-fn test_concatenate_bytes() {
-    let bytes = "test".as_bytes();
-    assert_eq!(concatenate_bytes(bytes), 0x74657374);
-    assert_ne!(concatenate_bytes(bytes), 0x74657375);
-}
-
-#[test]
-fn test_bit_manipulation() {
+fn bit_manipulation_returns_correct_values() {
     assert_eq!(bit_manipulation(&0x74657374, 5, 10, 5), 0x7D1D195C);
     assert_eq!(bit_manipulation(&0x74657374, 7, 18, 3), 0xBAB97991);
     assert_ne!(bit_manipulation(&0x74657374, 7, 18, 3), 0xBAB97990);
 }
 
 #[test]
-fn test_mutate_chunk() {
+fn prepare_block_returns_correct_values() {
     // pad of "test"
     let padded_value: Vec<u8> = vec![
         0x74, 0x65, 0x73, 0x74, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -224,12 +188,12 @@ fn test_mutate_chunk() {
         0x7fff59c9, 0xfe72c27a, 0x22ed8860, 0xc321f5c0, 0xea81a878, 0x6e0938fe, 0x32bbcc5b,
         0x33d3040f, 0x284c1f19, 0xb0964602, 0xfe6ad1fb, 0x8ec8c416, 0x11f0d783,
     ];
-    let mutated = mutate_chunk(&padded_value);
+    let mutated = prepare_block(&padded_value);
     assert_eq!(mutated, correct);
 }
 
 #[test]
-fn test_compression() {
+fn compression_compresses() {
     // mutated string of "test"
     let chunk: [u32; 64] = [
         0x74657374, 0x80000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -247,4 +211,6 @@ fn test_compression() {
         0xb0f00a08,
     ];
     assert_eq!(compression(chunk, H256_256), correct);
+}
+
 }

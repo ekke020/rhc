@@ -1,16 +1,14 @@
-mod bit_utils;
 mod consts;
 mod sha256_core;
 mod sha512_core;
-mod implementation;
-mod wrapper;
 
 use std::fmt;
 
-use self::implementation::{U28, U32, U48, U64};
 use self::sha256_core::{Sha224 as ShaCore224, Sha256 as ShaCore256};
 use self::sha512_core::{Sha384 as ShaCore384, Sha512 as ShaCore512, Sha512_256 as ShaCore512_256, Sha512_224 as ShaCore512_224};
-use self::wrapper::Wrapper;
+
+use super::compression::{U28, U32, U48, U64};
+use super::wrapper::Wrapper;
 
 pub type Sha224 = Wrapper<ShaCore224, U28, 28>;
 pub type Sha256 = Wrapper<ShaCore256, U32, 32>;
