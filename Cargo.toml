@@ -11,7 +11,7 @@ test = true
 [lib]
 name = "hash"
 test = true
-path = "rhc-lib/lib.rs"
+path = "lib/lib.rs"
 
 [dependencies]
 regex = "1"
@@ -24,5 +24,9 @@ predicates = "3.0.1"
 criterion = "0.4.0"
 
 [[bench]]
-name = "sha"
+name = "sha1"
+harness = false
+
+[[bench]]
+name = "sha2"
 harness = false
