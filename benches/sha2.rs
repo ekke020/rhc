@@ -1,16 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use hash::{sha1, sha2};
-
-fn sha1_benchmark(c: &mut Criterion) {
-    c.bench_function("sha1", |b| {
-        b.iter(|| {
-            let mut sha = sha1::Sha160::new();
-            sha.load(black_box(b"Benchmark"));
-            sha.run();
-            sha.extract();
-        })
-    });
-}
+use hash::sha2;
 
 fn sha2_224_benchmark(c: &mut Criterion) {
     c.bench_function("sha2_224", |b| {
@@ -80,7 +69,6 @@ fn sha2_512_256_benchmark(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    sha1_benchmark,
     sha2_224_benchmark,
     sha2_256_benchmark,
     sha2_384_benchmark,
