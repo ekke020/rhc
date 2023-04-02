@@ -1,4 +1,4 @@
-use std::{convert::TryInto, fmt::{LowerHex, UpperHex}};
+use std::convert::TryInto;
 
 pub trait CompressionSize {
     fn new(compressed: &[u8]) -> Self;

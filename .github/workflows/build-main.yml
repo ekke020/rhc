@@ -36,7 +36,9 @@ jobs:
     - name: 💎 Build 💎 
       run: cargo build 
     - name: 🧪 Run Unit Tests 🧪
-      run: cargo test
+      run: |
+        cargo test
+        cargo test --lib
     - name: 🔬 Run IT Tests 🔬
       run: |
         ./scripts/it.sh

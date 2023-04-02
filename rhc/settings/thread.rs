@@ -1,4 +1,4 @@
-use crate::algorithm::Algorithm;
+use hash::Algorithm;
 
 use super::{dictionary::DictionarySettings, incremental::IncrementalSettings, *};
 

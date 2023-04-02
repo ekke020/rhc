@@ -1,5 +1,5 @@
 use super::*;
-use crate::algorithm::AlgorithmType;
+use hash::AlgorithmType;
 
 const NAME: &str = "algorithm";
 const SHORT_HELP: &str = "The algorithm to target";

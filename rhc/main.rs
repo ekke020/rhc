@@ -1,5 +1,4 @@
 #![allow(warnings)]
-mod algorithm;
 mod central;
 mod cli;
 mod core;

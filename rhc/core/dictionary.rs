@@ -1,10 +1,8 @@
 use std::{str::from_utf8, sync::mpsc::Sender};
 
-use crate::{
-    algorithm::{self, Algorithm},
-    central::Message,
-    settings::thread::ThreadSettings
-};
+use hash::Algorithm;
+
+use crate::{central::Message, settings::thread::ThreadSettings};
 
 pub struct Dictionary<'a> {
     target: &'a Vec<u8>,

@@ -65,8 +65,7 @@ fn check_help(arg: &str, last_arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{algorithm::AlgorithmType, cli::flag::get_input};
-
+    use hash::AlgorithmType;
     use super::*;
 
     #[test]

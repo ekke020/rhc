@@ -1,8 +1,7 @@
-use std::sync::mpsc::Sender;
-
-use crate::{algorithm::Algorithm, central::Message, settings::thread::ThreadSettings};
-
 use super::charset::Table;
+use crate::{central::Message, settings::thread::ThreadSettings};
+use hash::Algorithm;
+use std::sync::mpsc::Sender;
 
 pub struct Incremental<'a> {
     target: &'a Vec<u8>,

@@ -1,7 +1,5 @@
-use crate::{
-    algorithm::AlgorithmType, core::charset::CharacterSet, error::argument::ArgumentError,
-};
-
+use hash::AlgorithmType;
+use crate::{core::charset::CharacterSet, error::argument::ArgumentError};
 mod dictionary;
 mod incremental;
 pub mod thread;

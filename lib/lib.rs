@@ -1,5 +1,6 @@
-mod sha1;
-mod sha2;
+#![allow(warnings)]
+pub mod sha1;
+pub mod sha2;
 mod common;
 mod wrapper;
 mod compression;

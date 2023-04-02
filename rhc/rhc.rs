@@ -1,4 +1,3 @@
-
 use crate::{error::Error, cli, central};
 
 pub(super) fn run() -> Result<(), Error> {
